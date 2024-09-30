@@ -35,7 +35,7 @@ class GantryController:
             return None
 
 
-c = GantryController('COM3', 115200)
+c = GantryController("COM3", 115200)
 c.connect()
 c.sendGCode("G91")
 
