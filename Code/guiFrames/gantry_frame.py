@@ -4,9 +4,10 @@ BUTTON_SIZE = 40
 BUTTON_PAD = 10
 
 class GantryFrame(ctk.CTkFrame):          
-    def __init__(self, master):
+    def __init__(self, master, gantry):
         super().__init__(master)
         
+        self.gantry = gantry
         self.configure(border_color="#1f6aa5", border_width=2)
         self.grid(row=0, column=1, padx=50, pady=50, sticky="")
 
@@ -74,14 +75,8 @@ class GantryFrame(ctk.CTkFrame):
         self.stepSizeLabel.configure(text="Step Size: " + str(int(value)) + " mm")
         
     def sendCommand(self):
-        print(str(self.commandEntry.get()))
+        command = str(self.commandEntry.get())
+        print(command)
+        self.gantry.sendGCode(command)
+        #self.commandEntry.delete(0, "end") # clear entry box
         
-        self.commandEntry.delete(0, "end") # clear entry box
-        
-    
-app = ctk.CTk()
-app.geometry("600x600")
-
-g = GantryFrame(app)
-
-app.mainloop()
