@@ -8,11 +8,12 @@ class GantryController:
         self.port = port
         self.baudrate = baudrate
         self.ser = None
+        self.connect()
 
     def connect(self):
         if self.ser == None:
             try:
-                self.ser = serial.Serial(self.port, self.baudrate, timeout=1)
+                self.ser = serial.Serial(self.port, self.baudrate, timeout=0.01)
                 
             except:
                 print("could not connect to serial port")
@@ -23,15 +24,15 @@ class GantryController:
         return True
             
     def disconnect(self):
-        if(self.ser != None):
+        if(self.ser != None ):
             self.ser.close()
-        print("disconnected from serial port")
+            print("disconnected from serial port")
 
     def sendGCode(self, gcode: str):
         if(self.ser != None):
             self.ser.write(str.encode(gcode +"\r\n"))
 
-    def receiveResponse(self):
+    def receiveMessage(self):
         if(self.ser != None):
             
             return self.ser.readline().decode().strip()
@@ -44,7 +45,6 @@ class GantryController:
 app = ctk.CTk()
 app.geometry("600x600")
 geee = GantryController("COM3", 115200)
-geee.connect()
 
 g = GantryFrame(app, geee)
 

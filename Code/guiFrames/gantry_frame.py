@@ -64,11 +64,11 @@ class GantryFrame(ctk.CTkFrame):
         self.sendCommandButton.grid(row=6, column=4, padx=20, pady=20, sticky="")
         
         # Home Button
-        self.homeButton = ctk.CTkButton(self, text="Home", width = BUTTON_SIZE, height = BUTTON_SIZE)
+        self.homeButton = ctk.CTkButton(self, text="Connect", width = BUTTON_SIZE, height = BUTTON_SIZE, command = self.connectToController)
         self.homeButton.grid(row=7, column=0, padx=BUTTON_PAD, pady=BUTTON_PAD, sticky="")
         
         # Quick Stop Button
-        self.quickStopButton = ctk.CTkButton(self, text="Stop", width = BUTTON_SIZE, height = BUTTON_SIZE)
+        self.quickStopButton = ctk.CTkButton(self, text="Stop", width = BUTTON_SIZE, height = BUTTON_SIZE, command=self.quickStop)
         self.quickStopButton.grid(row=7, column=1, padx=BUTTON_PAD, pady=BUTTON_PAD, sticky="")
         
     def updateStepSize(self, value):
@@ -79,4 +79,9 @@ class GantryFrame(ctk.CTkFrame):
         print(command)
         self.gantry.sendGCode(command)
         #self.commandEntry.delete(0, "end") # clear entry box
+    
+    def connectToController(self):
+        self.gantry.connect()
         
+    def quickStop(self):
+        self.gantry.sendGCode("M410")
