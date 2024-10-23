@@ -12,7 +12,6 @@ class GantryFrame(ctk.CTkFrame):
         self.grid(row=0, column=1, padx=50, pady=50, sticky="")
 
         self.stepSize_mm = 1
-        
         # Title Label
         self.titleLabel = ctk.CTkLabel(self, text="Gantry Control", justify="center", font=("Arial", 20, "bold"))
         self.titleLabel.grid(row=0, column=0, padx=20, pady=20, sticky="we", columnspan = 5)
