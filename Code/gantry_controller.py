@@ -1,7 +1,9 @@
+from numpy import pad
 import serial
 from time import sleep
 import customtkinter as ctk
 from guiFrames.gantry_frame import GantryFrame
+from guiFrames.hotplate_frame import HotplateFrame
 
 class GantryController:
     def __init__(self, port, baudrate):
@@ -43,10 +45,14 @@ class GantryController:
 
 
 app = ctk.CTk()
-app.geometry("600x600")
+app.geometry("800x800")
 geee = GantryController("COM3", 115200)
 
 g = GantryFrame(app, geee)
+g.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+h = HotplateFrame(app)
+h.grid(row=1, column=0, padx=10, pady=10, sticky="nw")
+
 
 app.mainloop()
 # for i in range(10):
