@@ -10,13 +10,14 @@ class GantryFrame(ctk.CTkFrame):
         self.gantry = gantry
         self.configure(border_color="#1f6aa5", border_width=2)
         self.grid(row=0, column=1, padx=50, pady=50, sticky="")
-
+        
         self.stepSize_mm = 1
         # Title Label
         self.titleLabel = ctk.CTkLabel(self, text="Gantry Control", justify="center", font=("Arial", 20, "bold"))
         self.titleLabel.grid(row=0, column=0, padx=20, pady=20, sticky="we", columnspan = 5)
         
         # Gantry Step Size Slider
+        
         self.stepSizeSlider = ctk.CTkSlider(self, from_=1, to=10, number_of_steps=9, orientation="vertical", command = self.updateStepSize)
         self.stepSizeSlider.grid(row=2, column=0, padx=20, pady=0, sticky="ns", rowspan=3)
         self.stepSizeSlider.set(1)
