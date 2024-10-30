@@ -4,6 +4,7 @@ from time import sleep
 import customtkinter as ctk
 from guiFrames.gantry_frame import GantryFrame
 from guiFrames.hotplate_frame import HotplateFrame
+from guiFrames.gripper_frame import GripperFrame
 
 class GantryController:
     def __init__(self, port, baudrate):
@@ -53,6 +54,8 @@ g.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
 h = HotplateFrame(app)
 h.grid(row=1, column=0, padx=10, pady=10, sticky="nw")
 
+gg = GripperFrame(app)
+gg.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
 
 app.mainloop()
 # for i in range(10):
