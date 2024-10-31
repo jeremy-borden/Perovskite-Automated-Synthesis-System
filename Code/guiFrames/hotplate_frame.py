@@ -27,11 +27,5 @@ class HotplateFrame(ctk.CTkFrame):
         self.temperatureSlider.set(0)
         
     def UpdateTargetTemperature(self, value):
-        self.temperatureLabel.configure(text="Target Hotplate Temperature: \t" + str(int(value)) + " °C")
+        self.temperatureLabel.configure(text="Target Hotplate Temperature: " + str(int(value)) + " °C")
         
-# app = ctk.CTk()
-# app.geometry("600x600")
-
-# hotplateFrame = HotplateFrame(app)
-
-# app.mainloop()

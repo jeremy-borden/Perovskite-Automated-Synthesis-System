@@ -5,6 +5,7 @@ import customtkinter as ctk
 from guiFrames.gantry_frame import GantryFrame
 from guiFrames.hotplate_frame import HotplateFrame
 from guiFrames.gripper_frame import GripperFrame
+from guiFrames.pipette_frame import PipetteFrame
 
 class GantryController:
     def __init__(self, port, baudrate):
@@ -46,18 +47,24 @@ class GantryController:
 
 
 app = ctk.CTk()
-app.geometry("800x800")
+app.geometry("1200x1000")
 geee = GantryController("COM3", 115200)
 
 g = GantryFrame(app, geee)
-g.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+g.grid(row=0, column=0, padx=10, pady=10, sticky="nw", rowspan = 2)
+
 h = HotplateFrame(app)
-h.grid(row=1, column=0, padx=10, pady=10, sticky="nw")
+h.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
 
 gg = GripperFrame(app)
-gg.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
+gg.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+
+p = PipetteFrame(app)
+p.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
 app.mainloop()
+
+
 # for i in range(10):
 # c.sendGCode("M105")
 # print(c.receiveResponse())
