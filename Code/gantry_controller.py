@@ -72,8 +72,7 @@ app.mainloop()
 
 
 
-6314579566
-KNITT 2405
+
 # for i in range(10):
 # c.sendGCode("M105")
 # print(c.receiveResponse())
