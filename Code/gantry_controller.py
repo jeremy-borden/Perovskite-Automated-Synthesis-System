@@ -6,6 +6,8 @@ from guiFrames.gantry_frame import GantryFrame
 from guiFrames.hotplate_frame import HotplateFrame
 from guiFrames.gripper_frame import GripperFrame
 from guiFrames.pipette_frame import PipetteFrame
+from guiFrames.procedure_frame import ProcedureFrame
+
 
 class GantryController:
     def __init__(self, port, baudrate):
@@ -51,18 +53,24 @@ app.geometry("1200x1000")
 geee = GantryController("COM3", 115200)
 
 g = GantryFrame(app, geee)
-g.grid(row=0, column=0, padx=10, pady=10, sticky="nw", rowspan = 2)
+g.grid(row=1, column=0, padx=10, pady=10, sticky="nw", rowspan = 2)
 
 h = HotplateFrame(app)
-h.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
+h.grid(row=1, column=1, padx=10, pady=10, sticky="nw")
 
 gg = GripperFrame(app)
-gg.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+gg.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
 p = PipetteFrame(app)
-p.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
+p.grid(row=1, column=2, padx=10, pady=10, sticky="nsew")
+
+proc = ProcedureFrame(app)
+proc.grid(row=0, column=0, padx=10, pady=10, sticky="nsew", columnspan = 3)
 
 app.mainloop()
+
+
+
 
 
 # for i in range(10):
