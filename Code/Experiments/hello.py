@@ -1,7 +1,10 @@
+from textwrap import wrap
 import numpy as np
 import cv2
 import pickle
-  
+
+FRAME_WIDTH_PIXEL = 640
+FRAME_HEIGHT_PIXEL = 480
 # Load Aruco detector
 dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
 parameters = cv2.aruco.DetectorParameters()
@@ -9,15 +12,18 @@ detector = cv2.aruco.ArucoDetector(dictionary, parameters)
 print("Loaded Aruco Dictionary")
 
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 print("Loaded Camera")
 
-camArray = np.array(pickle.load(open( "cameraMatrix.pkl", "rb" )))
-np.save('camera_coefficients.npy', camArray)
-cameraMatrix = cv2.UMat(camArray)
 
-distArray = np.array(pickle.load(open( "dist.pkl", "rb" )))
-np.save('dist_coefficients.npy', distArray)
-dist = cv2.UMat(distArray)
+
+print("Loading Camera Coefficients...",end = "")
+camera_coefficients = np.load('Code/Experiments/camera_coefficients.npy')
+print("Loading Distortion Coefficients...",end = "")
+distortion_coefficients = np.load('Code/Experiments/dist_coefficients.npy')
+newCameraMatrix, roi = cv2.getOptimalNewCameraMatrix(camera_coefficients, distortion_coefficients, (FRAME_WIDTH_PIXEL, FRAME_HEIGHT_PIXEL), 1, (FRAME_WIDTH_PIXEL, FRAME_HEIGHT_PIXEL))
+print("Loaded Camera And Distortion Coefficients")
 
 
 
@@ -51,8 +57,8 @@ while True:
     
     h,  w = img.shape[:2]
 
-    newCameraMatrix, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix, dist, (w,h), 1, (w,h))
-    dst = cv2.undistort(img, cameraMatrix, dist, None, newCameraMatrix).get()
+
+    dst = cv2.undistort(img, camera_coefficients, distortion_coefficients, None, newCameraMatrix)
     # crop the image
     x, y, w, h = roi
     dst = dst[y:y+h, x:x+w]
@@ -77,17 +83,17 @@ while True:
     #         print("diff", abs(ddistance/(dperms[0]/20.2) - distance/(perms[0]/20.2)))
     
     
-    if len(corners) > 0:
-        
-        for i in range(0, len(corners)):
 
-            rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], 0.050, cameraMatrix, dist)
-           
+    for corner in corners:
 
-            e = cv2.drawFrameAxes(dst, cameraMatrix, dist, rvec, tvec, 0.025) 
-            img = e
-            e = cv2.putText(img, str(tvec.get()), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, 1)
-            img = e
+        rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corner, 0.050, camera_coefficients, distortion_coefficients)
+
+
+        e = cv2.drawFrameAxes(dst, camera_coefficients, distortion_coefficients, rvec, tvec, 0.025) 
+        R = cv2.Rodrigues(rvec)
+        img = e
+        e = cv2.putText(img, str(R[0]), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2, 1)
+        img = e
             
 
             

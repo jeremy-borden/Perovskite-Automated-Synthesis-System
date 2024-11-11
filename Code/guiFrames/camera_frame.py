@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import cv2
 
 class CameraFrame(ctk.CTkFrame):
     def __init__(self, master, cap):

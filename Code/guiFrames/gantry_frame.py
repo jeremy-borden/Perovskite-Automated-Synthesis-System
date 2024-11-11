@@ -1,13 +1,16 @@
 import customtkinter as ctk
 
+from Code.componentDrivers.gantry_controller import GantryController
+
 BUTTON_SIZE = 40
 BUTTON_PAD = 10
 
 class GantryFrame(ctk.CTkFrame):          
-    def __init__(self, master, gantry):
+    def __init__(self, master: int, gantry: GantryController):
         super().__init__(master)
         
         self.gantry = gantry
+
         self.configure(border_color="#1f6aa5", border_width=2)
         self.grid(row=0, column=1, padx=50, pady=50, sticky="")
         
@@ -17,7 +20,6 @@ class GantryFrame(ctk.CTkFrame):
         self.titleLabel.grid(row=0, column=0, padx=20, pady=20, sticky="we", columnspan = 5)
         
         # Gantry Step Size Slider
-        
         self.stepSizeSlider = ctk.CTkSlider(self, from_=1, to=10, number_of_steps=9, orientation="vertical", command = self.updateStepSize)
         self.stepSizeSlider.grid(row=2, column=0, padx=20, pady=0, sticky="ns", rowspan=3)
         self.stepSizeSlider.set(1)
@@ -78,7 +80,7 @@ class GantryFrame(ctk.CTkFrame):
         command = str(self.commandEntry.get())
         print(command)
         self.gantry.sendGCode(command)
-        #self.commandEntry.delete(0, "end") # clear entry box
+        self.commandEntry.delete(0, "end") # clear entry box
     
     def connectToController(self):
         self.gantry.connect()
