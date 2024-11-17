@@ -1,12 +1,11 @@
 import customtkinter as ctk
 
-from Code.componentDrivers.gantry_controller import GantryController
-from guiframes.hotplate_frame import HotplateFrame
-from guiframes.hotplate_frame import HotplateFrame
-from guiframes.gantry_frame import GantryFrame
-from guiframes.gripper_frame import GripperFrame
-from guiframes.pipette_frame import PipetteFrame
-from guiframes.procedure_frame import ProcedureFrame
+from componentDrivers.gantry_controller import GantryController
+from guiFrames.hotplate_frame import HotplateFrame
+from guiFrames.gantry_frame import GantryFrame
+from guiFrames.gripper_frame import GripperFrame
+from guiFrames.pipette_frame import PipetteFrame
+from guiFrames.procedure_frame import ProcedureFrame
 
 
 gantry_controller = GantryController("COM3", 115200)
