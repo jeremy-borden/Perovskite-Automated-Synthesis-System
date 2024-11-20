@@ -36,6 +36,19 @@ class PipetteFrame(ctk.CTkFrame):
         self.drawVolumeButton = ctk.CTkButton(self, text="Set", width = 50, command = self.UpdateDrawVolume)
         self.drawVolumeButton.grid(row=3, column=2, padx=10, pady=10, sticky="nw")
         
+        
+        # mock Label
+        self.angle_1_label = ctk.CTkLabel(self, text="Dispense Time: 10 Seconds")
+        self.angle_1_label.grid(row=5, column=0, padx=10, pady=10, sticky="nw")
+
+        # mock Value Entry
+        self.angle_1_entry = ctk.CTkEntry(self, placeholder_text="...", width = 50)
+        self.angle_1_entry.grid(row=5, column=1, padx=10, pady=10, sticky="ne")
+        
+        # mock Button
+        self.angle_1_button = ctk.CTkButton(self, text="Set", width = 50)
+        self.angle_1_button.grid(row=5, column=2, padx=10, pady=10, sticky="ne")
+        
     def UpdateDrawVolume(self):
         try:
             entry = int(self.drawVolumeEntry.get())

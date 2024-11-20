@@ -1,7 +1,7 @@
 import serial
 from time import sleep
 
-class GantryController:
+class GantryDriver:
     def __init__(self, port, baudrate):
         self.port = port
         self.baudrate = baudrate
@@ -26,13 +26,21 @@ class GantryController:
             self.ser.close()
             print("disconnected from serial port")
 
-    def sendGCode(self, gcode: str):
-        if(self.ser != None):
-            self.ser.write(str.encode(gcode +"\r\n"))
+    def sendGCode(self, gcode: str, wait_for_response: bool = False):
+        if(self.ser == None):
+            return
+        
+        self.ser.write(str.encode(gcode +"\r\n"))
+        
+        if(wait_for_response):
+            while True:
+                response = self.receiveMessage()
+                if response == "ok":
+                    break
 
     def receiveMessage(self):
-        if(self.ser != None):
-            
-            return self.ser.readline().decode().strip()
-        else:
-            return None
+        if(self.ser == None):
+            return
+        
+        return self.ser.readline().decode().strip()
+

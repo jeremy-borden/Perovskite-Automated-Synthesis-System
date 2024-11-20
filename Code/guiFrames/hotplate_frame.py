@@ -18,13 +18,31 @@ class HotplateFrame(ctk.CTkFrame):
         self.temperatureLabel.grid(row=2, column=0, padx=10, pady=10, sticky="nw")
         
         # Hotplate Target Temperature Label
-        self.temperatureLabel = ctk.CTkLabel(self, text="Target Hotplate Temperature: " + str(int(0)) + " °C")
-        self.temperatureLabel.grid(row=3, column=0, padx=10, pady=10, sticky="nw")
+        # mock Label
+        self.angle_1_label = ctk.CTkLabel(self, text="Bake Temperature: 150 °C")
+        self.angle_1_label.grid(row=4, column=0, padx=10, pady=10, sticky="nw")
+
+        # mock Value Entry
+        self.angle_1_entry = ctk.CTkEntry(self, placeholder_text="...", width = 50)
+        self.angle_1_entry.grid(row=4, column=1, padx=10, pady=10, sticky="ne")
         
-        # Hotplate Temperature Slider
-        self.temperatureSlider = ctk.CTkSlider(self, width = 300, from_=0, to=300, number_of_steps=301, orientation="horizontal", command = self.UpdateTargetTemperature)
-        self.temperatureSlider.grid(row=4, column=0, padx=10, pady=10, sticky="we")
-        self.temperatureSlider.set(0)
+        # mock Button
+        self.angle_1_button = ctk.CTkButton(self, text="Set", width = 50)
+        self.angle_1_button.grid(row=4, column=2, padx=10, pady=10, sticky="ne")
+         # mock Label
+        self.angle_1_label = ctk.CTkLabel(self, text="Time To Bake: 180 Seconds")
+        self.angle_1_label.grid(row=5, column=0, padx=10, pady=10, sticky="nw")
+
+        # mock Value Entry
+        self.angle_1_entry = ctk.CTkEntry(self, placeholder_text="...", width = 50)
+        self.angle_1_entry.grid(row=5, column=1, padx=10, pady=10, sticky="ne")
+        
+        # mock Button
+        self.angle_1_button = ctk.CTkButton(self, text="Set", width = 50)
+        self.angle_1_button.grid(row=5, column=2, padx=10, pady=10, sticky="ne")
+        
+        
+        
         
     def UpdateTargetTemperature(self, value):
         self.temperatureLabel.configure(text="Target Hotplate Temperature: " + str(int(value)) + " °C")

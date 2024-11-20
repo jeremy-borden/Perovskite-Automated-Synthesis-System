@@ -1,6 +1,6 @@
 import customtkinter as ctk
 
-from Code.componentDrivers.gantry_controller import GantryController
+from Code.componentDrivers.gantry_driver import GantryController
 
 BUTTON_SIZE = 40
 BUTTON_PAD = 10

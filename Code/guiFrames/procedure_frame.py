@@ -12,14 +12,30 @@ class ProcedureFrame(ctk.CTkFrame):
 
         # Title Label
         self.titleLabel = ctk.CTkLabel(self, text="Procedure Overview", justify="center", font=("Arial", 20, "bold"))
-        self.titleLabel.grid(row=0, column=3, padx=20, pady=20, sticky="nwes")
+        self.titleLabel.grid(row=0, column=0, padx=20, pady=20, sticky="nwes", columnspan = 2)
         
-        self.progressLabel = ctk.CTkLabel(self, text="Procedure Progress: " + str(int(50)) + "%")
-        self.progressLabel.grid(row=1, column=0, padx=20, pady=20, sticky="nwe")
+        self.progressLabel = ctk.CTkLabel(self, justify="left", text="Procedure Progress: " + str(int(50)) + "%")
+        self.progressLabel.grid(row=2, column=0, padx=20, pady=20, sticky="ne")
         
         self.progressbar = ctk.CTkProgressBar(self, orientation="horizontal")
-        self.progressbar.grid(row=2, column=0, padx=20, pady=20, sticky="nwe", columnspan = 2)
+        self.progressbar.grid(row=2, column=1, padx=20, pady=20, sticky="ne")
         self.progressbar.set(0.5)
         
-        self.runlbl = ctk.CTkLabel(self, justify="left",text="Procedure Number: 3\nTime Elapsed: 10 minutes\nEstimated Time Remaining: 20 minutes")
-        self.runlbl.grid(row=1, column=4, padx=20, pady=20, sticky="nwe")
+        self.runlbl = ctk.CTkLabel(self, justify="left",text="Procedure Number: 10\nTime Elapsed: 10 minutes\nEstimated Time Remaining: 20 minutes")
+        self.runlbl.grid(row=3, column=0, padx=20, pady=20, sticky="ne")
+        
+        # mock Label
+        self.angle_1_label = ctk.CTkLabel(self, text="Number of Procedures To Run: 30")
+        self.angle_1_label.grid(row=1, column=0, padx=10, pady=10, sticky="nw")
+
+        # mock Value Entry
+        self.angle_1_entry = ctk.CTkEntry(self, placeholder_text="...", width = 50)
+        self.angle_1_entry.grid(row=1, column=1, padx=10, pady=10, sticky="ne")
+        
+        # mock Button
+        self.angle_1_button = ctk.CTkButton(self, text="Set", width = 50)
+        self.angle_1_button.grid(row=1, column=2, padx=10, pady=10, sticky="ne")
+        
+        #########################
+        # mock Label
+        
