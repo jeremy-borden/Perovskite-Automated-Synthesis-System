@@ -11,21 +11,62 @@ LABEL_WIDTH = 100
 class ProcedureFrame(ctk.CTkScrollableFrame):
     def __init__(self, master):
         super().__init__(master, width=450, height=800)
+        self.steps = []
         
         self.titleLabel = ctk.CTkLabel(self, text="Procedure", justify="left", font=("Arial", 14, "bold")).grid(row=0, column=0)
         
         self.btn_frame = ctk.CTkFrame(self, height=100, border_color="#1f6aa5", border_width=2)
         self.btn_frame.grid(row=1, column=0, sticky = "nwe", padx=10, pady=10)
-        self.add_step_button = ctk.CTkButton(self.btn_frame, text="Add Step", width = 20, height = 20)
+        self.add_step_button = ctk.CTkButton(self.btn_frame, text="Add Step", width = 20, height = 20, command=self.onAddStep)
         self.add_step_button.grid(row=1, column=0, sticky = "nw", padx=10, pady=10)
-
-        
-        hf = HeatStep(self).grid(row=2, column=0, sticky = "nw", padx=10, pady=10)
-        sf = SpinStep(self).grid(row=3, column=0, sticky = "nw", padx=10, pady=10)
-        af = ApplyStep(self).grid(row=4, column=0, sticky = "nw", padx=10, pady=10)
-        mf = MixStep(self).grid(row=5, column=0, sticky = "nw", padx=10, pady=10)
-        
+        self.step_dropdown = ctk.CTkOptionMenu(self.btn_frame, width = 50, height = 20, values=["Heat", "Spin", "Apply", "Mix"])
+        self.step_dropdown.grid(row=1, column=1, sticky = "nw", padx=10, pady=10)
+        self.delete_step_button = ctk.CTkButton(self.btn_frame, text="Delete Step", width = 20, height = 20, command=self.onRemoveStep)
+        self.delete_step_button.grid(row=1, column=2, sticky = "nw", padx=10, pady=10)
     
+    def getSteps(self):
+        for step in self.steps:
+            
+            
+    def onAddStep(self):
+        step_label = self.step_dropdown.get()
+        
+        match step_label:
+            case "Heat":
+                step = HeatStep(self)
+            case "Spin":
+                step = SpinStep(self)
+            case "Apply":
+                step = ApplyStep(self)
+            case "Mix":
+                step = MixStep(self)
+            case _:
+                step = None
+        
+        if (step != None):
+            step.grid(row=len(self.steps)+2, column=0, sticky = "nw", padx=10, pady=10)
+            self.steps.append(step)
+        
+    def onRemoveStep(self):
+        if (len(self.steps) == 0): return
+        
+        self.steps.pop().destroy()
+        
+class StepManager():
+    def __init__(self, procedure_frame: ProcedureFrame):
+        self.steps = {}
+        self.frame = procedure_frame
+    
+    def addStep(self, step):
+        self.steps.append(step)
+        
+    def removeStep(self, step, index):
+        self.steps.pop(index)
+        
+    def insertStep(self, step, index):
+        self.steps.insert(index, step)
+
+
         
 class StepFrame(ctk.CTkFrame):
     def __init__(self, master, title):
@@ -149,27 +190,6 @@ class MixStep(StepFrame):
         
         self.vial_list.pop().destroy()
     
-        
-        
-      
-    
-        
-        
-class StepManager():
-    def __init__(self):
-        self.steps = {}
-        
-    
-    def addStep(self, step):
-        self.steps.append(step)
-        
-    def removeStep(self, step, index):
-        self.steps.pop(index)
-        
-    def insertStep(self, step, index):
-        self.steps.insert(index, step)
-
-
 
 
 
