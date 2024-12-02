@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from pyparsing import col
 
 class ProcedureFrame(ctk.CTkFrame):
     def __init__(self, master):

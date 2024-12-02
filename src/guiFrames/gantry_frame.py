@@ -1,12 +1,12 @@
 import customtkinter as ctk
 
-from Code.componentDrivers.gantry_driver import GantryController
+from drivers.controlboard_driver import ControlBoard
 
 BUTTON_SIZE = 40
 BUTTON_PAD = 10
 
 class GantryFrame(ctk.CTkFrame):          
-    def __init__(self, master: int, gantry: GantryController):
+    def __init__(self, master: int, gantry: ControlBoard):
         super().__init__(master)
         
         self.gantry = gantry

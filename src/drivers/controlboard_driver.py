@@ -1,12 +1,19 @@
 import serial
-from time import sleep
+import threading
+import queue
 
-class GantryDriver:
+DEFAULT_SPEED = 1000
+
+class ControlBoard:
     def __init__(self, port, baudrate):
         self.port = port
         self.baudrate = baudrate
         self.ser = None
         self.connect()
+        
+        self.message_queue = queue.Queue()
+        self.thread = threading.Thread(target=self.receiveMessage, args=())
+        self.thread.start()
 
     def connect(self):
         if self.ser == None:
@@ -32,15 +39,13 @@ class GantryDriver:
         
         self.ser.write(str.encode(gcode +"\r\n"))
         
-        if(wait_for_response):
-            while True:
-                response = self.receiveMessage()
-                if response == "ok":
-                    break
-
+        
     def receiveMessage(self):
         if(self.ser == None):
             return
         
-        return self.ser.readline().decode().strip()
-
+        while True:
+            if(self.ser.inWaiting() != 0):
+                message = self.ser.readline().decode().strip()
+                self.message_queue.put(message)
+                print(message)

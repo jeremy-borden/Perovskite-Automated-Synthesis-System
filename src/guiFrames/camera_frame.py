@@ -20,3 +20,10 @@ class CameraFrame(ctk.CTkFrame):
             
             self.imageLabel.configure(image = imagee, require_redraw=True)
             self.imageLabel.after(20, self.updateImage)
+            
+if __name__ == "__main__":
+    app = ctk.CTk()
+    app.geometry("1200x1000")
+    camera_frame = CameraFrame(app)
+    camera_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+    app.mainloop()

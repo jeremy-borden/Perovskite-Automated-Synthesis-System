@@ -1,17 +1,17 @@
+from pdb import run
 import customtkinter as ctk
+import threading
 
-from componentDrivers import hotplate_driver
-from componentDrivers.gantry_driver import GantryDriver
+from drivers.controlboard_driver import ControlBoard
 
 from guiFrames.hotplate_frame import HotplateFrame
 from guiFrames.gantry_frame import GantryFrame
 from guiFrames.gripper_frame import GripperFrame
 from guiFrames.pipette_frame import PipetteFrame
-from guiFrames.procedure_frame import ProcedureFrame
+from guiFrames.procedure_frame_copy import ProcedureFrame
 
+control_board = ControlBoard("COM4", 115200)
 
-gantry_driver = GantryDriver("COM3", 115200)
-hotplate_driver = hotplate_driver.HotplateDriver(0x60)
 
 
 # Create and run GUI
@@ -21,8 +21,6 @@ app.geometry("1200x1000")
 procedure_frame = ProcedureFrame(app)
 procedure_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-gantry_frame = GantryFrame(app, gantry_driver)
-gantry_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew", rowspan = 2)
 
 hotplate_frame = HotplateFrame(app)
 hotplate_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
@@ -32,5 +30,6 @@ gripper_frame.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
 pipette_frame = PipetteFrame(app)
 pipette_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+
 
 app.mainloop()

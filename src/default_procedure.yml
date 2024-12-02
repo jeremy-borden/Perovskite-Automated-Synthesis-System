@@ -1,0 +1,22 @@
+Settings:
+  bakeTimeSeconds: 180
+  bakeTempCelsius: 200
+  idleTempCelsius: 60
+
+# GOTO [location/X,Y,Z]
+# HOTPLATE [on/idle/off/temp]
+# GRIPPERHAND [open/close/angle]
+
+# --- high level gui should create these ---
+#maybe high level procedure?
+#like
+# MIX A(10ul), B(10ul), C(15ul) into D[10+10+15]
+# DISPESE_ON_SAMPLE D(40ul)
+# HEAT_SAMPLE(180C, 100s) 
+# RECORD_SPECTRUM
+
+Procedure:
+  - 
+
+
+  
