@@ -1,11 +1,15 @@
+from tkinter import filedialog
 import customtkinter as ctk
 import abc
 
+from drivers.procedure_driver import ProcedureLoaderSaver
 LABEL_WIDTH = 150
 
+
 class ProcedureFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master):
-        super().__init__(master, width=450, height=500)
+    def __init__(self, master, procedure_load_save: ProcedureLoaderSaver):
+        super().__init__(master, width=450, height=600)
+        self.procedure_load_save = procedure_load_save
         self.step_frames = []
         
         self.titleLabel = ctk.CTkLabel(self, text="Procedure", justify="left", font=("Arial", 14, "bold")).grid(row=0, column=0)
@@ -22,8 +26,11 @@ class ProcedureFrame(ctk.CTkScrollableFrame):
         self.delete_step_button = ctk.CTkButton(self.btn_frame, text="Delete Step", width = 20, height = 20, command=self.onRemoveStep)
         self.delete_step_button.grid(row=1, column=2, sticky = "nw", padx=10, pady=10)
         
-        self.export_button = ctk.CTkButton(self.btn_frame, text="Export", width = 20, height = 20, command=self.exportProcedure)
-        self.export_button.grid(row=1, column=3, sticky = "nw", padx=10, pady=10)
+        self.save_button = ctk.CTkButton(self.btn_frame, text="Save", width = 20, height = 20, command=self.saveProcedure)
+        self.save_button.grid(row=1, column=3, sticky = "nw", padx=10, pady=10)
+        
+        self.load_button = ctk.CTkButton(self.btn_frame, text="Load", width = 20, height = 20, command=self.loadProcedure)
+        self.load_button.grid(row=1, column=4, sticky = "nw", padx=10, pady=10)
         
     def get_steps(self):
         steps = []
@@ -31,11 +38,25 @@ class ProcedureFrame(ctk.CTkScrollableFrame):
             steps.append(step.get_values())
         return steps
         
-    def exportProcedure(self):
+    def saveProcedure(self):
         steps = self.get_steps()
         print(steps)
         
-            
+        
+        path = filedialog.asksaveasfilename(initialdir= "src/", filetypes = (("Yaml files", "*.yml"),))
+        
+        self.procedure_load_save.Save(path, steps)
+        
+        
+    def loadProcedure(self):
+        file = filedialog.askopenfilename(initialdir = "src/",
+                                          title = "Select a File",
+                                          filetypes = (("Yaml files",
+                                                        "*.yml*"),
+                                                       ("all files",
+                                                        "*.*")))
+        if (file != None):
+            self.procedure_load_save.Open(file)
             
     def onAddStep(self):
         step_label = self.step_dropdown.get()
@@ -61,27 +82,6 @@ class ProcedureFrame(ctk.CTkScrollableFrame):
         
         self.step_frames.pop().destroy()
         
-class StepManager():
-    def __init__(self):
-        self.steps = {}
-      
-    
-    def decodeStep(self, step_dict):
-        step_type = step_dict["step_type"]
-        
-        match step_type:
-            case "heat":
-                temperature = step_dict["temperature"]
-                duration = step_dict["duration"]
-                
-            case "spin":
-                step = SpinStep(self.frame)
-            case "apply":
-                step = ApplyStep(self.frame)
-            case "mix":
-                step = MixStep(self.frame)
-            case _:
-                step = None
 
         
 class StepFrame(ctk.CTkFrame):
@@ -290,7 +290,9 @@ class MixStep(StepFrame):
 
 if __name__ == "__main__":
     app = ctk.CTk()
-    step_manager = StepManager()
-    procedure_frame = ProcedureFrame(app).grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+    
+    procedure_load_save = ProcedureLoaderSaver()
+    
+    procedure_frame = ProcedureFrame(app, procedure_load_save).grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
  
     app.mainloop()
