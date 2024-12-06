@@ -1,0 +1,16 @@
+- duration: '799'
+  speed: ' 9779'
+  step_type: spin
+- duration: '7979'
+  step_type: heat
+  temperature: '799'
+- destination_vial: Vial 1
+  source_amounts:
+  - vyt
+  - '7557'
+  - '57'
+  sources:
+  - Vial 1
+  - Vial 3
+  - Vial 1
+  step_type: mix
