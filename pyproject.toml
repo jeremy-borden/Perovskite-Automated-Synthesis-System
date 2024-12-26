@@ -1,0 +1,9 @@
+[project]
+name = "PASS_ECD515"
+version = "0.1.0"
+dependencies = [
+    "pyserial",
+    "customtkinter",
+    "numpy",
+    "pyyaml",
+    "cv2"]

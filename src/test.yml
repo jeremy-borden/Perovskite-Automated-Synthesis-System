@@ -1,0 +1,12 @@
+- destination_vial: Vial 1
+  source_amounts:
+  - ''
+  - '90'
+  sources:
+  - Vial 2
+  - Vial 3
+  step_type: mix
+- amount: ''
+  duration: ''
+  source_vial: Vial 1
+  step_type: apply
