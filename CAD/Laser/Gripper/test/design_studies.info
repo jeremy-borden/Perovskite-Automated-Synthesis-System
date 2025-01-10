@@ -1,0 +1,7 @@
+<cfd_design_studies version="24.1.10" user_name="m_kni">
+ <design_study instance_id="id_not_defined" study_id="a240391a-dc86-42aa-a10d-3d1bf72b2564" folder="C:/Users/m_kni/OneDrive/Documents/GitHub/Perovskite-Automated-Synthesis-System/CAD/Gripper/test" name="test">
+  <design lock_status="false" launcher_type="CP_ASM_INVENTOR_IMPORT" model_id="5x5x11bearing.cfdsmt" name="Design 1">
+   <analysis name="Scenario 1"/>
+  </design>
+ </design_study>
+</cfd_design_studies>

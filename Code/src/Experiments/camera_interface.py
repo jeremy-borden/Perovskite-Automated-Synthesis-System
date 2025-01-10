@@ -1,12 +1,8 @@
-from re import A
-from matplotlib.pyplot import gray
 import numpy as np
 import cv2
   
 def AvergaeMarkerAngle(image, detector, marker_id: int) -> float:
-    """Returns the average angle of all aruco markers of a specific id in the image.
-        Uses math based on https://www.youtube.com/watch?v=wg9bI8-Qx2Q.
-        
+    """Returns the average angle of all aruco markers of a specific id in the image.  
         Args:
             image: input image.
             detector: cv2 aruco marker detector.
@@ -20,12 +16,13 @@ def AvergaeMarkerAngle(image, detector, marker_id: int) -> float:
     
     corners, ids, rejected = detector.detectMarkers(gray_image)
     
-    if ids is None:                                    
+    if ids is None:                                 
         return None
     
     camera_coefficients = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]) # assume pinhole camera
     distortion_coefficients = np.array([])
     roll_angles = []
+    
     for (corner, ide) in zip(corners, ids):
         rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corner, 0.050, camera_coefficients, distortion_coefficients)
         
@@ -38,6 +35,7 @@ def AvergaeMarkerAngle(image, detector, marker_id: int) -> float:
         roll_angles.append(roll)
         
     angle = np.mean(roll_angles)
+    
     return angle
     
     

@@ -8,7 +8,7 @@ LABEL_WIDTH = 150
 
 class ProcedureFrame(ctk.CTkScrollableFrame):
     def __init__(self, master, procedure_load_save: ProcedureLoaderSaver):
-        super().__init__(master, width=450, height=750)
+        super().__init__(master, width=450, height=800)
         self.procedure_load_save = procedure_load_save
         self.step_frames = []
 
