@@ -1,0 +1,28 @@
+Settings:
+  bakeTimeSeconds: 180
+  bakeTempCelsius: 200
+  idleTempCelsius: 60
+
+Procedure:
+  - function: gcode
+    args: [ "M114" ]
+  - function: gcode
+    args: [ "M155 S1" ]
+  - function: print
+    args: [ "hello world" ]
+  - function: goto
+    args: [ 100, 0, 0, 1000]
+  - function: goto
+    args: [ 0, 0, 0, 1000]
+
+  - function: wait
+    args: [ 10 ]
+  - function: echo
+    args: [ "echoing" ]
+
+  - function: print
+    args: [ "goodbye world" ]
+  
+
+
+  
