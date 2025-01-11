@@ -2,12 +2,12 @@ from tkinter import filedialog
 import customtkinter as ctk
 import abc
 
-from drivers.procedure_driver import ProcedureLoaderSaver
+from drivers.procedure_driver import Procedure
 LABEL_WIDTH = 150
 
 
 class ProcedureFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, procedure_load_save: ProcedureLoaderSaver):
+    def __init__(self, master, procedure_load_save: Procedure):
         super().__init__(master, width=450, height=800)
         self.procedure_load_save = procedure_load_save
         self.step_frames = []
@@ -106,6 +106,7 @@ class StepFrame(ctk.CTkFrame):
 
     def onFocusIn(self, event):
         print(f"Focus")
+        
 
     @abc.abstractmethod
     def get_values(self):
@@ -311,9 +312,9 @@ class MixStep(StepFrame):
 if __name__ == "__main__":
     app = ctk.CTk()
 
-    procedure_load_save = ProcedureLoaderSaver()
+    procedure_load_save = Procedure()
 
-    procedure_frame = ProcedureFrame(app, procedure_load_save).grid(
-        row=0, column=0, padx=10, pady=10, sticky="nsew")
+    procedure_frame = ProcedureFrame(app, procedure_load_save)
+    procedure_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
     app.mainloop()

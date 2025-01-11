@@ -1,4 +1,3 @@
-from pdb import run
 import customtkinter as ctk
 import threading
 
