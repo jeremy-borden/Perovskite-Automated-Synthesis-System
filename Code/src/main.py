@@ -9,7 +9,7 @@ from guiFrames.gripper_frame import GripperFrame
 from guiFrames.pipette_frame import PipetteFrame
 from guiFrames.procedure_frame_copy import ProcedureFrame
 
-control_board = ControlBoard("COM4", 115200)
+# control_board = ControlBoard("COM4", 115200)
 
 
 

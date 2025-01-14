@@ -19,7 +19,7 @@ Procedure:
   - function: goto
     args: [ 0, 0, 0, 1000]
 
-  - function: wait
+  - function: sleep
     args: [ 10 ]
     
   - function: echo

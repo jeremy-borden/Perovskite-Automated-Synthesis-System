@@ -1,0 +1,24 @@
+Settings:
+  bakeTimeSeconds: 180
+  bakeTempCelsius: 200
+  idleTempCelsius: 60
+
+Procedure:
+  - function: print
+    args: [ "hello world" ]
+
+  - function: sleep
+    args: [ 2 ]
+    
+  - function: print
+    args: [ "point 1" ]
+
+  - function: sleep
+    args: [ 2 ]
+    
+  - function: print
+    args: [ "point 2" ]
+  
+
+
+  
