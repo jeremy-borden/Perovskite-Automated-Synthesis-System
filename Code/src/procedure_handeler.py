@@ -67,6 +67,7 @@ class ProcedureHandeler(threading.Thread):
             except TypeError as e:
                 self.logger.error(f"Function #{index}, \"{func_name}\" has incorrect arguments: {e}")
                 valid = False
+                
         return valid
         
     def _add_moves(self):

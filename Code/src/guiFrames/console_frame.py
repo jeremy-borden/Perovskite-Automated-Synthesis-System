@@ -14,6 +14,7 @@ class ConsoleFrame(ctk.CTkFrame):
             border_width=2)
         
         self.logger = logger
+        
         console_handler = ConsoleLogHandler(self)
         console_handler.setFormatter(logging.Formatter('%(levelname)s\t%(asctime)s: %(message)s'))
         logger.addHandler(console_handler)
@@ -25,7 +26,10 @@ class ConsoleFrame(ctk.CTkFrame):
             justify="left",
             anchor="w",
             font=("Arial", 20, "bold"))
-        self.title_label.grid(row=0, column=0, padx=20, pady=10, sticky="nw")
+        self.title_label.grid(
+            row=0, column=0, 
+            padx=20, pady=10, 
+            sticky="nw")
         
         # logging level selector
         self.log_level = ctk.CTkOptionMenu(
@@ -43,6 +47,10 @@ class ConsoleFrame(ctk.CTkFrame):
             corner_radius=0,
             state="disabled")
         self.console.grid(row=1, column=0, padx=20, pady=10, columnspan=2, sticky="nsew")
+        
+        self.console.tag_config("DEBUG", foreground="#8df564")
+        self.console.tag_config("WARNING", foreground="#e4f089")
+        self.console.tag_config("ERROR", foreground="red")
 
     def write_to_console(self, text: str):
         """ Write a message to the console
@@ -50,8 +58,11 @@ class ConsoleFrame(ctk.CTkFrame):
         ### Args:
             text (str): message to be logged in console
         """
+        
+        prefix = text.split(" ")[0]
+        
         self.console.configure(state="normal")
-        self.console.insert("end", text + "\n")
+        self.console.insert("end", text + "\n", prefix)
         self.console.configure(state="disabled")
         self.console.see("end")
 

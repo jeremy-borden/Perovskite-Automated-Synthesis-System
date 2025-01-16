@@ -1,29 +1,49 @@
 import customtkinter as ctk
 import cv2
+from PIL import Image
+import sys
+import os
+
+# get current directory so we can import from outside guiFrames folder
+pp=os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.append(pp)
+from src.drivers.camera_driver import Camera
 
 class CameraFrame(ctk.CTkFrame):
-    def __init__(self, master, cap):
-        super().__init__(master)
-        self.cap = cap
+    def __init__(self, master, camera: Camera):
+        super().__init__(
+            master=master,
+            border_color="#1f6aa5",
+            border_width=2)
         
-        self.imageLabel = ctk.CTkLabel(self, text = "Image", image = None)
-        self.imageLabel.grid(row=0, column=0, padx=20, pady=20, sticky="")
-        
-    def updateImage(self):
-        ret, frame = self.cap.read()
-        if ret is True:
-            opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA) 
+        self.camera = camera
 
-            # Capture the latest frame and transform to image 
-            captured_image = Image.fromarray(opencv_image) 
-            imagee = ctk.CTkImage(light_image = captured_image, dark_image=captured_image, size=(400, 400))
+        # title
+        self.title_label = ctk.CTkLabel(
+            master=self,
+            text="Camera Feed",
+            justify="left",
+            anchor="w",
+            font=("Arial", 20, "bold"))
+        self.title_label.grid(row=0, column=0, padx=5, pady=5, sticky = "w")
+        
+        # image label
+        self.image_label = ctk.CTkLabel(
+            master=self,
+            text="",
+            width=400,
+            height=300)
+        self.image_label.grid(row=1, column=0, padx=5, pady=5)
+        
+        self.update_image()
+        
+    def update_image(self):
+        frame = self.camera.get_frame()
+        if frame is not None:
+            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = Image.fromarray(image)
+            image = ctk.CTkImage(light_image=image, size=(400, 300))
             
-            self.imageLabel.configure(image = imagee, require_redraw=True)
-            self.imageLabel.after(20, self.updateImage)
-            
-if __name__ == "__main__":
-    app = ctk.CTk()
-    app.geometry("1200x1000")
-    camera_frame = CameraFrame(app)
-    camera_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-    app.mainloop()
+            self.image_label.configure(image=image)
+            self.image_label.image = image
+        self.after(10, self.update_image)

@@ -1,14 +1,22 @@
-
 import customtkinter as ctk
 from queue import Queue
+import os
+import sys
+
+# get current directory so we can import from outside guiFrames folder
+pp=os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.append(pp)
+from src.drivers.controlboard_driver import ControlBoard
 
 class InfoFrame(ctk.CTkFrame):
-    def __init__(self, master, data_dict):
-        super().__init__(master)
-        self.data = data_dict
-        self.configure(border_color="#1f6aa5", border_width=2)
-        self.grid(row=0, column=0, padx=5, pady=5, sticky="new")
+    def __init__(self, master, control_board: ControlBoard):
+        super().__init__(
+            master=master,
+            border_color="#1f6aa5",
+            border_width=2)
 
+        self.control_board = control_board
+        
         # Title
         self.title_label = ctk.CTkLabel(
             master=self,
@@ -37,8 +45,7 @@ class InfoFrame(ctk.CTkFrame):
         self.update_information()
         
     def update_information(self):
-        if not self.data["current_temp"].empty():
-            current_temperature = self.data["current_temp"].get_nowait()
-            self.hotplate_label.configure(text=f"Hotplate: {current_temperature}/{current_temperature}")
+        current_temperature = self.control_board.hotplate_temperature
+        self.hotplate_label.configure(text=f"Hotplate: {current_temperature}/{current_temperature}")
 
         self.after(1000, self.update_information)
