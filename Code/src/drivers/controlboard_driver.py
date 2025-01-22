@@ -79,21 +79,15 @@ class ControlBoard():
         self.logger.debug(f"Sending message: {message}")
 
 
-    def _finish_move(self):
+    def finish_move(self):
         """Wait for the move to finish"""
         self.send_message("M400")
         self.received_ok.clear()
         self.logger.debug("Waiting for move to finish")
         self.received_ok.wait()  # Wait until the move_finished event is set
 
-    def goto(self, x: float, y: float, z: float, speed: int = 1000):
-        """Move the toolhead to the specified coordiantes """
-        self.send_message(f"G0 X{x} Y{y} Z{z} F{speed}")
-        self._finish_move()
-
-    def echo(self, message: str):
-        """ Make the control board echo a message """
-        self.send_message(f"M118 {message}")
+    def get_temperature(self):
+        return self.hotplate_temperature
 
 
 class ControlBoardLineReader(serial.threaded.LineReader):
@@ -110,7 +104,7 @@ class ControlBoardLineReader(serial.threaded.LineReader):
         """Process each received line."""
         line = line.strip()
         self.logger.debug(f"Received: {line}")
-        if "ok" in line:
+        if line == "ok":
             self.control_board.received_ok.set()  # Set the event when "DONE" is received
         elif "B:" in line:
             # Extract the temperature from the line "B:{temp} ..."

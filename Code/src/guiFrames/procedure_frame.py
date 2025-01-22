@@ -1,11 +1,11 @@
 import customtkinter as ctk
-from procedure_handeler import ProcedureHandeler
+from procedure_handler import ProcedureHandler
 
 
 class ProcedureFrame(ctk.CTkFrame):
     """GUI Frame to display and control the procedure."""
 
-    def __init__(self, master, procedure_handeler: ProcedureHandeler):
+    def __init__(self, master, procedure_handeler: ProcedureHandler):
         super().__init__(
             master=master,
             border_color="#1f6aa5",
@@ -19,9 +19,12 @@ class ProcedureFrame(ctk.CTkFrame):
             text="Procedure Overview",
             justify="center",
             anchor="w",
-            font=("Arial", 20, "bold"))
-        self.title_label.grid(row=0, column=0, padx=20,
-                              pady=20, sticky="nswe", columnspan=3)
+            font=("Arial", 20, "bold")
+        )
+        self.title_label.grid(
+            row=0, column=0, columnspan=3,
+            padx=20, pady=20, sticky="nswe",
+        )
 
         # start button
         self.start_button = ctk.CTkButton(
@@ -29,18 +32,24 @@ class ProcedureFrame(ctk.CTkFrame):
             text="Start",
             width=100,
             height=50,
-            command=self.start_procedure)
-        self.start_button.grid(row=1, column=0, padx=20, pady=20)
-
+            command=self.start_procedure
+        )
+        self.start_button.grid(
+            row=1, column=0,
+            padx=20, pady=20
+        )
         # pause button
         self.pause_button = ctk.CTkButton(
             master=self,
             text="Pause",
             width=100,
             height=50,
-            command=self.toggle_pause)
-        self.pause_button.grid(row=1, column=1, padx=20, pady=20)
-
+            command=self.toggle_pause
+        )
+        self.pause_button.grid(
+            row=1, column=1,
+            padx=20, pady=20
+        )
         # stop button
         self.stop_button = ctk.CTkButton(
             master=self,
@@ -48,8 +57,39 @@ class ProcedureFrame(ctk.CTkFrame):
             width=100,
             height=50,
             command=self._stop_procedure)
-        self.stop_button.grid(row=1, column=2, padx=20, pady=20)
+        self.stop_button.grid(
+            row=1, column=2,
+            padx=20, pady=20)
 
+        # progress bar
+      
+        self.progress_bar = ctk.CTkProgressBar(
+            master=self,
+            width=200,
+            mode="determinate"
+        )
+        self.progress_bar.grid(
+            row=2, column=0, columnspan=2,
+            padx=5, pady=5, sticky="nw"
+        )
+        self.progress_label = ctk.CTkLabel(
+            master=self,
+            text="0%"
+        )
+        self.progress_label.grid(
+            row=2, column=2,
+            padx=5, pady=5, sticky="nw"
+        )
+        
+        self.time_label = ctk.CTkLabel(
+            master=self,
+            text="",
+        )
+        self.time_label.grid(
+            row=3,column=0,
+            padx=5, pady=5
+        )
+ 
         self.update()
 
     def update(self):
@@ -70,6 +110,11 @@ class ProcedureFrame(ctk.CTkFrame):
             else:
                 self.pause_button.configure(text="Resume")
 
+        self.time_label.configure(text=self.procedure_handeler.get_time_elapsed())
+        self.progress_bar.set(self.procedure_handeler.get_progress())
+        
+        self.progress_label.configure(text=f"{int(self.procedure_handeler.get_progress()*100)}%")
+        
         self.after(250, self.update)
 
     def start_procedure(self):
@@ -90,10 +135,3 @@ class ProcedureFrame(ctk.CTkFrame):
     def _stop_procedure(self):
 
         self.procedure_handeler.stop()
-
-
-if __name__ == "__main__":
-    app = ctk.CTk()
-    app.geometry("800x600")
-
-    app.mainloop()

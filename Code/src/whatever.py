@@ -2,7 +2,7 @@ from tkinter import filedialog
 import customtkinter as ctk
 import abc
 
-from drivers.procedure_driver import Procedure
+from Code.src.drivers.procedure_file_driver import Procedure
 LABEL_WIDTH = 150
 
 

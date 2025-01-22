@@ -5,27 +5,18 @@ Settings:
 
 Procedure:
   - function: gcode
-    args: [ "M114" ]
+    args: [ "G91" ]
 
-  - function: gcode
-    args: [ "M155 S1" ]
-
-  - function: print
+  - function: log
     args: [ "hello world" ]
 
   - function: goto
-    args: [ 100, 0, 0, 1000]
+    args: [ 0, 0, 10, 500]
 
   - function: goto
-    args: [ 0, 0, 0, 1000]
+    args: [ 0, 0, -10, 500]
 
-  - function: sleep
-    args: [ 10 ]
-    
-  - function: echo
-    args: [ "echoing" ]
-
-  - function: print
+  - function: log
     args: [ "goodbye world" ]
   
 

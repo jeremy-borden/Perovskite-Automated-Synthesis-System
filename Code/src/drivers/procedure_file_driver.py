@@ -1,7 +1,7 @@
 import yaml
 
 
-class Procedure:
+class ProcedureFile:
     def Open(self, path: str):
         with open(path, 'r', encoding='utf-8') as output_file:
             config = yaml.safe_load(output_file)

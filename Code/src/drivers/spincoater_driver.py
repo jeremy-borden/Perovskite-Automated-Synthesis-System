@@ -34,14 +34,14 @@ class SpinCoater():
         self.reader_thread.daemon = True
         self.reader_thread.start()
         
-    def _send_command(self, command: str):
+    def send_message(self, message: str):
         if self.serial is None:
             self.logger.error("Serial is not connected")
             return
 
-        if '\r\n' not in command:
+        if '\r\n' not in message:
             command += "\r\n"
-        self.reader_thread.write(command.encode("ascii"))
+        self.reader_thread.write(message.encode("ascii"))
         self.logger.debug(f"Sending command: {command}")
 
 

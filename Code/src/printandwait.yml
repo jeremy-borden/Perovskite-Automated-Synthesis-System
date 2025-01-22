@@ -4,20 +4,23 @@ Settings:
   idleTempCelsius: 60
 
 Procedure:
-  - function: print
+  - function: log
     args: [ "hello world" ]
 
-  - function: sleep
+  - function: wait
     args: [ 2 ]
     
-  - function: print
+  - function: log
     args: [ "point 1" ]
 
-  - function: sleep
+  - function: wait
     args: [ 2 ]
     
-  - function: print
+  - function: log
     args: [ "point 2" ]
+
+  - function: wait
+    args: [ 2 ]
   
 
 
