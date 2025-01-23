@@ -18,7 +18,7 @@ class SpinCoater():
             return
 
         try:
-            self.serial = serial.Serial(self.com_port, 9600, timeout=3)
+            self.serial = serial.Serial(self.com_port, 9600, timeout=3) # try removing timeout?
             self._begin_reader_thread()
             self.logger.info(
                 f"Connected to spincoater on port {self.com_port}")
@@ -38,6 +38,7 @@ class SpinCoater():
             return
         
         self.serial.close()
+        self.serial = None # idk if this is a good idea to do this? maybe better to just check if port is open later
 
     def _begin_reader_thread(self):
         self.reader_thread = serial.threaded.ReaderThread(

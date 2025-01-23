@@ -17,6 +17,11 @@ class ControlBoard():
         self.com_port = com_port
         
         self.hotplate_temperature = 0
+        self.positions = {"X": 0,
+                          "Y": 0,
+                          "Z": 0,
+                          "A": 0,
+                          "B": 0}
         self.serial = None
         self.reader_thread = None
 
@@ -93,7 +98,8 @@ class ControlBoard():
 class ControlBoardLineReader(serial.threaded.LineReader):
     """Class to read lines from the control board on a separate thread."""
     TERMINATOR = b"\n"
-
+    POSITION_PREFIXS = ["X:", "Y:", "Z:", "A:", "B:"]
+    
     def __init__(self, logger: logging.Logger, control_board: ControlBoard):
         """Initialize with optional logger."""
         super().__init__()
@@ -106,7 +112,15 @@ class ControlBoardLineReader(serial.threaded.LineReader):
         self.logger.debug(f"Received: {line}")
         if line == "ok":
             self.control_board.received_ok.set()  # Set the event when "DONE" is received
-        elif "B:" in line:
+        
+        if all(substr in self.POSITION_PREFIXS for substr in line): # if these substrings are present we know the board is sending positional data
+            for substr, key in zip(self.POSITION_PREFIXS, self.control_board.positions):
+                # extract the number that comes after the prefix and before the next space
+                number = (line.split(substr)[1]).split(" ")[0]
+                self.control_board[key] = float(number)
+            
+            
+        if "B:" in line: # 
             # Extract the temperature from the line "B:{temp} ..."
             temp = line.split("B:")[1]
             temp = temp.split(" ")[0]
