@@ -1,3 +1,5 @@
 **/OldVersions/
 .vscode
-**/_pycache__/
+
+**/__pycache__/
+**/.pyc
