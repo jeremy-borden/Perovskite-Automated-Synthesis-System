@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import logging
 
-from pyparsing import col
 
 
 class ConsoleFrame(ctk.CTkFrame):

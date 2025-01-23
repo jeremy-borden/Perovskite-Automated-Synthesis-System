@@ -18,12 +18,26 @@ class SpinCoater():
             return
 
         try:
-            self.serial = serial.Serial(self.com_port, 250000, timeout=0.5)
+            self.serial = serial.Serial(self.com_port, 9600, timeout=3)
             self._begin_reader_thread()
             self.logger.info(
-                f"Connected to control board on port {self.com_port}")
+                f"Connected to spincoater on port {self.com_port}")
         except serial.SerialException as e:
-            self.logger.error(f"Error connecting to control board: {e}")
+            self.logger.error(f"Error connecting to spincoater: {e}")
+            
+    def is_connected(self) -> bool:
+        if self.serial is None:
+            return False
+        if self.serial.is_open is False:
+            return False
+        
+        return True
+    
+    def disconnect(self):
+        if self.serial is None:
+            return
+        
+        self.serial.close()
 
     def _begin_reader_thread(self):
         self.reader_thread = serial.threaded.ReaderThread(
@@ -39,10 +53,10 @@ class SpinCoater():
             self.logger.error("Serial is not connected")
             return
 
-        if '\r\n' not in message:
-            command += "\r\n"
+        # if '\r\n' not in message:
+        #     message += "\r\n"
         self.reader_thread.write(message.encode("ascii"))
-        self.logger.debug(f"Sending command: {command}")
+        self.logger.debug(f"Sending command: {message}")
 
 
 class SpinCoaterLineReader(serial.threaded.LineReader):
@@ -55,3 +69,11 @@ class SpinCoaterLineReader(serial.threaded.LineReader):
     def handle_line(self, line: str):
         line = line.strip()
         self.logger.debug(f"Received: {line}")
+    
+    def connection_lost(self, exc):
+        """Handle the loss of connection."""
+        if exc:
+            self.logger.error(f"Serial connection lost: {exc}")
+        else:
+            self.logger.info("Serial connection closed")
+        self.spincoater.disconnect()

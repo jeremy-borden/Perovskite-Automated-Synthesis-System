@@ -1,7 +1,7 @@
 import logging
 from queue import Queue
 import customtkinter as ctk
-import scipy as sp
+
 
 from guiFrames.console_frame import ConsoleFrame
 from guiFrames.procedure_frame import ProcedureFrame
@@ -10,6 +10,7 @@ from guiFrames.camera_frame import CameraFrame
 from guiFrames.conection_frame import ConnectionFrame
 
 from drivers.controlboard_driver import ControlBoard
+from drivers.spincoater_driver import SpinCoater
 from drivers.dac_driver import DAC
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
@@ -36,20 +37,23 @@ if __name__ == "__main__":
     # initialize connection to control board
     control_board = ControlBoard(
         com_port="COM7",
-        logger=logger
-    )
+        logger=logger)
+    
+    spincoater= SpinCoater(
+        com_port="COM4",
+        logger=logger)
     
     dac = DAC(0x00)
 
     # load in the procedure
-    procedure_config = ProcedureFile().Open("Code/src/default_procedure.yml")
+    procedure_config = ProcedureFile().Open("Code/src/printandwait.yml")
     move_list = procedure_config["Procedure"]
 
     # create dispatcher
     dispatcher = Dispatcher(
         logger=logger,
         control_board=control_board,
-        spincoater=None,
+        spincoater=spincoater,
         dac=dac)
 
     procedure_handler = ProcedureHandler(
@@ -60,8 +64,8 @@ if __name__ == "__main__":
     procedure_handler.start()
 
     camera = Camera(logger=logger)
-    # camera.connect()
-    # camera.start()
+    #camera.connect()
+    #camera.start()
 
     app = ctk.CTk()
     app.geometry("1000x1000")
@@ -70,17 +74,15 @@ if __name__ == "__main__":
     procedure_frame.grid(
         row=0, column=0,
         padx=5, pady=5,
-        sticky="nsew"
-        )
+        sticky="nsew")
 
     console_frame = ConsoleFrame(app, logger)
     console_frame.grid(
         row=1, column=0,
         padx=5, pady=5,
-        sticky="nsew"
-        )
+        sticky="nsew")
 
-    connection_frame = ConnectionFrame(master=app, control_board=control_board)
+    connection_frame = ConnectionFrame(master=app, control_board=control_board, spincoater=spincoater)
     connection_frame.grid(
         row=0, column=1,
         padx=5, pady=5,
