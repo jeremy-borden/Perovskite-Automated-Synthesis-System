@@ -41,18 +41,20 @@ class ControlBoard():
             self.logger.error(f"Error connecting to control board: {e}")
     
     def disconnect(self):
-        if self.serial is None:
+        if not self.is_connected():
             return
         
         self.serial.close()
+        self.logger.debug("Control Board Disconnected")
             
     def is_connected(self) -> bool:
-        if self.serial is None:
-            return False
-        if self.serial.is_open is False:
-            return False
+        return self.serial is not None and self.serial.is_open
+    
+    def kill(self):
+        """ Sends M112 to immediately stop steppers and heaters"""
+        self.send_message("M112")
         
-        return True
+        
             
     def _begin_reader_thread(self):
         self.reader_thread = serial.threaded.ReaderThread(
@@ -78,8 +80,8 @@ class ControlBoard():
             self.logger.error("Reader thread is not running")
             return
 
-        if '\r\n' not in message:
-            message += "\r\n"
+        # if '\r\n' not in message:
+        #     message += "\r\n"
         self.reader_thread.write(message.encode("utf-8"))
         self.logger.debug(f"Sending message: {message}")
 

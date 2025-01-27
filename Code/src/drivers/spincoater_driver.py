@@ -13,8 +13,8 @@ class SpinCoater():
         self.reader_thread = None
         
     def connect(self):
-        if self.serial is not None:
-            self.logger.error("Connection already established")
+        if self.is_connected():
+            self.logger.error("Spin Coater is already connected")
             return
 
         try:
@@ -24,21 +24,15 @@ class SpinCoater():
                 f"Connected to spincoater on port {self.com_port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to spincoater: {e}")
-            
-    def is_connected(self) -> bool:
-        if self.serial is None:
-            return False
-        if self.serial.is_open is False:
-            return False
-        
-        return True
-    
+               
     def disconnect(self):
-        if self.serial is None:
+        if not self.is_connected():
             return
-        
         self.serial.close()
-        self.serial = None # idk if this is a good idea to do this? maybe better to just check if port is open later
+        self.logger.debug("Spin Coater Disconnected")
+        
+    def is_connected(self) -> bool:
+        return self.serial is not None and self.serial.is_open
 
     def _begin_reader_thread(self):
         self.reader_thread = serial.threaded.ReaderThread(
@@ -54,18 +48,16 @@ class SpinCoater():
             self.logger.error("Serial is not connected")
             return
 
-        # if '\r\n' not in message:
-        #     message += "\r\n"
         self.reader_thread.write(message.encode("ascii"))
         self.logger.debug(f"Sending command: {message}")
 
 
 class SpinCoaterLineReader(serial.threaded.LineReader):
     """Class to read lines from the spin coater on a separate thread"""
-    def __init__(self, logger: logging.Logger, spincoater: SpinCoater):
+    def __init__(self, logger: logging.Logger, spin_coater: SpinCoater):
         super().__init__()
         self.logger = logger
-        self.spincoater = spincoater
+        self.spin_coater = spin_coater
 
     def handle_line(self, line: str):
         line = line.strip()
@@ -77,4 +69,4 @@ class SpinCoaterLineReader(serial.threaded.LineReader):
             self.logger.error(f"Serial connection lost: {exc}")
         else:
             self.logger.info("Serial connection closed")
-        self.spincoater.disconnect()
+        self.spin_coater.disconnect()

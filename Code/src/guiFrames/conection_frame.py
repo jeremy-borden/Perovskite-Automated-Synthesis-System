@@ -7,20 +7,22 @@ import os
 # get current directory so we can import from outside guiFrames folder
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(path)
-from src.drivers.spincoater_driver import SpinCoater
 from src.drivers.controlboard_driver import ControlBoard
+from src.drivers.spincoater_driver import SpinCoater
+from src.drivers.camera_driver import Camera
+
 
 class ConnectionFrame(ctk.CTkFrame):
-    def __init__(self, master, control_board: ControlBoard, spincoater: SpinCoater):
+    def __init__(self, master, control_board: ControlBoard, spin_coater: SpinCoater, camera: Camera):
         super().__init__(
             master=master,
             border_color="#1f6aa5",
             border_width=2,
-            height=400
-        )
+            height=400)
 
         self.control_board = control_board
-        self.spincoater = spincoater
+        self.spin_coater = spin_coater
+        self.camera = camera
 
         # title
         self.title_label = ctk.CTkLabel(
@@ -61,10 +63,8 @@ class ConnectionFrame(ctk.CTkFrame):
             text="Status: Disconected",
             width=100,
             height=20,
-            font=("Arial", 10)
-        )
-        self.control_board_status_label.grid(
-            row=3, column=0, padx=5, pady=5, sticky="nw")
+            font=("Arial", 10))
+        self.control_board_status_label.grid(row=3, column=0, padx=5, pady=5, sticky="nw")
         
         # spincoater
         spincoater_image = ctk.CTkImage(
@@ -85,8 +85,7 @@ class ConnectionFrame(ctk.CTkFrame):
             text="Connect",
             width=100,
             height=30,
-            command=self._connect_spincoater
-        )
+            command=self._connect_spincoater)
         self.connect_spincoater_button.grid(
             row=2, column=1, padx=5, pady=5, sticky="nw")
 
@@ -95,11 +94,41 @@ class ConnectionFrame(ctk.CTkFrame):
             text="Status: Disconected",
             width=100,
             height=20,
-            font=("Arial", 10)
-        )
+            font=("Arial", 10))
         self.spincoater_status_label.grid(
             row=3, column=1, padx=5, pady=5, sticky="nw")
         
+        # camera
+        camera_image = ctk.CTkImage(
+            light_image=Image.open("Code/src/guiImages/camera.png"),
+            size=(100, 100))
+        self.camera_image_label = ctk.CTkLabel(
+            master=self,
+            text="",
+            image=camera_image,
+            width=100,
+            height=100
+        )
+        self.camera_image_label.grid(
+            row=1, column=2, padx=5, pady=5, sticky="nw")
+
+        self.connect_camera_button = ctk.CTkButton(
+            master=self,
+            text="Connect",
+            width=100,
+            height=30,
+            command=self._connect_camera)
+        self.connect_camera_button.grid(
+            row=2, column=2, padx=5, pady=5, sticky="nw")
+
+        self.camera_status_label = ctk.CTkLabel(
+            master=self,
+            text="Status: Disconected",
+            width=100,
+            height=20,
+            font=("Arial", 10))
+        self.camera_status_label.grid(
+            row=3, column=2, padx=5, pady=5, sticky="nw")
 
         # command entry
         self.command_destination = "Control Board"
@@ -125,7 +154,7 @@ class ConnectionFrame(ctk.CTkFrame):
             width=300,
             height=50
         )
-        self.command_entry.grid(row=4, column=1, rowspan=2, padx=5, pady=5, sticky="nw")
+        self.command_entry.grid(row=4, column=1, rowspan=2, columnspan=2, padx=5, pady=5, sticky="nw")
         self.command_entry.bind("<Return>", self._send_entry)
         
         self.send_entry_button = ctk.CTkButton(
@@ -135,24 +164,34 @@ class ConnectionFrame(ctk.CTkFrame):
             height=50,
             command=self._send_entry
         )
-        self.send_entry_button.grid(row=4, column=2, rowspan=2, padx=5, pady=5, sticky="nw")
+        self.send_entry_button.grid(row=4, column=3, rowspan=2, padx=5, pady=5, sticky="nw")
         self._update()
 
     def _update(self):
-
-        if not self.spincoater.is_connected():
-            self.connect_spincoater_button.configure(state="normal")
+        
+        if not self.spin_coater.is_connected():
+            if self.connect_spincoater_button.cget("state") != "normal":
+                self.connect_spincoater_button.configure(state="normal")
             self.spincoater_status_label.configure(
                 text="Status: Disconected")
         else:
             self.spincoater_status_label.configure(text="Status: Connected")
             
         if not self.control_board.is_connected():
-            self.connect_control_board_button.configure(state="normal")
+            if self.connect_control_board_button.cget("state") != "normal":
+                self.connect_control_board_button.configure(state="normal")
             self.control_board_status_label.configure(
                 text="Status: Disconected")
         else:
             self.control_board_status_label.configure(text="Status: Connected")
+            
+        if not self.camera.is_connected():
+            if self.connect_camera_button.cget("state") != "normal":
+                self.connect_camera_button.configure(state="normal")
+            self.camera_status_label.configure(
+                text="Status: Disconected")
+        else:
+            self.camera_status_label.configure(text="Status: Connected")
 
         self.after(1000, self._update)
 
@@ -161,9 +200,13 @@ class ConnectionFrame(ctk.CTkFrame):
         self.connect_control_board_button.configure(state="disabled")
     
     def _connect_spincoater(self):
-        self.spincoater.connect()
+        self.spin_coater.connect()
         self.connect_spincoater_button.configure(state="disabled")
-
+        
+    def _connect_camera(self):
+        self.camera.connect()
+        self.connect_camera_button.configure(state="disabled")
+        
     def _set_command_destination(self, value: str):
         self.command_destination = value
         self.command_destination_label.configure(text=f"Destination: {self.command_destination}")
@@ -177,4 +220,4 @@ class ConnectionFrame(ctk.CTkFrame):
         if self.command_destination == "Control Board":
             self.control_board.send_message(value)
         elif self.command_destination == "Spincoater":
-            self.spincoater.send_message(value)
+            self.spin_coater.send_message(value)

@@ -12,18 +12,14 @@ class ProcedureHandler(threading.Thread):
     """
 
     def __init__(self, logger: logging.Logger, dispatcher: Dispatcher):
-        super().__init__(
-            name="ProcedureHandeler",
-            daemon=True
-        )
+        super().__init__(name="ProcedureHandeler",daemon=True)
+        
         self.logger = logger
         self.dispatcher = dispatcher
-        self.move_in_progress = False
 
         self.procedure = None
         self.current_step = 0
         
-        self.move_queue = queue.Queue()
         self.running = threading.Event()
         self.started = threading.Event()
         self.running.clear()
@@ -37,46 +33,35 @@ class ProcedureHandler(threading.Thread):
         Args:
             procedure (list): list of moves to run.
         """
+        
         if not self.dispatcher.validate_moves(procedure):
             self.logger.error("Invalid moves in procedure")
             return
 
+        if self.started.is_set():
+            self.logger.error("Cannot change moves until procedure stops")
+            return
         self.procedure = procedure
-
-    def _add_moves(self):
-        """Add moves to the procedure queue."""
-        for move in self.procedure:
-            self.move_queue.put(move)
-
-    def clear_moves(self):
-        """Clear the procedure queue."""
-        self.move_queue.queue.clear()
 
     def run(self):
         """Run the procedure."""
         while True:
             self.started.wait()
+            
+            for move in self.procedure:
+                if not self.running.is_set():
+                    self.procedure_timer.pause()
+                    self.running.wait()
+                    self.procedure_timer.unpause()
 
-            if self.move_queue.empty():
-                self.logger.error("No moves in queue")
-                self.stop()
-                continue
-
-            while not self.move_queue.empty() and self.started.is_set():
-                
-                self.running.wait()
-
-                self.logger.debug("Getting next move")
-                move = self.move_queue.get()
+                self.logger.debug(f"Executing move {self.current_step}")
                 
                 func_name = move["function"]
                 func_args = move["args"]
 
                 self.dispatcher.move_dict[func_name](*func_args)
-                self.move_queue.task_done()
                 self.current_step+=1
-
-            
+                
             self.stop()
 
     def begin(self):
@@ -86,7 +71,6 @@ class ProcedureHandler(threading.Thread):
             return
         self.start_time=time.time()
         
-        self._add_moves()
         self.started.set()
         self.running.set()
         self.procedure_timer.start()
@@ -95,23 +79,19 @@ class ProcedureHandler(threading.Thread):
 
     def stop(self):
         """Stop the procedure."""
-
         self.started.clear()
         self.running.clear()
-        self.clear_moves()
         self.procedure_timer.pause()
-        self.logger.info("Procedure stopped")
+        self.logger.info("Stopping procedure...")
 
     def pause(self):
         """Pause the procedure."""
         self.running.clear()
-        self.procedure_timer.pause()
         self.logger.info("Pausing procedure...")
 
     def resume(self) -> None:
         """Resume the procedure."""
         self.running.set()
-        self.procedure_timer.unpause()
         self.logger.info("Resuming procedure...")
         
     def get_time_elapsed(self) -> timedelta:
@@ -130,21 +110,21 @@ class Timer():
         self.is_paused = False
         
     def start(self):
-        self.start_time = datetime.now().replace(microsecond=0)
+        self.start_time = datetime.now()
         self.is_paused = False
         
     def pause(self):
         if self.is_paused:
             return
             
-        self.pause_time = datetime.now().replace(microsecond=0)
+        self.pause_time = datetime.now()
         self.is_paused = True
     
     def unpause(self):
         if not self.is_paused:
             return
         
-        last_pause_time = datetime.now().replace(microsecond=0) - self.pause_time
+        last_pause_time = datetime.now() - self.pause_time
         self.start_time = self.start_time + last_pause_time
         self.is_paused = False
         
@@ -153,6 +133,6 @@ class Timer():
             return timedelta(0)
         
         if self.is_paused:
-            return self.pause_time - self.start_time
+            return self.pause_time.replace(microsecond=0) - self.start_time.replace(microsecond=0)
         else:
-            return datetime.now().replace(microsecond=0) - self.start_time
+            return datetime.now().replace(microsecond=0) - self.start_time.replace(microsecond=0)

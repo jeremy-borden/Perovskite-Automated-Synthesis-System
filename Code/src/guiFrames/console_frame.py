@@ -14,9 +14,9 @@ class ConsoleFrame(ctk.CTkFrame):
         
         self.logger = logger
         
-        console_handler = ConsoleLogHandler(self)
-        console_handler.setFormatter(logging.Formatter('%(levelname)s\t%(asctime)s: %(message)s'))
-        logger.addHandler(console_handler)
+        self.console_handler = ConsoleLogHandler(self)
+        self.console_handler.setFormatter(logging.Formatter('%(levelname)s\t%(asctime)s: %(message)s'))
+        self.logger.addHandler(self.console_handler)
         
         # title label
         self.title_label = ctk.CTkLabel(
@@ -74,6 +74,7 @@ class ConsoleFrame(ctk.CTkFrame):
         self.logger.setLevel(level)
         self.logger.debug(f"Logging level set to {level}")
 
+    
 class ConsoleLogHandler(logging.StreamHandler):
     """ Custom log handler to write log messages to the console frame """
     def __init__(self, console):
@@ -82,3 +83,4 @@ class ConsoleLogHandler(logging.StreamHandler):
 
     def emit(self, record):
         self.console.write_to_console(self.format(record))
+    

@@ -1,3 +1,4 @@
+from sre_parse import State
 import customtkinter as ctk
 from procedure_handler import ProcedureHandler
 
@@ -89,33 +90,35 @@ class ProcedureFrame(ctk.CTkFrame):
             row=3,column=0,
             padx=5, pady=5
         )
- 
+        # TODO add button to select procedure
+        
+        
         self.update()
 
     def update(self):
         """ Update the frame """
 
         if not self.procedure_handeler.started.is_set():
-            self.start_button.configure(state="normal")
+            if self.start_button.cget("state") != "normal":
+                self.start_button.configure(state="normal") 
             self.pause_button.configure(text="Pause")
             self.pause_button.configure(state="disabled")
             self.stop_button.configure(state="disabled")
         else:
             self.start_button.configure(state="disabled")
-            self.pause_button.configure(state="normal")
-            self.stop_button.configure(state="normal")
+            if self.pause_button.cget("state") != "normal":
+                self.pause_button.configure(state="normal")
+            if self.stop_button.cget("state") != "normal":
+                self.stop_button.configure(state="normal")
 
-            if self.procedure_handeler.running.is_set():
-                self.pause_button.configure(text="Pause")
-            else:
-                self.pause_button.configure(text="Resume")
+                
 
         self.time_label.configure(text=self.procedure_handeler.get_time_elapsed())
         self.progress_bar.set(self.procedure_handeler.get_progress())
         
         self.progress_label.configure(text=f"{int(self.procedure_handeler.get_progress()*100)}%")
         
-        self.after(250, self.update)
+        self.after(20, self.update)
 
     def start_procedure(self):
         """ Callback to begin the procedure."""
@@ -126,8 +129,10 @@ class ProcedureFrame(ctk.CTkFrame):
         """ Toggle the pause state of the procedure  """
         if self.procedure_handeler.running.is_set():
             self.procedure_handeler.pause()
+            self.pause_button.configure(text="Resume")
         else:
             self.procedure_handeler.resume()
+            self.pause_button.configure(text="Pause")
 
         # disable button after pressing to prevent double press
         self.pause_button.configure(state="disabled")
