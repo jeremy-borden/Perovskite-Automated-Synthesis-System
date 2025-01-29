@@ -42,6 +42,7 @@ class ProcedureHandler(threading.Thread):
             self.logger.error("Cannot change moves until procedure stops")
             return
         self.procedure = procedure
+        self.current_step = 0
 
     def run(self):
         """Run the procedure."""

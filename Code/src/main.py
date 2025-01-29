@@ -11,7 +11,7 @@ from guiFrames.conection_frame import ConnectionFrame
 
 from drivers.controlboard_driver import ControlBoard
 from drivers.spincoater_driver import SpinCoater
-from drivers.dac_driver import DAC
+#from drivers.dac_driver import DAC
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     spincoater= SpinCoater(com_port="COM3",logger=logger)
     camera = Camera(logger=logger)
     camera.start()
-    dac = DAC(0x00)
+    dac=None #dac = DAC(0x00)
 
     # create dispatcher, might switch to just dict in the future
     dispatcher = Dispatcher(logger=logger,control_board=control_board,spincoater=spincoater,dac=dac)

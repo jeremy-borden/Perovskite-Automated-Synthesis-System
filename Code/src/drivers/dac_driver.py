@@ -1,8 +1,8 @@
-from smbus2 import SMBus
+#from smbus2 import SMBus
 
 class DAC():
     def __init__(self, address, resolution_bits: int = 12):
-        self.bus = SMBus(1)
+        #self.bus = SMBus(1)
         self.address = address
         self.resolution_bits = resolution_bits
         
