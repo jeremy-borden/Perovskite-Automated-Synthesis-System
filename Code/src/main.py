@@ -28,33 +28,25 @@ def create_logger() -> logging.Logger:
     _logger.addHandler(_console_handler)
 
     return _logger
-    
-    
-    
-    
+
 if __name__ == "__main__":
     # initialize logger
     logger = create_logger()
 
     # initialize peripherals
     control_board = ControlBoard(com_port="COM7",logger=logger)
-    spincoater= SpinCoater(com_port="COM4",logger=logger)
+    spincoater= SpinCoater(com_port="COM3",logger=logger)
     camera = Camera(logger=logger)
     camera.start()
     dac = DAC(0x00)
-    
-    
 
-    
-
-    
     # create dispatcher, might switch to just dict in the future
     dispatcher = Dispatcher(logger=logger,control_board=control_board,spincoater=spincoater,dac=dac)
     procedure_handler = ProcedureHandler(logger=logger,dispatcher=dispatcher)
-    
     procedure_handler.start()
+    
     # load in the procedure
-    procedure_config = ProcedureFile().Open("Code/src/printandwait.yml")
+    procedure_config = ProcedureFile().Open("Code/src/default_procedure.yml")
     if procedure_config is not None:
         move_list = procedure_config["Procedure"]
         procedure_handler.set_procedure(move_list)

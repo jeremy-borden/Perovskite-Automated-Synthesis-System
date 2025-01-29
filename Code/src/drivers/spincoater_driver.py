@@ -1,7 +1,13 @@
 import logging
 import serial
 import serial.threaded
-
+# SPINCOATER COMMANDS
+# spc set pcmode
+# spc add step {rpm} {time}
+# spc get steps
+# spc del steps
+# spc run
+# spc stop
 
 class SpinCoater():
     """ Class to control the spin coater """
@@ -18,7 +24,7 @@ class SpinCoater():
             return
 
         try:
-            self.serial = serial.Serial(self.com_port, 9600, timeout=3) # try removing timeout?
+            self.serial = serial.Serial(self.com_port, 9600, timeout=None) # try removing timeout?
             self._begin_reader_thread()
             self.logger.info(
                 f"Connected to spincoater on port {self.com_port}")
@@ -32,7 +38,7 @@ class SpinCoater():
         self.logger.debug("Spin Coater Disconnected")
         
     def is_connected(self) -> bool:
-        return self.serial is not None and self.serial.is_open
+        return (self.serial is not None) and (self.serial.is_open)
 
     def _begin_reader_thread(self):
         self.reader_thread = serial.threaded.ReaderThread(
@@ -54,6 +60,8 @@ class SpinCoater():
 
 class SpinCoaterLineReader(serial.threaded.LineReader):
     """Class to read lines from the spin coater on a separate thread"""
+    
+    TERMINATOR = b"\n"
     def __init__(self, logger: logging.Logger, spin_coater: SpinCoater):
         super().__init__()
         self.logger = logger

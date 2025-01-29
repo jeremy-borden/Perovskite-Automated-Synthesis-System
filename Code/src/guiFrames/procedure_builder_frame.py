@@ -84,13 +84,10 @@ class ProcedureBuilder(ctk.CTkFrame):
         if self.selected_step is not None:
             self.selected_step.configure(border_color="#1f6aa5")
         
-        
         widget = event.widget
         while widget != self.step_frame:
             if isinstance(widget, StepFrame):
                 self.selected_step = widget
-                print(f"Selected frame: {widget}")
-
                 break
             widget = widget.master
         

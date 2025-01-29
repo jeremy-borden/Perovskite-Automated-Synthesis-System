@@ -54,8 +54,6 @@ class ControlBoard():
         """ Sends M112 to immediately stop steppers and heaters"""
         self.send_message("M112")
         
-        
-            
     def _begin_reader_thread(self):
         self.reader_thread = serial.threaded.ReaderThread(
             serial_instance=self.serial,
@@ -88,6 +86,9 @@ class ControlBoard():
 
     def finish_move(self):
         """Wait for the move to finish"""
+        if not self.is_connected():
+            self.logger.error("Serial is not connected")
+            return
         self.send_message("M400")
         self.received_ok.clear()
         self.logger.debug("Waiting for move to finish")
