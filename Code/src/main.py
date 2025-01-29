@@ -28,10 +28,7 @@ def create_logger() -> logging.Logger:
     _logger.addHandler(_console_handler)
 
     return _logger
-    
-    
-    
-    
+
 if __name__ == "__main__":
     # initialize logger
     logger = create_logger()
