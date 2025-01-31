@@ -44,8 +44,8 @@ class Dispatcher():
             return False
 
         for index, move in enumerate(moves):
-            func_name = move["function"]
-            func_args = move["args"]
+            func_name = move[0]
+            func_args = move[1:]
 
             if func_name not in self.move_dict:
                 self.logger.error(f"Function #{index},{func_name} not found in dispatcher")

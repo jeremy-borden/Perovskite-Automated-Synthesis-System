@@ -12,7 +12,7 @@ class ProcedureHandler(threading.Thread):
     """
 
     def __init__(self, logger: logging.Logger, dispatcher: Dispatcher):
-        super().__init__(name="ProcedureHandeler",daemon=True)
+        super().__init__(name="ProcedureHandler",daemon=True)
         
         self.logger = logger
         self.dispatcher = dispatcher
@@ -57,8 +57,8 @@ class ProcedureHandler(threading.Thread):
 
                 self.logger.debug(f"Executing move {self.current_step}")
                 
-                func_name = move["function"]
-                func_args = move["args"]
+                func_name = move[0]
+                func_args = move[1:]
 
                 self.dispatcher.move_dict[func_name](*func_args)
                 self.current_step+=1

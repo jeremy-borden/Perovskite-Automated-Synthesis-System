@@ -4,20 +4,13 @@ Settings:
   idleTempCelsius: 60
 
 Procedure:
-  - function: gcode
-    args: [ "G91" ]
 
-  - function: log
-    args: [ "hello world" ]
+  - ["log",   "Default Procedure! Yipee!!" ]
+  - ["wait",  1 ]
+  - ["log",   "So Default!" ]
+  - ["wait",  1 ]
+  - ["log",   "Bye Bye!!!" ]
 
-  - function: goto
-    args: [ 0, 0, 10, 500]
-
-  - function: goto
-    args: [ 0, 0, -10, 500]
-
-  - function: log
-    args: [ "goodbye world" ]
   
 
 

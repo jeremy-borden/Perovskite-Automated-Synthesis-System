@@ -192,8 +192,7 @@ class WaitStep(StepFrame):
         
     def get_steps(self):
         wait_time: int = self.wait_time_entry.get()
-        d = {"function": "wait",
-             "args": wait_time}
+        d = ["wait", wait_time]
         
         return [d]
     
@@ -220,9 +219,11 @@ class HeatStep(StepFrame):
 
         
     def get_steps(self):
-        
-        s1 = {"function": "set_temp",
-              "args": int(self.heat_temperature.get_entry())}
+        target_temperature = int(self.heat_temperature.get_entry())
+        move = ["set_temp", target_temperature]
+        return move
+
+
 
 class MoveStep(StepFrame):
     def __init__(self, master):
