@@ -2,6 +2,7 @@ import customtkinter as ctk
 import abc
 from time import sleep
 
+
 class ProcedureBuilder(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(
@@ -13,10 +14,12 @@ class ProcedureBuilder(ctk.CTkFrame):
         self.step_list = []
         self.selected_step = None
         
-        self.steps = {"Wait":WaitStep,
-                          "Heat":HeatStep,
-                          "Move":MoveStep,
-                          "Move Fluid": MoveFluidStep,}
+        self.steps = {
+            "Wait":WaitStep,
+            "Heat":HeatStep,
+            "Move":MoveStep,
+            "Move Fluid": MoveFluidStep,
+            "Spin": SpinStep}
         
         # TODO add button to save procedure
         self.step_frame = ctk.CTkScrollableFrame(
@@ -254,7 +257,7 @@ class MoveFluidStep(StepFrame):
         self.fluid_amount_ul.grid(row=1, column=0, padx=5, pady=5)
         
         self.destination = LabelEntry(self.step_frame, "Destination Vial: ")
-        self.destination_vial.grid(row=2, column=0, padx=5, pady=5)
+        self.destination.grid(row=2, column=0, padx=5, pady=5)
         
         self.mix_checkbox = ctk.CTkCheckBox(master=self.step_frame,
             width=20,
@@ -282,7 +285,7 @@ class MoveFluidStep(StepFrame):
         
         return super().get_steps()
     
-class Spin(StepFrame):
+class SpinStep(StepFrame):
     def __init__(self, master):
         super().__init__(
                 master=master,
@@ -292,7 +295,7 @@ class Spin(StepFrame):
         self.spin_rpm.grid(row=0, column=0, padx=5,pady=5)
         
         self.spin_duration = LabelEntry(self.step_frame, "Spin Duration (s): ")
-        self.spin_duration.grid(row=0, column=0, padx=5, pady=5)
+        self.spin_duration.grid(row=1, column=0, padx=5, pady=5)
         
     
 
@@ -303,38 +306,28 @@ class Spin(StepFrame):
 class LabelEntry(ctk.CTkFrame):
     def __init__(self, master, label: str):
         super().__init__(
-            master=master,
-            width=200,
-        )
+            master=master,width=200,)
         
         self.label = ctk.CTkLabel(
-            master=self,
-            text=label,
+            master=self,text=label,
             width=100,
-            anchor="w"
-        )
+            anchor="w")
         self.label.grid(
             row=0, column=0,
-            padx=5, pady=5,
-            sticky="nw"
-        )
+            padx=5, pady=5,sticky="nw")
         self.entry = ctk.CTkEntry(
-            master=self,
-            width=100, 
-            placeholder_text="..."
-        )
+            master=self,placeholder_text="...",
+            width=100)
         self.entry.grid(
             row=0, column=1,
-            padx=5, pady=5,
-            sticky="nw"
-        )
+            padx=5, pady=5,sticky="nw")
     def get_entry(self):
         return self.entry.get()
       
 if __name__ == "__main__":
     app = ctk.CTk()
     app.geometry("1000x1000")
-    
+    app.configure()
     f = ProcedureBuilder(app)
     f.grid(
         row=0, column=0,

@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import logging
-
+from queue import Queue
 
 
 class ConsoleFrame(ctk.CTkFrame):
@@ -13,11 +13,11 @@ class ConsoleFrame(ctk.CTkFrame):
             border_width=2)
         
         self.logger = logger
-        
+        self.msg_q = Queue()
         self.console_handler = ConsoleLogHandler(self)
         self.console_handler.setFormatter(logging.Formatter('%(levelname)s\t%(asctime)s: %(message)s'))
         self.logger.addHandler(self.console_handler)
-        
+
         # title label
         self.title_label = ctk.CTkLabel(
             master=self,
@@ -50,6 +50,21 @@ class ConsoleFrame(ctk.CTkFrame):
         self.console.tag_config("DEBUG", foreground="#8df564")
         self.console.tag_config("WARNING", foreground="#e4f089")
         self.console.tag_config("ERROR", foreground="red")
+        
+        self._update()
+        
+        
+    def _update(self):
+        while not self.msg_q.empty():
+            msg = self.msg_q.get()
+            self.write_to_console(msg)
+            self.msg_q.task_done()
+            self.console.see("end")
+            
+            
+      
+        
+        self.after(50, self._update)
 
     def write_to_console(self, text: str):
         """ Write a message to the console
@@ -63,7 +78,7 @@ class ConsoleFrame(ctk.CTkFrame):
         self.console.configure(state="normal")
         self.console.insert("end", text + "\n", prefix)
         self.console.configure(state="disabled")
-        self.console.see("end")
+
 
     def update_logging_level(self, level: str):
         """ Update the logging level
@@ -82,5 +97,5 @@ class ConsoleLogHandler(logging.StreamHandler):
         self.console = console
 
     def emit(self, record):
-        self.console.write_to_console(self.format(record))
+        self.console.msg_q.put(self.format(record))
     

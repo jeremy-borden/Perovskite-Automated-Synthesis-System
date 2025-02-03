@@ -1,7 +1,9 @@
+from objects.gripper import Gripper
+from drivers.camera_driver import Camera
 from drivers.spincoater_driver import SpinCoater
 from drivers.controlboard_driver import ControlBoard
 from drivers.dac_driver import DAC
-
+from image_processing import ImageProcessor
 
 from time import sleep
 from inspect import signature
@@ -11,20 +13,24 @@ import logging
 MAX_TEMPERATURE = 540 # TODO move to constants later
 
 class Dispatcher():
-    def __init__(self, logger: logging.Logger, control_board: ControlBoard, spincoater: SpinCoater, dac: DAC):
+    def __init__(self, logger: logging.Logger, control_board: ControlBoard, spincoater: SpinCoater, hotplate, camera: Camera, gripper: Gripper):
         self.logger = logger
         self.control_board = control_board
         self.spincoater = spincoater
-        self.dac = dac
+        self.camera = camera
+        self.gripper = gripper
+        self.hotplate = hotplate
+        
+        ImageProcessor.set_detector()
 
         self.move_dict = {
             "log": self.log,
             "wait": self.wait,
             "goto": self.move_toolhead,
-            "echo": self.echo_controlboard,
             "gcode": self.control_board.send_message,
-            "set_temp": self.set_temperature,
-            "wait_for_temp": self.wait_for_temperature
+            "set_temp": self.hotplate.set_temperature,
+            "wait_for_temp": self.hotplate.wait_for_temperature,
+            "align_gripper": self.align_gripper
         }
     
     def validate_moves(self, moves: list) -> bool:
@@ -62,45 +68,32 @@ class Dispatcher():
         return valid
     
     
+    def kill(self):
+        self.control_board.kill()
+        self.spincoater.stop()
+        self.spincoater.clear_steps()
+        self.gripper.detatch_servos()
+    
     # controlboard tasks
     def move_toolhead(self, x: float, y: float, z: float, speed: int = 1000):
         """Move the toolhead to the specified coordiantes """
         self.control_board.send_message(f"G0 X{x} Y{y} Z{z} F{speed}")
         self.control_board.finish_move()
-    
-    def echo_controlboard(self, message: str):
-        """ Make the control board echo a message """
-        self.control_board.send_message(f"M118 {message}")
-    
-    # hotplate tasks
-    def set_temperature(self, temperature: int):
-        """ Set the hotplate to the specified temperature in degrees celcius"""
-        
-        if temperature > MAX_TEMPERATURE:
-            temperature = MAX_TEMPERATURE
-        if temperature < 0:
-            temperature = 0
-            
-        level = float(temperature/MAX_TEMPERATURE)
-        self.dac.setVoltageLevel(level)
-    
-    def wait_for_temperature(self, target_temperature: int, threshold: int = 1):
-        """Waits until target temperature is met within the threshold"""
-        
-        while abs(self.control_board.get_temperature - target_temperature) > threshold:
-            self.logger.debug(f"Waiting to reach {target_temperature}C")
-            sleep(1)
-            
+
     # TODO add spincoater tasks
     def add_spincoater_step(self, rpm: int, spin_time_seconds: int):
         """ Command the spincoater to spin at a specified speed for a specified time"""
         
-        self.spincoater.send_message(f"spc add step {rpm} {spin_time_seconds}")
+        self.spincoater.add_step(rpm, spin_time_seconds)
     
+    def align_gripper(self):
+        sleep(1) # wait for machine to settle
+        
+        frame = self.camera.get_frame()
+        angle = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
+        self.gripper.set_arm_angle(angle)
     
     # TODO add vial carousel tasks
-    
-    # TODO add kill commands
     
     # general tasks
     def log(self, message: str):
@@ -111,4 +104,3 @@ class Dispatcher():
         """ Wait for the specified amount of time"""
         self.logger.info(f"Waiting for {wait_time_seconds} seconds")
         sleep(wait_time_seconds)
-

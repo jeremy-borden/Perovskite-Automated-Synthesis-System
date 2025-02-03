@@ -6,7 +6,7 @@ Settings:
 Procedure:
 
   - ["log",   "Default Procedure! Yipee!!" ]
-  - ["wait",  1 ]
+  - ["wait",  3 ]
   - ["log",   "So Default!" ]
   - ["wait",  1 ]
   - ["log",   "Bye Bye!!!" ]

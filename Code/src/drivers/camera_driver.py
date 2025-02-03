@@ -18,6 +18,7 @@ class Camera(threading.Thread):
         
         self.running = threading.Event()
         self.release = threading.Event()
+        self.start()
         
 
     def connect(self):
@@ -26,7 +27,7 @@ class Camera(threading.Thread):
             return 
         
         try:
-            self.video_capture = cv2.VideoCapture(0, cv2.CAP_DSHOW) # DSHOW for windows only, otherwise try V42L
+            self.video_capture = cv2.VideoCapture(0) # DSHOW for windows only, otherwise try V42L
             self.running.set()
             self.logger.debug("Connected to camera")
         except cv2.error as e:
@@ -46,9 +47,8 @@ class Camera(threading.Thread):
     def run(self):
         while True:
             self.running.wait()
-            
             self.release.clear()
-            print("heejeiokl")
+   
             while self.is_connected():
                 try:
                     ret, frame = self.video_capture.read()
@@ -67,9 +67,8 @@ class Camera(threading.Thread):
                     self.video_capture.release()
                     self.video_capture = None
                 
-                
-            
-            print("5 big booms")
+            self.running.clear()
+
     def get_frame(self):
         return self.frame
     

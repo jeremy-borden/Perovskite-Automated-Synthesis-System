@@ -16,7 +16,6 @@ class ControlBoard():
         self.logger = logger
         self.com_port = com_port
         
-        self.hotplate_temperature = 0
         self.positions = {"X": 0,
                           "Y": 0,
                           "Z": 0,
@@ -82,7 +81,32 @@ class ControlBoard():
         #     message += "\r\n"
         self.reader_thread.write(message.encode("utf-8"))
         self.logger.debug(f"Sending message: {message}")
-
+        
+    def move_axes(self, axes: str, distances: float, speeds: int, relative: bool = False):
+        
+        
+        
+        if not isinstance(axes, list):
+            axes = [axes]
+        if not isinstance(distances, list):
+            distances = [distances]
+        if not isinstance(speeds, list):
+            speeds = [speeds]
+            
+        if len(axes) != len(distances) or len(axes) != len(speeds):
+            raise "Inputs must have the same length"
+            
+        if relative:
+            self.send_message("G90")
+        else:
+            self.send_message("G91")
+            
+        for axis, distance, speed in zip(axes, distances, speeds):
+            if axis not in self.positions.keys():
+                raise f"Invalid axis {axis}"
+            
+            self.send_message(f"G0 {axis}{distance} F{speed}")
+            
 
     def finish_move(self):
         """Wait for the move to finish"""
@@ -94,8 +118,7 @@ class ControlBoard():
         self.logger.debug("Waiting for move to finish")
         self.received_ok.wait()  # Wait until the move_finished event is set
 
-    def get_temperature(self):
-        return self.hotplate_temperature
+
 
 
 class ControlBoardLineReader(serial.threaded.LineReader):
@@ -123,11 +146,11 @@ class ControlBoardLineReader(serial.threaded.LineReader):
                 self.control_board[key] = float(number)
             
             
-        if "B:" in line: # 
-            # Extract the temperature from the line "B:{temp} ..."
-            temp = line.split("B:")[1]
-            temp = temp.split(" ")[0]
-            self.control_board.hotplate_temperature = float(temp)
+        # if "B:" in line: # 
+        #     # Extract the temperature from the line "B:{temp} ..."
+        #     temp = line.split("B:")[1]
+        #     temp = temp.split(" ")[0]
+        #     self.control_board.hotplate_temperature = float(temp)
             
     def connection_lost(self, exc):
         """Handle the loss of connection."""

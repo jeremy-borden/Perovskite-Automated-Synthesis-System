@@ -24,7 +24,7 @@ class SpinCoater():
             return
 
         try:
-            self.serial = serial.Serial(self.com_port, 9600, timeout=None) # try removing timeout?
+            self.serial = serial.Serial(self.com_port, 9600, timeout=None)
             self._begin_reader_thread()
             self.logger.info(
                 f"Connected to spincoater on port {self.com_port}")
@@ -56,6 +56,25 @@ class SpinCoater():
 
         self.reader_thread.write(message.encode("ascii"))
         self.logger.debug(f"Sending command: {message}")
+        
+        
+        
+    def stop(self):
+        self.send_message("spc stop")
+        
+    def run(self):
+        self.send_message("spc run")
+        
+    def add_step(self, rpm: int, time_seconds:float):
+        self.send_message(f"spc add step {rpm} {time_seconds}")
+    
+    def clear_steps(self):
+        self.send_message("spc del steps")
+        
+    def set_pc_mode(self):
+        self.send_message("spc set pcmode")
+        
+    
 
 
 class SpinCoaterLineReader(serial.threaded.LineReader):
