@@ -20,7 +20,7 @@ class ADC():
     def read_adc(self, channel):
         """Reads ADC value from the given channel (0-3 for a typical 4-channel ADC)."""
         if channel < 0 or channel > 3:
-            return ValueError("Invalid ADC channel. Must be 0-3.")
+            raise ValueError("Invalid ADC channel. Must be 0-3.")
 
         adc_command = 0x40 | (channel << 4)  # Example (varies by ADC)
         self.bus.write_byte(self.address, adc_command)
@@ -53,5 +53,19 @@ class ADC():
     #     temperature = 1.0 / temperature
     #     temperature -= 273.15
     #     return temperature
+
+# Example usage:
+   # if __name__ == "__main__":
+   # adc = ADC(address=0x48)  # Replace with ADC's I2C address
+
+   # try:
+   #     while True:
+   #         adc_value = adc.read_adc(0)  # Read from channel 0
+  #          print(f"ADC Value: {adc_value}")
+  #          time.sleep(1)  # Read every second
+  #  except KeyboardInterrupt:
+  #      print("Exiting program.")
+        
+        
         
         
