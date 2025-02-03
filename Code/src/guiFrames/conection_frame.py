@@ -36,7 +36,7 @@ class ConnectionFrame(ctk.CTkFrame):
 
         # control board
         control_board_image = ctk.CTkImage(
-            light_image=Image.open("Code/src/guiImages/controlboard.png"),
+            light_image=Image.open("guiImages/controlboard.png"),
             size=(100, 100))
         self.control_board_image_label = ctk.CTkLabel(
             master=self,
@@ -68,7 +68,7 @@ class ConnectionFrame(ctk.CTkFrame):
         
         # spincoater
         spincoater_image = ctk.CTkImage(
-            light_image=Image.open("Code/src/guiImages/spincoater.png"),
+            light_image=Image.open("guiImages/spincoater.png"),
             size=(100, 100))
         self.spincoater_image_label = ctk.CTkLabel(
             master=self,
@@ -100,7 +100,7 @@ class ConnectionFrame(ctk.CTkFrame):
         
         # camera
         camera_image = ctk.CTkImage(
-            light_image=Image.open("Code/src/guiImages/camera.png"),
+            light_image=Image.open("guiImages/camera.png"),
             size=(100, 100))
         self.camera_image_label = ctk.CTkLabel(
             master=self,

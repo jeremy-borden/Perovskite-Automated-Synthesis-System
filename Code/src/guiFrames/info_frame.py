@@ -42,10 +42,27 @@ class InfoFrame(ctk.CTkFrame):
             width=400,)
         self.pipette_label.grid(row=2, column=0, padx=20, pady=20)
         
+        self.toolhead_position_label = ctk.CTkLabel(
+            master=self,
+            text="Toolhead Position: X/X",
+            justify="left",
+            anchor="w",
+            width=400,)
+        self.toolhead_position_label.grid(row=3, column=0, padx=20, pady=20)
+        
         self.update_information()
         
     def update_information(self):
-        current_temperature = self.control_board.get_temperature()
-        self.hotplate_label.configure(text=f"Hotplate: {current_temperature}/{current_temperature}")
+        #current_temperature = self.control_board.get_temperature()
+        #self.hotplate_label.configure(text=f"Hotplate: {current_temperature}/{current_temperature}")
+        
+        x=self.control_board.positions["X"]
+        y=self.control_board.positions["Y"]
+        z=self.control_board.positions["Z"]
+        self.toolhead_position_label.configure(
+            text=f"X: {x}\tY: {y}\tZ: {z}"
+        )
+        
+        
 
         self.after(1000, self.update_information)

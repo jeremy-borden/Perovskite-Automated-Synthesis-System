@@ -8,24 +8,24 @@ from moves import Dispatcher
 
 
 class ProcedureHandler(threading.Thread):
-    """Class to handle procedures for the control board.
+    """This class controls the main procedure thread, which calls functions .
     """
 
     def __init__(self, logger: logging.Logger, dispatcher: Dispatcher):
-        super().__init__(name="ProcedureHandeler",daemon=True)
+        super().__init__(name="ProcedureHandler",daemon=True)
         
         self.logger = logger
         self.dispatcher = dispatcher
 
         self.procedure = None
         self.current_step = 0
+        self.pq = queue.Queue()
         
         self.running = threading.Event()
         self.started = threading.Event()
-        self.running.clear()
-        self.started.clear()
-        
+ 
         self.procedure_timer = Timer()
+        self.start()
 
     def set_procedure(self, procedure: list):
         """Set the procedure to be run.
@@ -42,6 +42,9 @@ class ProcedureHandler(threading.Thread):
             self.logger.error("Cannot change moves until procedure stops")
             return
         self.procedure = procedure
+        
+        
+        
         self.current_step = 0
 
     def run(self):
@@ -49,20 +52,33 @@ class ProcedureHandler(threading.Thread):
         while True:
             self.started.wait()
             
-            for move in self.procedure:
+            while not self.pq.empty():
+                
+                
                 if not self.running.is_set():
                     self.procedure_timer.pause()
                     self.running.wait()
                     self.procedure_timer.unpause()
 
+                    
                 self.logger.debug(f"Executing move {self.current_step}")
                 
-                func_name = move["function"]
-                func_args = move["args"]
-
-                self.dispatcher.move_dict[func_name](*func_args)
-                self.current_step+=1
+                move = self.pq.get()
+                func_name = move[0]
+                func_args = move[1:]
                 
+                try:
+                    self.dispatcher.move_dict[func_name](*func_args)
+                    self.pq.task_done()
+                except Exception as e:
+                    self.logger.error(f"Error while running procedure: {e}")
+                    self.stop()
+                    
+                self.current_step+=1
+            
+            
+            if self.pq.all_tasks_done == True:
+                self.logger.debug("all tasks done")
             self.stop()
 
     def begin(self):
@@ -70,12 +86,16 @@ class ProcedureHandler(threading.Thread):
         if not self.procedure:
             self.logger.error("No procedure set")
             return
+        for i in self.procedure:
+            self.pq.put(i)
+            
+        self.current_step = 0
         self.start_time=time.time()
         
         self.started.set()
         self.running.set()
         self.procedure_timer.start()
-        self.current_step = 0
+        
         self.logger.info("Procedure started")
 
     def stop(self):
@@ -84,6 +104,13 @@ class ProcedureHandler(threading.Thread):
         self.running.clear()
         self.procedure_timer.pause()
         self.logger.info("Stopping procedure...")
+        while not self.pq.empty():
+            _ = self.pq.get()
+            self.pq.task_done()
+            
+    def kill(self):
+        self.dispatcher.kill()
+        self.logger.error("Machine shut down. Reboot required")
 
     def pause(self):
         """Pause the procedure."""
@@ -137,3 +164,4 @@ class Timer():
             return self.pause_time.replace(microsecond=0) - self.start_time.replace(microsecond=0)
         else:
             return datetime.now().replace(microsecond=0) - self.start_time.replace(microsecond=0)
+        

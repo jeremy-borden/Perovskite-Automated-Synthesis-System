@@ -19,8 +19,8 @@ class ProcedureFrame(ctk.CTkFrame):
             master=master,
             border_color="#1f6aa5",
             border_width=2)
-
         self.procedure_handler = procedure_handler
+        self.killed = False
 
         # title label
         self.title_label = ctk.CTkLabel(
@@ -31,94 +31,86 @@ class ProcedureFrame(ctk.CTkFrame):
             font=("Arial", 20, "bold")
         )
         self.title_label.grid(
-            row=0, column=0, columnspan=3,
+            row=0, column=0, columnspan=4,
             padx=20, pady=20, sticky="nswe",
         )
 
         # start button
         self.start_button = ctk.CTkButton(
-            master=self,
-            text="Start",
-            width=100,
-            height=50,
+            master=self,text="Start",
+            width=80,height=50,
             command=self._start_procedure
         )
         self.start_button.grid(
             row=1, column=0,
-            padx=20, pady=20
+            padx=5, pady=20
         )
         # pause button
         self.pause_button = ctk.CTkButton(
-            master=self,
-            text="Pause",
-            width=100,
-            height=50,
-            command=self._toggle_pause
-        )
+            master=self,text="Pause",
+            width=80,height=50,
+            command=self._toggle_pause)
         self.pause_button.grid(
             row=1, column=1,
-            padx=20, pady=20
-        )
+            padx=5, pady=20)
         # stop button
         self.stop_button = ctk.CTkButton(
-            master=self,
-            text="Stop",
-            width=100,
-            height=50,
+            master=self,text="Stop",
+            width=80,height=50,
             command=self._stop_procedure)
         self.stop_button.grid(
             row=1, column=2,
-            padx=20, pady=20)
-
-        # progress bar
-      
-        self.progress_bar = ctk.CTkProgressBar(
-            master=self,
-            width=200,
-            mode="determinate"
-        )
-        self.progress_bar.grid(
-            row=2, column=0, columnspan=2,
-            padx=5, pady=5, sticky="nw"
-        )
-        self.progress_label = ctk.CTkLabel(
-            master=self,
-            text="0%"
-        )
-        self.progress_label.grid(
-            row=2, column=2,
-            padx=5, pady=5, sticky="nw"
-        )
+            padx=5, pady=20)
+        # kill button
+        self.kill_button = ctk.CTkButton(
+            master=self, text="Kill",
+            fg_color="#a10e22",hover_color="#45060f",
+            width=80,height=50,
+            command=self._kill_procedure)
+        self.kill_button.grid(
+            row=1, column=3,
+            padx=5, pady=20)
+        
+        # progress
         
         self.time_label = ctk.CTkLabel(
-            master=self,
-            text="",
-        )
+            master=self,text="",)
         self.time_label.grid(
-            row=3,column=0,
-            padx=5, pady=5
-        )
-        # TODO add button to select procedure
+            row=2,column=0,
+            padx=5, pady=5)
+        self.progress_bar = ctk.CTkProgressBar(
+            master=self,mode="determinate",
+            width=200)
+        self.progress_bar.grid(
+            row=2, column=1, columnspan=2,
+            padx=5, pady=5, sticky="nw")
+        self.progress_label = ctk.CTkLabel(
+            master=self,text="0%")
+        self.progress_label.grid(
+            row=2, column=3,
+            padx=5, pady=5, sticky="nw")
+        
+        
+       
         self.current_procedure = "default_procedure.yml"
         
         self.import_procedure_button = ctk.CTkButton(
-            master=self, text="Import Procedure",
+            master=self, text="Import",
+            width=80, height=30,
             command=self._import_procedure)
         self.import_procedure_button.grid(
             row=4,column=0,
             padx=5, pady=5)
         
-        
         self.current_procedure_label = ctk.CTkLabel(
-            master=self, text=f"Current Procedure: {self.current_procedure}",
-        )
+            master=self, text=f"Current Procedure: {self.current_procedure}")
         self.current_procedure_label.grid(
-            row=4,column=1,columnspan=2,
+            row=4,column=1,columnspan=3,
             padx=5,pady=5)
         
-        self.update()
+        self._update()
 
-    def update(self):
+    def _update(self):
         """ Update the frame """
 
         if not self.procedure_handler.started.is_set():
@@ -130,10 +122,18 @@ class ProcedureFrame(ctk.CTkFrame):
             self.import_procedure_button.configure(state="normal")
         else:
             self.start_button.configure(state="disabled")
+            
             if self.pause_button.cget("state") != "normal":
                 self.pause_button.configure(state="normal")
             if self.stop_button.cget("state") != "normal":
                 self.stop_button.configure(state="normal")
+            self.import_procedure_button.configure(state="disabled")
+            
+        if self.killed:
+            self.start_button.configure(state="disabled")
+            self.pause_button.configure(state="disabled")
+            self.stop_button.configure(state="disabled")
+            self.kill_button.configure(state="disabled")
             self.import_procedure_button.configure(state="disabled")
                 
 
@@ -142,7 +142,7 @@ class ProcedureFrame(ctk.CTkFrame):
         
         self.progress_label.configure(text=f"{int(self.procedure_handler.get_progress()*100)}%")
         
-        self.after(20, self.update)
+        self.after(500, self._update)
 
     def _start_procedure(self):
         """ Callback to begin the procedure."""
@@ -164,11 +164,14 @@ class ProcedureFrame(ctk.CTkFrame):
     def _stop_procedure(self):
         self.procedure_handler.stop()
         
+    def _kill_procedure(self):
+        self.killed=True
+        self.procedure_handler.kill()
+        
     def _import_procedure(self):
         file_path = filedialog.askopenfilename(
-            initialdir="src/",title="Select a File",
+            initialdir="src/procedures/",title="Select a File",
             filetypes=(("Yaml files","*.yml*"),))
-        print(file_path)
         if file_path != "":
             file = ProcedureFile().Open(path=file_path)
             procedure = file["Procedure"]

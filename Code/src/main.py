@@ -1,7 +1,12 @@
 import logging
-from queue import Queue
+from tkinter import PhotoImage
 import customtkinter as ctk
+from PIL import Image
+from gpiozero import AngularServo, Device
+from gpiozero.pins.pigpio import PiGPIOFactory
 
+from objects.hotplate import Hotplate
+from objects.gripper import Gripper
 
 from guiFrames.console_frame import ConsoleFrame
 from guiFrames.procedure_frame import ProcedureFrame
@@ -11,50 +16,65 @@ from guiFrames.conection_frame import ConnectionFrame
 
 from drivers.controlboard_driver import ControlBoard
 from drivers.spincoater_driver import SpinCoater
-#from drivers.dac_driver import DAC
+from drivers.dac_driver import DAC
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
 
-
-def create_logger() -> logging.Logger:
-    _logger = logging.getLogger("Main Logger")
-    _logger.setLevel(logging.DEBUG)
-    _console_handler = logging.StreamHandler()
-    _formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    _console_handler.setFormatter(_formatter)
-    _logger.addHandler(_console_handler)
-
-    return _logger
-
 if __name__ == "__main__":
-    # initialize logger
-    logger = create_logger()
-
+    # --------INITIALIZATION--------
+    logger = logging.getLogger("Main Logger")
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(console_handler)
+    logger.setLevel(logging.DEBUG)
+    
+    #enable software pwm
+    Device.pin_factory = PiGPIOFactory()
+    
     # initialize peripherals
     control_board = ControlBoard(com_port="COM7",logger=logger)
     spincoater= SpinCoater(com_port="COM3",logger=logger)
     camera = Camera(logger=logger)
-    camera.start()
-    dac=None #dac = DAC(0x00)
 
-    # create dispatcher, might switch to just dict in the future
-    dispatcher = Dispatcher(logger=logger,control_board=control_board,spincoater=spincoater,dac=dac)
-    procedure_handler = ProcedureHandler(logger=logger,dispatcher=dispatcher)
-    procedure_handler.start()
+    # initialize objects
     
-    # load in the procedure
-    procedure_config = ProcedureFile().Open("Code/src/default_procedure.yml")
+    gripper = Gripper(arm_servo=AngularServo(pin=17, min_angle=0, max_angle=270),
+                      finger_servo=AngularServo(pin=18, min_angle=0, max_angle=180))
+    
+    dac = DAC(0x00)
+    hotplate = Hotplate(max_temperature=540, dac=dac)
+    
+
+    dispatcher = Dispatcher(logger=logger,
+                            control_board=control_board,
+                            spincoater=spincoater,
+                            hotplate=hotplate,
+                            camera=camera,
+                            gripper=gripper)
+    
+    
+    procedure_handler = ProcedureHandler(logger=logger,dispatcher=dispatcher)
+    
+    # --------LOAD DEFAULT PROCEDURE--------
+    procedure_config = ProcedureFile().Open("procedures/default_procedure.yml")
     if procedure_config is not None:
         move_list = procedure_config["Procedure"]
         procedure_handler.set_procedure(move_list)
     else:
         logger.warning("Default procedure not found")
 
+
+
+    # --------GUI--------
     app = ctk.CTk()
+    ctk.set_appearance_mode("dark")
     app.geometry("1000x1000")
+    app.title("ECD 515 - Perovskite Automated Synthesis System")
+    icon = PhotoImage(file="guiImages/logo.png")
+    app.wm_iconphoto(False, icon)
 
     procedure_frame = ProcedureFrame(app, procedure_handler)
     procedure_frame.grid(
@@ -70,9 +90,7 @@ if __name__ == "__main__":
     connection_frame.grid(
         row=0, column=1,
         padx=5, pady=5, sticky="nsew")
- ## TODO add a yaml callable function that is called aruco align servo that aligns the servo with the aruco marker
- # also TODO actually put the aruco marker stuff in here, camera output should draw boxes. option to turn it on or off
- # TODO put gui in its own file and make a custom root thing
+
     camera_frame = CameraFrame(master=app, camera=camera)
     camera_frame.grid(
         row=1, column=1,rowspan=2,
@@ -83,9 +101,10 @@ if __name__ == "__main__":
         row=2, column=0,
         padx=5, pady=5, sticky="nsew")
 
+    # run the gui
     app.mainloop()
     
-    # cleanup
+    # --------CLEANUP--------
     logger.removeHandler(console_frame.console_handler)
     
     control_board.disconnect()
