@@ -4,7 +4,7 @@ import customtkinter as ctk
 from PIL import Image
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
-
+from time import sleep
 from objects.hotplate import Hotplate
 from objects.gripper import Gripper
 
@@ -41,13 +41,19 @@ if __name__ == "__main__":
 
     # initialize objects
     
-    gripper = Gripper(arm_servo=AngularServo(pin=17, min_angle=0, max_angle=270),
-                      finger_servo=AngularServo(pin=18, min_angle=0, max_angle=180))
+    gripper = Gripper(arm_servo=AngularServo(pin=17, min_angle=0, max_angle=270, ),
+                      finger_servo=AngularServo(pin=18, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000))
     
     dac = DAC(0x00)
     hotplate = Hotplate(max_temperature=540, dac=dac)
     
-
+    gripper.open()
+    sleep(1)
+    gripper.close()
+    sleep(1)
+    gripper.open()
+    sleep(1)
+    
     dispatcher = Dispatcher(logger=logger,
                             control_board=control_board,
                             spincoater=spincoater,
