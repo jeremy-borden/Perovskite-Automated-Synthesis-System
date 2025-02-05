@@ -30,7 +30,11 @@ class Dispatcher():
             "gcode": self.control_board.send_message,
             "set_temp": self.hotplate.set_temperature,
             "wait_for_temp": self.hotplate.wait_for_temperature,
-            "align_gripper": self.align_gripper
+            "align_gripper": self.align_gripper,
+            "open_gripper": self.gripper.open,
+            "close_gripper": self.gripper.close,
+            "set_angle_gripper": self.gripper.set_arm_angle
+            
         }
     
     def validate_moves(self, moves: list) -> bool:

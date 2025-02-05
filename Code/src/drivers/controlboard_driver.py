@@ -83,7 +83,7 @@ class ControlBoard():
         self.logger.debug(f"Sending message: {message}")
         
     def move_axes(self, axes: str, distances: float, speeds: int, relative: bool = False):
-        
+        """ Takes in a list of axes, distances and speeds to move the gantry"""
         
         
         if not isinstance(axes, list):

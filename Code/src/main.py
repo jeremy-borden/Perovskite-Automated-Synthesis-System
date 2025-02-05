@@ -47,12 +47,6 @@ if __name__ == "__main__":
     dac = DAC(0x00)
     hotplate = Hotplate(max_temperature=540, dac=dac)
     
-    gripper.open()
-    sleep(1)
-    gripper.close()
-    sleep(1)
-    gripper.open()
-    sleep(1)
     
     dispatcher = Dispatcher(logger=logger,
                             control_board=control_board,
