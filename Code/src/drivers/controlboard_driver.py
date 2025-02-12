@@ -33,7 +33,7 @@ class ControlBoard():
         
         
         try:
-            self.serial = serial.Serial(self.com_port, 250000, timeout=0.5)
+            self.serial = serial.Serial(self.com_port, 115200, timeout=None)
             self._begin_reader_thread()
             self.logger.info(f"Connected to control board on port {self.com_port}")
         except serial.SerialException as e:
@@ -77,8 +77,8 @@ class ControlBoard():
             self.logger.error("Reader thread is not running")
             return
 
-        # if '\r\n' not in message:
-        #     message += "\r\n"
+        if '\r\n' not in message:
+            message += "\r\n"
         self.reader_thread.write(message.encode("utf-8"))
         self.logger.debug(f"Sending message: {message}")
         
@@ -131,6 +131,7 @@ class ControlBoardLineReader(serial.threaded.LineReader):
         super().__init__()
         self.logger = logger
         self.control_board = control_board
+        self.logger.debug("Line Reader Started")
 
     def handle_line(self, line):
         """Process each received line."""
