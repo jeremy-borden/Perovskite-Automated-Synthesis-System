@@ -1,10 +1,4 @@
-Settings:
-  bakeTimeSeconds: 180
-  bakeTempCelsius: 200
-  idleTempCelsius: 60
-
 Procedure:
-
   - ["log",   "Default Procedure! Yipee!!" ]
   - ["wait",  3 ]
   - ["log",   "So Default!" ]

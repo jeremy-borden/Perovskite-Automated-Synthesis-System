@@ -10,7 +10,7 @@ class ProcedureFile:
         except FileNotFoundError as e:
             return None
 
-    def Save(self, path: str, procedure: list):
+    def Save(self, path: str, procedure):
         if not path.endswith(".yml"):
             path += ".yml"
         with open(path, 'w', encoding='utf-8') as output_file:

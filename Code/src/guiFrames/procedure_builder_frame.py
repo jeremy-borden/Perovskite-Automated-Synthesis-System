@@ -1,7 +1,14 @@
 import customtkinter as ctk
+from tkinter import filedialog
 import abc
 from time import sleep
 
+# get current directory so we can import from outside guiFrames folder
+import sys
+import os
+path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.append(path)
+from src.drivers.procedure_file_driver import ProcedureFile
 
 class ProcedureBuilder(ctk.CTkFrame):
     def __init__(self, master):
@@ -21,13 +28,13 @@ class ProcedureBuilder(ctk.CTkFrame):
             "Move Fluid": MoveFluidStep,
             "Spin": SpinStep}
         
-        # TODO add button to save procedure
+        
         self.step_frame = ctk.CTkScrollableFrame(
             master=self,
             width=500,
             height=600)
         self.step_frame.grid(
-            row=0, column=0, rowspan=4,
+            row=0, column=0, rowspan=5,
             padx=5,pady=5)
         
         self.step_frame.bind("<Button-1>", self._deselect_step)
@@ -56,7 +63,7 @@ class ProcedureBuilder(ctk.CTkFrame):
             text="Insert Step",
             width=80,
             height=50,
-            command=self.insert_step)
+            command=self._insert_step)
         self.insert_step_button.grid(
             row=2, column=1,
             padx=5, pady=5,
@@ -68,9 +75,21 @@ class ProcedureBuilder(ctk.CTkFrame):
             text="Delete Step",
             width=80,
             height=50,
-            command=self.delete_step)
+            command=self._delete_step)
         self.delete_step_button.grid(
             row=3, column=1,
+            padx=5, pady=5,
+            sticky="nw")
+        
+        # export steps button
+        self.export_button = ctk.CTkButton(
+            master=self,
+            text="Export\nProcedure",
+            width=80,
+            height=50,
+            command=self._export)
+        self.export_button.grid(
+            row=4, column=1,
             padx=5, pady=5,
             sticky="nw")
         
@@ -112,7 +131,7 @@ class ProcedureBuilder(ctk.CTkFrame):
         self.step_list.append(new_step)
         self._update()
     
-    def delete_step(self):
+    def _delete_step(self):
         if self.selected_step is None:
             return
         
@@ -125,7 +144,7 @@ class ProcedureBuilder(ctk.CTkFrame):
         self._update()
         step.destroy()
         
-    def insert_step(self):
+    def _insert_step(self):
         if self.selected_step is None:
             return
         
@@ -134,6 +153,21 @@ class ProcedureBuilder(ctk.CTkFrame):
         index = self.step_list.index(self.selected_step)
         self.step_list.insert(index, new_step)
         self._update()
+        
+    def _export(self):
+        procedure = {"Procedure": []}
+        for steps in self.step_list:
+            for step in steps.get_steps():
+                procedure["Procedure"].append(step)
+            
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=("Yaml files","*.yml*"),
+            initialdir="src/procedures/",title="Save As",
+            filetypes=(("Yaml files","*.yml*"),))
+        if file_path != "":
+            ProcedureFile().Save(path=file_path, procedure=procedure)
+            
+        
         
     def _update(self):
         """ Update the step frame"""
@@ -194,7 +228,7 @@ class WaitStep(StepFrame):
         
         
     def get_steps(self):
-        wait_time: int = self.wait_time_entry.get()
+        wait_time: int = self.wait_time.get_entry()
         d = ["wait", wait_time]
         
         return [d]

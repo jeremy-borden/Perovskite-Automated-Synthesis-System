@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "Hotplatelib")(type "KiCad")(uri "${KIPRJMOD}/Hotplatelib.kicad_sym")(options "")(descr ""))
+)
