@@ -57,7 +57,8 @@ class PipetteHandler():
         #calculate distance to fully depress plunger
         distance_mm = self.current_pipette.PLUNGER_BOTTOM_MM - self.current_pipette.PLUNGER_BOTTOM_MM
         
-        
+        feed_rate = distance_mm
+        self.control_board.move_axes(["A"], distance_mm, )
         
         pass
     
