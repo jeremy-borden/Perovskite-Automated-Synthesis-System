@@ -30,6 +30,7 @@ class PipetteHandler():
         
         self.current_pipette: Pipette = None
         self.volume_ul
+        self.current_position_mm = 0
         
     def set_pipette(self, index: int):
         if index > len(self.pipettes):
@@ -42,25 +43,33 @@ class PipetteHandler():
         # calculate the distance needed to push out specified volume
         distance_mm = volume_ul / self.current_pipette.DISPENSED_UL_PER_MM
         
+        # go to top of plunger
+        self.control_board.move_axes(["A"], self.current_pipette.PLUNGER_TOP_MM, 300, False)
         # pre-depress plunger
-        self.control_board.move_axes(["A"], -distance_mm, 300, False)
+        self.control_board.move_axes(["A"], -distance_mm, 300, True)
         #lower into vial
         self.control_board.move_axes(["Y"], -10, 300, True)
         #un press plunger
-        self.control_board.move_axes(["A"], distance_mm, 300, False)
+        self.control_board.move_axes(["A"], distance_mm, 300, True)
         #raise out of vial
         self.control_board.move_axes(["Y"], 10, 300, True)
+        
+        self.current_position_mm = self.current_pipette.PLUNGER_TOP_MM-distance_mm
 
     
     def dispense_all(self, duration_s: float):
         
-        #calculate distance to fully depress plunger
-        distance_mm = self.current_pipette.PLUNGER_BOTTOM_MM - self.current_pipette.PLUNGER_BOTTOM_MM
+        #calculate feedrate
+        feed_rate = (self.current_position_mm - self.current_pipette.PLUNGER_BOTTOM_MM) / duration_s
+        # press plunger down to minimum height, ejecting all fluid
+        self.control_board.move_axes("A", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate, False)
+        # press plunger beyond min height. Our plungers have a function where you can press farther to ensure all fluid is out
+        self.control_board.move_axes("A", -10, 300, True)
         
-        feed_rate = distance_mm
-        self.control_board.move_axes(["A"], distance_mm, )
+        #return to top of plunger
+        self.control_board.move_axes("A", self.current_pipette.PLUNGER_TOP_MM, 300, False)
         
-        pass
+        self.current_position_mm = self.current_pipette.PLUNGER_TOP_MM
     
     def dock_pipette(self):
         pass

@@ -117,6 +117,7 @@ class ControlBoard():
         self.received_ok.clear()
         self.logger.debug("Waiting for move to finish")
         self.received_ok.wait()  # Wait until the move_finished event is set
+        
 
 
 
