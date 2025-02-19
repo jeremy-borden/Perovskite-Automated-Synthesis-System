@@ -36,9 +36,9 @@ if __name__ == "__main__":
     Device.pin_factory = PiGPIOFactory()
     
     # initialize peripherals
-    control_board = ControlBoard(com_port="dev/ttyACM0",logger=logger)
-    spincoater= SpinCoater(com_port="dev/ttyACM1",logger=logger)
-    spectrometer = Spectrometer(com_port="dev/ttyACM2")
+    control_board = ControlBoard(com_port="/dev/ttyACM0",logger=logger)
+    spincoater= SpinCoater(com_port="/dev/ttyACM1",logger=logger)
+    spectrometer = Spectrometer(com_port="/dev/ttyACM2")
     camera = Camera(logger=logger)
 
     # initialize objects
