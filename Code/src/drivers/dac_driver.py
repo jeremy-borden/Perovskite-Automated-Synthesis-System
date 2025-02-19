@@ -15,4 +15,4 @@ class DAC():
         print(level)
         data = int(level * (pow(2, self.resolution_bits) - 1))
         print(data)
-        self.bus.write_byte_data(self.address, 0x00, data)
+        self.bus.write_word_data(self.address, 0x00, data)
