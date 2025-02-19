@@ -15,4 +15,8 @@ class DAC():
         print(level)
         data = int(level * (pow(2, self.resolution_bits) - 1))
         print(data)
-        self.bus.write_word_data(self.address, 0x00, data)
+        
+        high_byte = (data >> 8) & 0x0F  # Upper 4 bits
+        low_byte = data & 0xFF  # Lower 8 bits
+        self.bus.write_i2c_block_data(self.address, high_byte, [low_byte])
+
