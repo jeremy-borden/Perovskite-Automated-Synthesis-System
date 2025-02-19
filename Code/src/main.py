@@ -46,7 +46,7 @@ if __name__ == "__main__":
     gripper = Gripper(arm_servo=AngularServo(pin=17, min_angle=0, max_angle=270, ),
                       finger_servo=AngularServo(pin=18, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000))
     
-    dac = DAC(0x00)
+    dac = DAC(0x60)
     hotplate = Hotplate(max_temperature=540, dac=dac)
     
     
