@@ -26,6 +26,7 @@ class SpinCoater():
         try:
             self.serial = serial.Serial(self.com_port, 9600, timeout=None)
             self._begin_reader_thread()
+            self.set_pc_mode()
             self.logger.info(
                 f"Connected to spincoater on port {self.com_port}")
         except serial.SerialException as e:
