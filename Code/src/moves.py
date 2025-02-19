@@ -27,14 +27,15 @@ class Dispatcher():
             "log": self.log,
             "wait": self.wait,
             "goto": self.move_toolhead,
+            "home": self.home,
             "gcode": self.control_board.send_message,
             "set_temp": self.hotplate.set_temperature,
             "wait_for_temp": self.hotplate.wait_for_temperature,
             "align_gripper": self.align_gripper,
             "open_gripper": self.gripper.open,
             "close_gripper": self.gripper.close,
-            "set_angle_gripper": self.gripper.set_arm_angle
-            
+            "set_angle_gripper": self.gripper.set_arm_angle,
+            "spin": self.spin
         }
     
     def validate_moves(self, moves: list) -> bool:
@@ -72,6 +73,18 @@ class Dispatcher():
         return valid
     
     
+    def spin(self, timelist, speedlist):
+        self.spincoater.clear_steps()
+        for time, speed in zip(timelist, speedlist):
+            self.spincoater.add_step(speed, time)
+        self.spincoater.run() 
+        
+        
+        
+    
+    def home(self):
+        self.control_board.send_message("G28")
+        
     def kill(self):
         self.control_board.kill()
         self.spincoater.stop()
@@ -91,8 +104,6 @@ class Dispatcher():
         self.spincoater.add_step(rpm, spin_time_seconds)
     
     def align_gripper(self):
-        sleep(1) # wait for machine to settle
-        
         frame = self.camera.get_frame()
         angle = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
         self.gripper.set_arm_angle(angle)
