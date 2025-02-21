@@ -140,8 +140,7 @@ class ControlBoardLineReader(serial.threaded.LineReader):
         self.logger.debug(f"Received: {line}")
         if line == "ok":
             self.control_board.received_ok.set()  # Set the event when "DONE" is received
-        
-        if all(substr in self.POSITION_PREFIXS for substr in line): # if these substrings are present we know the board is sending positional data
+        elif all(substr in self.POSITION_PREFIXS for substr in line): # if these substrings are present we know the board is sending positional data
             for substr, key in zip(self.POSITION_PREFIXS, self.control_board.positions):
                 # extract the number that comes after the prefix and before the next space
                 number = (line.split(substr)[1]).split(" ")[0]

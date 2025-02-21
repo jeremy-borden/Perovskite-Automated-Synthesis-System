@@ -29,3 +29,4 @@ class Hotplate():
         
         while abs(self.temperature - target_temperature) > threshold:
             sleep(1)
+            

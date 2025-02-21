@@ -9,7 +9,7 @@ class Gripper():
         self.finger_servo.angle = 0
     
     def close(self):
-        self.finger_servo.angle = 180
+        self.finger_servo.angle = 13
     
     def set_arm_angle(self, angle_degrees:int):
         self.arm_servo.angle = angle_degrees
