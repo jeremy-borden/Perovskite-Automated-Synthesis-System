@@ -14,4 +14,9 @@ class DAC():
             level = 1
         
         data = int(level * (pow(2, self.resolution_bits) - 1))
-        self.bus.write_byte_data(self.address, 0x00, data)
+        
+        # somehow this works (up to 200C) and i have no idea why
+        high_byte = (data >> 8) & 0x0F  # Upper 4 bits
+        low_byte = data & 0xFF  # Lower 8 bits
+        self.bus.write_i2c_block_data(self.address, high_byte, [low_byte])
+

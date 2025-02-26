@@ -1,0 +1,9 @@
+Procedure:
+  - ["align_gripper"]
+  - ["wait", 1]
+  - ["align_gripper"]
+  - ["wait", 1]
+  - ["align_gripper"]
+  - ["wait", 1]
+  - ["align_gripper"]
+  - ["wait", 1]

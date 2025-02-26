@@ -172,6 +172,7 @@ class ProcedureFrame(ctk.CTkFrame):
         file_path = filedialog.askopenfilename(
             initialdir="src/procedures/",title="Select a File",
             filetypes=(("Yaml files","*.yml*"),))
+        print(file_path)
         if file_path != "":
             file = ProcedureFile().Open(path=file_path)
             procedure = file["Procedure"]

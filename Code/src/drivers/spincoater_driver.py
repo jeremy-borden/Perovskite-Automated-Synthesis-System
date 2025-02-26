@@ -1,6 +1,7 @@
 import logging
 import serial
 import serial.threaded
+import threading
 # SPINCOATER COMMANDS
 # spc set pcmode
 # spc add step {rpm} {time}
@@ -18,6 +19,8 @@ class SpinCoater():
         self.serial = None
         self.reader_thread = None
         
+        self.done = threading.Event()
+        
     def connect(self):
         if self.is_connected():
             self.logger.error("Spin Coater is already connected")
@@ -26,6 +29,7 @@ class SpinCoater():
         try:
             self.serial = serial.Serial(self.com_port, 9600, timeout=None)
             self._begin_reader_thread()
+            self.set_pc_mode()
             self.logger.info(
                 f"Connected to spincoater on port {self.com_port}")
         except serial.SerialException as e:
@@ -62,8 +66,11 @@ class SpinCoater():
     def stop(self):
         self.send_message("spc stop")
         
-    def run(self):
+    def run(self, wait_to_finish: bool = False):
         self.send_message("spc run")
+        self.done.clear()
+        if wait_to_finish:
+            self.done.wait()
         
     def add_step(self, rpm: int, time_seconds:float):
         self.send_message(f"spc add step {rpm} {time_seconds}")
@@ -89,6 +96,10 @@ class SpinCoaterLineReader(serial.threaded.LineReader):
     def handle_line(self, line: str):
         line = line.strip()
         self.logger.debug(f"Received: {line}")
+        
+        if line == "done":
+            self.spin_coater.done.set()
+            
     
     def connection_lost(self, exc):
         """Handle the loss of connection."""

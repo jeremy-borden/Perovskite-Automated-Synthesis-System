@@ -1,6 +1,6 @@
 Procedure:
   - ["log",   "Default Procedure! Yipee!!" ]
-  - ["wait",  3 ]
+  - ["wait",  1 ]
   - ["log",   "So Default!" ]
   - ["wait",  1 ]
   - ["log",   "Bye Bye!!!" ]

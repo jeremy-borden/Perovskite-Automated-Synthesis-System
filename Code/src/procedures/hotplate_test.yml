@@ -1,0 +1,8 @@
+Procedure:
+  - ["set_temp", 0]
+  - ["wait",  10 ]
+  - ["set_temp", 100]
+  - ["wait",  10 ]
+  - ["set_temp", 200]
+  - ["wait",  10 ]
+  - ["set_temp", 0]

@@ -19,6 +19,7 @@ from drivers.spincoater_driver import SpinCoater
 from drivers.dac_driver import DAC
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
+from drivers.spectrometer_driver import Spectrometer
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
@@ -35,8 +36,9 @@ if __name__ == "__main__":
     Device.pin_factory = PiGPIOFactory()
     
     # initialize peripherals
-    control_board = ControlBoard(com_port="COM7",logger=logger)
-    spincoater= SpinCoater(com_port="COM3",logger=logger)
+    control_board = ControlBoard(com_port="/dev/ttyACM0",logger=logger)
+    spincoater= SpinCoater(com_port="/dev/ttyACM1",logger=logger)
+    spectrometer = Spectrometer(com_port="/dev/ttyACM2", logger=logger)
     camera = Camera(logger=logger)
 
     # initialize objects
@@ -44,7 +46,7 @@ if __name__ == "__main__":
     gripper = Gripper(arm_servo=AngularServo(pin=17, min_angle=0, max_angle=270, ),
                       finger_servo=AngularServo(pin=18, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000))
     
-    dac = DAC(0x00)
+    dac = DAC(0x60)
     hotplate = Hotplate(max_temperature=540, dac=dac)
     
     
@@ -86,7 +88,11 @@ if __name__ == "__main__":
         row=1, column=0,
         padx=5, pady=5,sticky="nsew")
 
-    connection_frame = ConnectionFrame(master=app, control_board=control_board, spin_coater=spincoater, camera=camera)
+    connection_frame = ConnectionFrame(master=app,
+                                       control_board=control_board,
+                                       spin_coater=spincoater,
+                                       camera=camera,
+                                       spectrometer=spectrometer)
     connection_frame.grid(
         row=0, column=1,
         padx=5, pady=5, sticky="nsew")
