@@ -80,8 +80,6 @@ class Dispatcher():
         self.spincoater.run() 
         
         
-        
-    
     def home(self):
         self.control_board.send_message("G28")
         

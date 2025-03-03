@@ -19,9 +19,9 @@ class ProcedureHandler(threading.Thread):
 
         self.procedure = None
         self.current_step = 0
-        self.pq = queue.Queue()
+        self.loop_count = 1
         
-        self.running = threading.Event()
+        self.paused = threading.Event()
         self.started = threading.Event()
  
         self.procedure_timer = Timer()
@@ -29,84 +29,75 @@ class ProcedureHandler(threading.Thread):
 
     def set_procedure(self, procedure: list):
         """Set the procedure to be run.
-
         Args:
             procedure (list): list of moves to run.
         """
+        if self.started.is_set():
+            self.logger.error("Cannot change moves until procedure stops")
+            return
         
         if not self.dispatcher.validate_moves(procedure):
             self.logger.error("Invalid moves in procedure")
             return
-
-        if self.started.is_set():
-            self.logger.error("Cannot change moves until procedure stops")
-            return
+         
         self.procedure = procedure
-        
-        
-        
-        self.current_step = 0
 
     def run(self):
-        """Run the procedure."""
+        """Run the procedure
+        """
         while True:
             self.started.wait()
             
-            while not self.pq.empty():
-                
-                
-                if not self.running.is_set():
-                    self.procedure_timer.pause()
-                    self.running.wait()
-                    self.procedure_timer.unpause()
+            self.dispatcher.home
+            
+            
+            # begin looping through each move
+            for loop in range(self.loop_count):
+                self.current_step = 0
+                for move in self.procedure:
+                    
+                    if self.paused.is_set():
+                        self.logger.debug("Paused")
+                        self.paused.wait()
+                        
+                    if not self.started.is_set():
+                        self.logger.debug("Stopping")
+                        break
+                    
+                    self.logger.debug(f"Executing move {self.current_step}")
+                    func_name = move[0]
+                    func_args = move[1:]
 
-                    
-                self.logger.debug(f"Executing move {self.current_step}")
-                
-                move = self.pq.get()
-                func_name = move[0]
-                func_args = move[1:]
-                
-                try:
-                    self.dispatcher.move_dict[func_name](*func_args)
-                    self.pq.task_done()
-                except Exception as e:
-                    self.logger.error(f"Error while running procedure: {e}")
-                    self.stop()
-                    
-                self.current_step+=1
-            
-            
-            if self.pq.all_tasks_done == True:
-                self.logger.debug("all tasks done")
+                    try:
+                        self.dispatcher.move_dict[func_name](*func_args)
+                    except Exception as e:
+                        self.logger.error(f"Error while running procedure: {e}")
+                        self.stop()
+                        
+                    self.current_step+=1
             self.stop()
+            
 
     def begin(self):
-        """Begin the procedure."""
+        """Begin the procedure
+        """
         if not self.procedure:
             self.logger.error("No procedure set")
             return
-        for i in self.procedure:
-            self.pq.put(i)
-            
-        self.current_step = 0
-        self.start_time=time.time()
         
         self.started.set()
-        self.running.set()
+        self.paused.clear()
         self.procedure_timer.start()
-        
         self.logger.info("Procedure started")
 
     def stop(self):
-        """Stop the procedure."""
+        """Stop the procedure.
+        """
         self.started.clear()
-        self.running.clear()
+        self.paused.set()
         self.procedure_timer.pause()
         self.logger.info("Stopping procedure...")
-        while not self.pq.empty():
-            _ = self.pq.get()
-            self.pq.task_done()
+        
             
     def kill(self):
         self.dispatcher.kill()
@@ -114,12 +105,12 @@ class ProcedureHandler(threading.Thread):
 
     def pause(self):
         """Pause the procedure."""
-        self.running.clear()
+        self.paused.set()
         self.logger.info("Pausing procedure...")
 
     def resume(self) -> None:
         """Resume the procedure."""
-        self.running.set()
+        self.paused.clear()
         self.logger.info("Resuming procedure...")
         
     def get_time_elapsed(self) -> timedelta:
@@ -130,6 +121,15 @@ class ProcedureHandler(threading.Thread):
             return 0
       
         return self.current_step / len(self.procedure)
+    
+    #set the number of procedurs to run
+    def set_procedure_loop_count(self, new_loop_count):
+        if self.started.is_set():
+            self.logger.error("Cannot change loop count until procedure stops")
+            return
+        
+        
+        self.loop_count = new_loop_count
         
 class Timer():
     def __init__(self):

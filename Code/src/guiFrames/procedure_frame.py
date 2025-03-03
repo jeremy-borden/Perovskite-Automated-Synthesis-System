@@ -28,23 +28,19 @@ class ProcedureFrame(ctk.CTkFrame):
             text="Procedure Overview",
             justify="center",
             anchor="w",
-            font=("Arial", 20, "bold")
-        )
+            font=("Arial", 20, "bold"))
         self.title_label.grid(
             row=0, column=0, columnspan=4,
-            padx=20, pady=20, sticky="nswe",
-        )
+            padx=20, pady=20, sticky="nswe",)
 
         # start button
         self.start_button = ctk.CTkButton(
             master=self,text="Start",
             width=80,height=50,
-            command=self._start_procedure
-        )
+            command=self._start_procedure)
         self.start_button.grid(
             row=1, column=0,
-            padx=5, pady=20
-        )
+            padx=5, pady=20)
         # pause button
         self.pause_button = ctk.CTkButton(
             master=self,text="Pause",
@@ -72,7 +68,6 @@ class ProcedureFrame(ctk.CTkFrame):
             padx=5, pady=20)
         
         # progress
-        
         self.time_label = ctk.CTkLabel(
             master=self,text="",)
         self.time_label.grid(
@@ -90,10 +85,20 @@ class ProcedureFrame(ctk.CTkFrame):
             row=2, column=3,
             padx=5, pady=5, sticky="nw")
         
+        #number of procedures
+        self.num_procedures_label = ctk.CTkLabel(
+            master=self, text="Number of Procedures:")
+        self.num_procedures_label.grid(
+            row=3, column=0,
+            padx=5, pady=5, sticky="w")
+        self.num_procedures_entry = ctk.CTkEntry(
+            master=self, width=80)
+        self.num_procedures_entry.grid(
+            row=3, column=1,
+            padx=5, pady=5, sticky="w")
         
-       
+       #import procedurs
         self.current_procedure = "default_procedure.yml"
-        
         self.import_procedure_button = ctk.CTkButton(
             master=self, text="Import",
             width=80, height=30,
@@ -101,12 +106,12 @@ class ProcedureFrame(ctk.CTkFrame):
         self.import_procedure_button.grid(
             row=4,column=0,
             padx=5, pady=5)
-        
         self.current_procedure_label = ctk.CTkLabel(
             master=self, text=f"Current Procedure: {self.current_procedure}")
         self.current_procedure_label.grid(
             row=4,column=1,columnspan=3,
             padx=5,pady=5)
+
         
         self._update()
 
@@ -180,3 +185,4 @@ class ProcedureFrame(ctk.CTkFrame):
             procedure_name = file_path.split("/")[-1]
             self.current_procedure=procedure_name
             self.current_procedure_label.configure(text=f"Current Procedure: {self.current_procedure}")
+            
