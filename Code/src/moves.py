@@ -106,7 +106,21 @@ class Dispatcher():
     def align_gripper(self):
         frame = self.camera.get_frame()
         angle = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
-        self.logger.info(angle)
+        
+        angle0 = None
+        angle1 = None
+        
+        while(angle0 is None or angle1 is None) or abs(angle1-angle0) > 5:
+            self.logger.debug("Getting first angle")
+            frame = self.camera.get_frame()
+            angle0 = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
+            sleep(1)
+            self.logger.debug("Getting second angle")
+            frame = self.camera.get_frame()
+            angle1 = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
+            sleep(1)
+            
+        self.logger.info(angle1)
         self.gripper.set_arm_angle(angle)
     
     # TODO add vial carousel tasks
