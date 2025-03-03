@@ -106,6 +106,7 @@ class Dispatcher():
     def align_gripper(self):
         frame = self.camera.get_frame()
         angle = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
+        self.logger.info(angle)
         self.gripper.set_arm_angle(angle)
     
     # TODO add vial carousel tasks
