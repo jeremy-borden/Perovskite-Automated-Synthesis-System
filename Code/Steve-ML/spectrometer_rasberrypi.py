@@ -7,6 +7,20 @@ Original file is located at
     https://colab.research.google.com/drive/1yK9vuu3NmPzc_fxeyzYqFBAWe1YKVdny
 
 # **Spectrometer Script for Raspberry Pi**
+
+1. Connects to the spectrometer
+
+2. Sets integration time
+
+3. Reads wavelengths
+
+4. Collects three spectra types
+
+5. Saves all data to CSV
+
+6. Plots the spectral data
+
+7. Disconnects safely
 """
 
 import serial
@@ -14,6 +28,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import logging
+import time
 
 # debugging
 logging.basicConfig(level=logging.INFO)
@@ -21,13 +36,13 @@ logging.basicConfig(level=logging.INFO)
 class SpectrometerController:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, com_port="COM18", integration_time=1000):
+    def __init__(self, com_port="/dev/ttyUSB0", integration_time=1000):
         self.logger = logging.getLogger("Spectrometer")
         self.com_port = com_port
         self.integration_time = integration_time
         self.serial = None
         self.wavelengths = []
-        self.measurements = {}  # to store intensities for Background, Reference, and Sample
+        self.measurements = {}  # stores intensities for Background, Reference, Sample
 
     def connect(self):
         """Establish connection to the spectrometer"""
@@ -51,7 +66,8 @@ class SpectrometerController:
         """Send a command to the spectrometer and return the response"""
         if self.is_connected():
             self.serial.write((command + "\n").encode())
-            response = self.serial.readline().decode().strip()
+            time.sleep(0.1)  # Small delay to allow spectrometer response can be changed to our req.
+            response = self.serial.read_until(b'\n').decode().strip()
             self.logger.info(f"Sent: {command}, Received: {response}")
             return response
 
@@ -61,9 +77,17 @@ class SpectrometerController:
         self.send_command(command)
 
     def read_wavelengths(self):
-        """Retrieve wavelength data from the spectrometer"""
-        response = self.send_command("<wavs?>")
-        self.wavelengths = np.fromstring(response, sep=',')
+        """Retrieve wavelength data from the spectrometer (handles multi-message responses)"""
+        self.serial.write("<wavs?>\n".encode())
+        time.sleep(0.5)  # dealy till all data is recieved
+
+        response_data = []
+        while self.serial.in_waiting > 0:
+            response_data.append(self.serial.readline().decode().strip())
+
+        full_response = "".join(response_data)  # combine multiple messages
+        self.wavelengths = np.fromstring(full_response, sep=',')
+
         self.logger.info(f"Read {len(self.wavelengths)} wavelength values.")
 
     def read_spectrum(self, measurement_type):
@@ -72,7 +96,7 @@ class SpectrometerController:
         raw_data = self.serial.read(3204)
         intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
 
-        # Store the collected data
+        # Store req. data
         self.measurements[measurement_type] = intensities
         self.logger.info(f"Read {len(intensities)} intensity values for {measurement_type}.")
 
@@ -95,7 +119,7 @@ class SpectrometerController:
         if not self.wavelengths:
             self.read_wavelengths()
 
-        # Collect data
+        # collect all data
         for measurement_type, intensities in self.measurements.items():
             for wl, intensity in zip(self.wavelengths, intensities):
                 data.append([wl, intensity, measurement_type])
@@ -103,7 +127,7 @@ class SpectrometerController:
         # Convert to DataFrame
         df = pd.DataFrame(data, columns=["Wavelength", "Intensity", "Measurement Type"])
 
-        # save to CSV
+        # Save to CSV
         df.to_csv(filename, index=False)
         self.logger.info(f"All spectra data saved to {filename}")
 
@@ -111,44 +135,24 @@ class SpectrometerController:
 def automated_measurement():
     """Runs a full measurement cycle (Background, Reference, Sample) and saves the data"""
 
-    spectrometer = SpectrometerController(com_port="COM18", integration_time=1000)  # need to change to our port name
+    spectrometer = SpectrometerController(com_port="/dev/ttyUSB0", integration_time=1000)  # chage to our port name
     spectrometer.connect()
 
-    # Set
     spectrometer.set_integration_time()
 
-    # Read
     spectrometer.read_wavelengths()
 
-    # measurements for different spectra
+    # calc. measurements for different types
     measurement_types = ["Background", "Reference", "Sample"]
     for measurement in measurement_types:
         spectrometer.read_spectrum(measurement)
 
-    # Save all spectra data to a single CSV
     spectrometer.save_all_to_csv("all_spectra_data.csv")
 
-    # Plot spectra
     spectrometer.plot_spectra()
 
-    # Disconnect
     spectrometer.disconnect()
 
-# Run automated sequence
+# Run the full automated sequence
 if __name__ == "__main__":
     automated_measurement()
-
-"""1. Connects to the spectrometer
-
-2. Sets integration time
-
-3. Reads wavelengths
-
-4. Collects three spectra types
-
-5. Saves all data to CSV
-
-6. Plots the spectral data
-
-7. Disconnects safely
-"""
