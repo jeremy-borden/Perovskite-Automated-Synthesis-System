@@ -36,6 +36,7 @@ class ControlBoard():
             self.serial = serial.Serial(self.com_port, 115200, timeout=None)
             self._begin_reader_thread()
             self.logger.info(f"Connected to control board on port {self.com_port}")
+            self.send_message("M501") # Load settings saved in eeprom
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to control board: {e}")
     
