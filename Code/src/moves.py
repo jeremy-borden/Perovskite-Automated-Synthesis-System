@@ -1,19 +1,22 @@
-from objects.gripper import Gripper
 from drivers.camera_driver import Camera
 from drivers.spincoater_driver import SpinCoater
 from drivers.controlboard_driver import ControlBoard
-from drivers.dac_driver import DAC
 from image_processing import ImageProcessor
 
 from time import sleep
 from inspect import signature
 import logging
 
+from objects.hotplate import Hotplate
+from objects.gripper import Gripper
+from objects.infeed import Infeed
 
 MAX_TEMPERATURE = 540 # TODO move to constants later
 
 class Dispatcher():
-    def __init__(self, logger: logging.Logger, control_board: ControlBoard, spincoater: SpinCoater, hotplate, camera: Camera, gripper: Gripper):
+    def __init__(self, logger: logging.Logger, 
+                 control_board: ControlBoard, spincoater: SpinCoater, hotplate: Hotplate, 
+                 camera: Camera, gripper: Gripper, infeed: Infeed):
         self.logger = logger
         self.control_board = control_board
         self.spincoater = spincoater
@@ -26,16 +29,24 @@ class Dispatcher():
         self.move_dict = {
             "log": self.log,
             "wait": self.wait,
-            "goto": self.move_toolhead,
             "home": self.home,
             "gcode": self.control_board.send_message,
+            
+            "goto": self.move_toolhead,
+            
             "set_temp": self.hotplate.set_temperature,
             "wait_for_temp": self.hotplate.wait_for_temperature,
+            
             "align_gripper": self.align_gripper,
             "open_gripper": self.gripper.open,
             "close_gripper": self.gripper.close,
+            
             "set_angle_gripper": self.gripper.set_arm_angle,
-            "spin": self.spin
+            
+            "spin": self.spin,
+            
+            "open_infeed": self.infeed.open,
+            "close_infeed": self.infeed.close,
         }
     
     def validate_moves(self, moves: list) -> bool:
@@ -73,34 +84,47 @@ class Dispatcher():
         return valid
     
     
-    def spin(self, timelist, speedlist):
-        self.spincoater.clear_steps()
-        for time, speed in zip(timelist, speedlist):
-            self.spincoater.add_step(speed, time)
-        self.spincoater.run() 
-        
-        
+
+# --------- GENERAL MOVES --------
     def home(self):
         self.control_board.send_message("G28")
+        self.gripper.open()
+        
         
     def kill(self):
         self.control_board.kill()
         self.spincoater.stop()
         self.spincoater.clear_steps()
         self.gripper.detatch_servos()
+        
+    def log(self, message: str):
+        """ Log the specified message"""
+        self.logger.info(message)
+
+    def wait(self, wait_time_seconds: int):
+        """ Wait for the specified amount of time"""
+        self.logger.info(f"Waiting for {wait_time_seconds} seconds")
+        sleep(wait_time_seconds)
     
-    # controlboard tasks
+    # --------- CONTROL BOARD MOVES --------
     def move_toolhead(self, x: float, y: float, z: float, speed: int = 1000):
         """Move the toolhead to the specified coordiantes """
         self.control_board.send_message(f"G0 X{x} Y{y} Z{z} F{speed}")
         self.control_board.finish_move()
 
-    # TODO add spincoater tasks
+    # --------- SPIN COATER MOVES --------
+    def spin(self, timelist, speedlist):
+        self.spincoater.clear_steps()
+        for time, speed in zip(timelist, speedlist):
+            self.spincoater.add_step(speed, time)
+        self.spincoater.run() 
+        
     def add_spincoater_step(self, rpm: int, spin_time_seconds: int):
         """ Command the spincoater to spin at a specified speed for a specified time"""
         
         self.spincoater.add_step(rpm, spin_time_seconds)
-    
+        
+    # --------- GRIPPER MOVES --------
     def align_gripper(self):
         frame = self.camera.get_frame()
         angle = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
@@ -122,13 +146,4 @@ class Dispatcher():
         self.gripper.set_arm_angle(angle)
     
     # TODO add vial carousel tasks
-    
-    # general tasks
-    def log(self, message: str):
-        """ Log the specified message"""
-        self.logger.info(message)
 
-    def wait(self, wait_time_seconds: int):
-        """ Wait for the specified amount of time"""
-        self.logger.info(f"Waiting for {wait_time_seconds} seconds")
-        sleep(wait_time_seconds)

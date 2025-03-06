@@ -91,8 +91,10 @@ class ProcedureFrame(ctk.CTkFrame):
         self.num_procedures_label.grid(
             row=3, column=0,
             padx=5, pady=5, sticky="w")
+        
         self.num_procedures_entry = ctk.CTkEntry(
-            master=self, width=80)
+            master=self, width=80,
+            validate="key", validatecommand=(self.register(self._validate_num_procedures), '%P'))
         self.num_procedures_entry.grid(
             row=3, column=1,
             padx=5, pady=5, sticky="w")
@@ -114,7 +116,14 @@ class ProcedureFrame(ctk.CTkFrame):
 
         
         self._update()
-
+        
+    def _validate_num_procedures(self, P):
+        """ Validate that only numbers are entered. """
+        if P.isdigit() or P == "":
+            return True
+        else:
+            return False
+        
     def _update(self):
         """ Update the frame """
 
@@ -151,8 +160,15 @@ class ProcedureFrame(ctk.CTkFrame):
 
     def _start_procedure(self):
         """ Callback to begin the procedure."""
-        if not self.procedure_handler.started.is_set():
-            self.procedure_handler.begin()
+
+        loop_entry = self.num_procedures_entry.get()
+        if loop_entry is None or int(loop_entry) == 0:
+            return
+        
+        if self.procedure_handler.started.is_set():
+            return
+        
+        self.procedure_handler.begin(int(loop_entry))
 
     def _toggle_pause(self):
         """ Toggle the pause state of the procedure  """
