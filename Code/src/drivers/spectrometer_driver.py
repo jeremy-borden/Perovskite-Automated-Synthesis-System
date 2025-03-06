@@ -47,7 +47,7 @@ class Spectrometer:
         """Check if the spectrometer is connected"""
         return self.serial is not None and self.serial.is_open
 
-    def send_command(self, command):
+    def send_message(self, command):
         """Send a command to the spectrometer and return the response"""
         if self.is_connected():
             self.serial.write((command + "\n").encode())
@@ -58,17 +58,17 @@ class Spectrometer:
     def set_integration_time(self):
         """Set the integration time for measurements"""
         command = f"<itime:{self.integration_time}>"
-        self.send_command(command)
+        self.send_message(command)
 
     def read_wavelengths(self):
         """Retrieve wavelength data from the spectrometer"""
-        response = self.send_command("<wavs?>")
+        response = self.send_message("<wavs?>")
         self.wavelengths = np.fromstring(response, sep=',')
         self.logger.info(f"Read {len(self.wavelengths)} wavelength values.")
 
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
-        self.send_command("<read:1>")
+        self.send_message("<read:1>")
         raw_data = self.serial.read(3204)
         intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
 

@@ -5,6 +5,7 @@ from PIL import Image
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
 from time import sleep
+from objects.infeed import Infeed
 from objects.hotplate import Hotplate
 from objects.gripper import Gripper
 
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     # initialize peripherals
     control_board = ControlBoard(com_port="/dev/ttyACM0",logger=logger)
     spincoater= SpinCoater(com_port="/dev/ttyACM1",logger=logger)
-    spectrometer = Spectrometer(com_port="/dev/ttyACM2", logger=logger)
+    spectrometer = Spectrometer(com_port="/dev/ttyACM0", logger=logger)
     camera = Camera(logger=logger)
 
     # initialize objects
@@ -48,14 +49,15 @@ if __name__ == "__main__":
     
     dac = DAC(0x60)
     hotplate = Hotplate(max_temperature=540, dac=dac)
-    
+    infeed = Infeed(servo=AngularServo(pin=18, min_angle=0, max_angle=180,))
     
     dispatcher = Dispatcher(logger=logger,
                             control_board=control_board,
                             spincoater=spincoater,
                             hotplate=hotplate,
                             camera=camera,
-                            gripper=gripper)
+                            gripper=gripper,
+                            infeed=infeed)
     
     
     procedure_handler = ProcedureHandler(logger=logger,dispatcher=dispatcher)
