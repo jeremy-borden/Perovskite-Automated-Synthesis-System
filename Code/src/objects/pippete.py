@@ -2,7 +2,7 @@ import os
 import sys
 pp=os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(pp)
-
+import logging
 from drivers.controlboard_driver import ControlBoard
 from gpiozero import AngularServo
 from dataclasses import dataclass
@@ -12,25 +12,24 @@ from time import sleep
 @dataclass
 class Pipette:
     MAX_VOLUME_UL: int # the maximum volume the pipette is capable of drawing
-    PLUNGER_TOP_MM: int # location where the actuator is just above the plunger
-    PLUNGER_BOTTOM_MM: int # location where the actuator presses the plunger to its limit
-    DISPENSED_UL_PER_MM: int
+    PLUNGER_TOP_MM: float # location where the actuator is just above the plunger
+    PLUNGER_BOTTOM_MM: float # location where the actuator presses the plunger to its limit
+    PLUNGER_FLUSH_MM: float
     last_fluid: str = None
     
 
 class PipetteHandler():
+    ACTUATOR_MAX_HEIGHT_MM: int
     
-    def __init__(self, control_board: ControlBoard, tip_eject_servo: AngularServo, hold_pipette_servo: AngularServo, pipettes: list):
+    def __init__(self, logger: logging.Logger, control_board: ControlBoard, tip_eject_servo: AngularServo, grabber_servo: AngularServo, pipettes: list):
         self.control_board = control_board
         self.tip_eject_servo = tip_eject_servo
-        self.hold_pipette_servo = hold_pipette_servo
+        self.grabber_servo = grabber_servo
         self.pipettes = pipettes
-        
-        
+        self.logger = logger
         
         self.current_pipette: Pipette = None
-        self.volume_ul
-        self.current_position_mm = 0
+        self.current_fluid_volume_ul = 0
         
     def set_pipette(self, index: int):
         if index > len(self.pipettes):
@@ -38,46 +37,58 @@ class PipetteHandler():
         
         self.current_pipette = self.pipettes[index]
         
-    def extract(self, volume_ul: int):
+    def get_pippete(self):
+        """Return the currently held pippete"""
+        return self.current_pipette
         
-        # calculate the distance needed to push out specified volume
-        distance_mm = volume_ul / self.current_pipette.DISPENSED_UL_PER_MM
+    def set_actuator_position(self, position_mm, speed):
+        # dont allow actuator to go too far away
+        if position_mm > self.ACTUATOR_MAX_HEIGHT_MM:
+            return
+        # dont allow actuator to go past the flush height if there is a pippete
+        if self.current_pipette is not None and position_mm < self.current_pipette.PLUNGER_FLUSH_MM:
+            return
         
-        # go to top of plunger
-        self.control_board.move_axes(["A"], self.current_pipette.PLUNGER_TOP_MM, 300, False)
-        # pre-depress plunger
-        self.control_board.move_axes(["A"], -distance_mm, 300, True)
-        #lower into vial
-        self.control_board.move_axes(["Y"], -10, 300, True)
-        #un press plunger
-        self.control_board.move_axes(["A"], distance_mm, 300, True)
-        #raise out of vial
-        self.control_board.move_axes(["Y"], 10, 300, True)
+        self.control_board.move_axis("B", position_mm, speed, False)
         
-        self.current_position_mm = self.current_pipette.PLUNGER_TOP_MM-distance_mm
-
+    def flush_pippete(self):
+        """Presses the pippete beyond its normal limit to ensure all fluid is purged.
+            The actuator then returns to the bottom of the plunger"""
+        self.control_board.move_axis("B", self.current_pipette.PLUNGER_FLUSH_MM, 300, False)
+        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, 300, False)
+        self.control_board.finish_moves()
+        self.current_fluid_volume_ul = 0
     
     def dispense_all(self, duration_s: float):
-        
+        """Move the actuator to depress the plunger until it reaches the bottom (wihtout flushing)"""
         #calculate feedrate
-        feed_rate = (self.current_position_mm - self.current_pipette.PLUNGER_BOTTOM_MM) / duration_s
+        current_position = self.control_board.positions["B"]
+        feed_rate = 60*(current_position - self.current_pipette.PLUNGER_BOTTOM_MM) / duration_s
         # press plunger down to minimum height, ejecting all fluid
-        self.control_board.move_axes("A", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate, False)
-        # press plunger beyond min height. Our plungers have a function where you can press farther to ensure all fluid is out
-        self.control_board.move_axes("A", -10, 300, True)
+        self.control_board.move_axis("A", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate, False)
+        self.current_fluid_volume_ul = 0
         
-        #return to top of plunger
-        self.control_board.move_axes("A", self.current_pipette.PLUNGER_TOP_MM, 300, False)
+    def draw_ul(self, volume_ul, feedrate):
+        """ Raises the actuator so that the specified volume is drawn. Cannot draw past max volume. 
+        Draws are persistant, so when draw_ul is called twice without dispensing, the total fluid is compounded...?"""
+        if self.current_fluid_volume_ul + volume_ul > self.current_pipette.MAX_VOLUME_UL:
+            self.logger.warning(f"Cannot draw above {self.current_pipette.MAX_VOLUME_UL}, attempted to draw to {self.current_fluid_volume_ul + volume_ul}")
+            return
+            
+        ul_per_mm = self.current_pipette.MAX_VOLUME_UL/(self.current_pipette.PLUNGER_TOP_MM - self.current_pipette.PLUNGER_BOTTOM_MM)
+        self.current_fluid_volume_ul += volume_ul
+        self.control_board.move_axis("A",  volume_ul*ul_per_mm, feedrate, True)
         
-        self.current_position_mm = self.current_pipette.PLUNGER_TOP_MM
-    
-    def dock_pipette(self):
-        pass
-    
     def eject_tip(self):
         self.tip_eject_servo.angle = 30
         sleep(0.5)
         self.tip_eject_servo.angle = 0
+         
+    def open_grabber(self):
+        self.grabber_servo.angle = 0
+        
+    def close_grabber(self):
+        self.grabber_servo.angle = 180
         
     def detatch_servos(self):
         self.tip_eject_servo.detach()
@@ -91,6 +102,7 @@ if __name__ == "__main__":
         MAX_VOLUME_UL=1000,
         PLUNGER_TOP_MM=155,
         PLUNGER_BOTTOM_MM=35,
+        PLUNGER_BASE_MM=8,
         DISPENSED_UL_PER_MM=5)
     
     tip_eject_servo = None

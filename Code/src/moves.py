@@ -7,22 +7,29 @@ from time import sleep
 from inspect import signature
 import logging
 
+from objects.toolhead import Toolhead
 from objects.hotplate import Hotplate
 from objects.gripper import Gripper
 from objects.infeed import Infeed
+from objects.pippete import PipetteHandler
 
 MAX_TEMPERATURE = 540 # TODO move to constants later
 
 class Dispatcher():
     def __init__(self, logger: logging.Logger, 
-                 control_board: ControlBoard, spincoater: SpinCoater, hotplate: Hotplate, 
-                 camera: Camera, gripper: Gripper, infeed: Infeed):
+                 spincoater: SpinCoater, hotplate: Hotplate, 
+                 camera: Camera, gripper: Gripper, infeed: Infeed, pippete_handler: PipetteHandler,
+                 toolhead: Toolhead):
+        
         self.logger = logger
-        self.control_board = control_board
+        self.toolhead = toolhead
+        self.infeed = infeed
+        self.pippete_handler = pippete_handler
         self.spincoater = spincoater
         self.camera = camera
         self.gripper = gripper
         self.hotplate = hotplate
+        
         
         ImageProcessor.set_detector()
 
@@ -47,6 +54,8 @@ class Dispatcher():
             
             "open_infeed": self.infeed.open,
             "close_infeed": self.infeed.close,
+            
+            "extract": self.extract,
         }
     
     def validate_moves(self, moves: list) -> bool:
@@ -144,6 +153,34 @@ class Dispatcher():
             
         self.logger.info(angle1)
         self.gripper.set_arm_angle(angle)
+        
+    # -------- PIPPETE MOVES --------
+    
+    def extract(self, volume_ul: int, dip_height_mm: float):
+            """ Assuming we are at the vial carousel, the system will extract fluid.
+            The gantry will "dip" into the vial by the amount specified"""
+            #TODO add a current location and check if thats possible
+            
+            # calculate the distance needed to push out specified volume
+            distance_mm = volume_ul / self.current_pipette.DISPENSED_UL_PER_MM
+            # go to bottom of plunger
+            self.control_board.move_axes(["A"], self.current_pipette.PLUNGER_BOTTOM_MM, 300, False)
+            #lower into vial
+            self.toolhead.move()
+            #un press plunger
+            self.control_board.move_axes(["A"], distance_mm, 300, True)
+            #raise out of vial
+            self.control_board.move_axes(["Y"], 10, 300, True)
+            
+    def dispense(self, duration_s):
+        """ Dispense all fluid in pippete, assuming there is any"""
+        # calculate feedrate
+        self.pippete_handler.dispense_all(duration_s)
+        
+    def get_pippete(self, pippete_num: int):
+        self.toolhead.set_position(900, 100, 50)
+        
+        
+    
     
     # TODO add vial carousel tasks
-

@@ -1,10 +1,10 @@
 import logging
 from tkinter import PhotoImage
 import customtkinter as ctk
-from PIL import Image
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
-from time import sleep
+
+
 from objects.infeed import Infeed
 from objects.hotplate import Hotplate
 from objects.gripper import Gripper
@@ -21,6 +21,7 @@ from drivers.dac_driver import DAC
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 from drivers.spectrometer_driver import Spectrometer
+from drivers.adc_driver import ADC
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
@@ -47,8 +48,9 @@ if __name__ == "__main__":
     gripper = Gripper(arm_servo=AngularServo(pin=17, min_angle=0, max_angle=270, ),
                       finger_servo=AngularServo(pin=18, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000))
     
-    dac = DAC(0x60)
-    hotplate = Hotplate(max_temperature=540, dac=dac)
+    dac = DAC()
+    adc = ADC()
+    hotplate = Hotplate(max_temperature=540, dac=dac, adc=adc)
     infeed = Infeed(servo=AngularServo(pin=18, min_angle=0, max_angle=180,))
     
     dispatcher = Dispatcher(logger=logger,
@@ -75,10 +77,10 @@ if __name__ == "__main__":
     # --------GUI--------
     app = ctk.CTk()
     ctk.set_appearance_mode("dark")
-    app.geometry("1000x1000")
+    app.geometry("1200x1000")
     app.title("ECD 515 - Perovskite Automated Synthesis System")
     icon = PhotoImage(file="guiImages/logo.png")
-    app.wm_iconphoto(False, icon)
+    app.wm_iconphoto(True, icon)
 
     procedure_frame = ProcedureFrame(app, procedure_handler)
     procedure_frame.grid(
