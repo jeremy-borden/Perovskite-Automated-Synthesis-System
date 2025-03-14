@@ -9,8 +9,11 @@ class Toolhead():
     def __init__(self, control_board: ControlBoard):
         self.control_board = control_board
         
-    def set_position(self, x_mm: float, y_mm: float, z_mm: float):
-        self.control_board.move_axis("X", x_mm, 500)
-        self.control_board.move_axis("Y", y_mm, 500)
-        self.control_board.move_axis("Z", z_mm, 300)
-        self.control_board.finish_moves()
+    def move_axis(self, axis: str, distance_mm: float, relative: bool = False, finish_move: bool = True):
+        self.control_board.move_axis(axis, distance_mm, 300, relative)
+        
+        if finish_move:
+            self.control_board.finish_moves()
+        
+    def get_position(self, axis):
+        return self.control_board.positions[axis]

@@ -51,6 +51,20 @@ class PipetteHandler():
         
         self.control_board.move_axis("B", position_mm, speed, False)
         
+    # def set_actuator_position_ul(self, position_ul , feedrate):
+    #     if position_ul > self.current_pipette.MAX_VOLUME_UL or position_ul < 0:
+    #         return
+        
+        
+    #     ul_per_mm = self.current_pipette.MAX_VOLUME_UL/(self.current_pipette.PLUNGER_TOP_MM - self.current_pipette.PLUNGER_BOTTOM_MM)
+    #     self.current_fluid_volume_ul += volume_ul
+        
+    #     self.control_board.move_axis("B",  volume_ul*ul_per_mm, feedrate)
+        
+
+        
+        
+        
     def flush_pippete(self):
         """Presses the pippete beyond its normal limit to ensure all fluid is purged.
             The actuator then returns to the bottom of the plunger"""
@@ -65,7 +79,7 @@ class PipetteHandler():
         current_position = self.control_board.positions["B"]
         feed_rate = 60*(current_position - self.current_pipette.PLUNGER_BOTTOM_MM) / duration_s
         # press plunger down to minimum height, ejecting all fluid
-        self.control_board.move_axis("A", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate, False)
+        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate, False)
         self.current_fluid_volume_ul = 0
         
     def draw_ul(self, volume_ul, feedrate):
@@ -77,7 +91,7 @@ class PipetteHandler():
             
         ul_per_mm = self.current_pipette.MAX_VOLUME_UL/(self.current_pipette.PLUNGER_TOP_MM - self.current_pipette.PLUNGER_BOTTOM_MM)
         self.current_fluid_volume_ul += volume_ul
-        self.control_board.move_axis("A",  volume_ul*ul_per_mm, feedrate, True)
+        self.control_board.move_axis("B",  volume_ul*ul_per_mm, feedrate, True)
         
     def eject_tip(self):
         self.tip_eject_servo.angle = 30

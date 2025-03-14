@@ -1,27 +1,28 @@
 from drivers.camera_driver import Camera
 from drivers.spincoater_driver import SpinCoater
-from drivers.controlboard_driver import ControlBoard
+
 from image_processing import ImageProcessor
 
 from time import sleep
 from inspect import signature
 import logging
 
+from objects import vial_carousel
 from objects.toolhead import Toolhead
 from objects.hotplate import Hotplate
 from objects.gripper import Gripper
 from objects.infeed import Infeed
 from objects.pippete import PipetteHandler
+from objects.vial_carousel import VialCarousel
 
 MAX_TEMPERATURE = 540 # TODO move to constants later
 
 class Dispatcher():
-    def __init__(self, logger: logging.Logger, 
-                 spincoater: SpinCoater, hotplate: Hotplate, 
+    def __init__(self, spincoater: SpinCoater, hotplate: Hotplate, 
                  camera: Camera, gripper: Gripper, infeed: Infeed, pippete_handler: PipetteHandler,
-                 toolhead: Toolhead):
+                 toolhead: Toolhead, vial_carousel: VialCarousel):
+        self.logger = logging.getLogger("Main Logger")
         
-        self.logger = logger
         self.toolhead = toolhead
         self.infeed = infeed
         self.pippete_handler = pippete_handler
@@ -29,7 +30,7 @@ class Dispatcher():
         self.camera = camera
         self.gripper = gripper
         self.hotplate = hotplate
-        
+        self.vial_carousel = vial_carousel
         
         ImageProcessor.set_detector()
 
@@ -37,12 +38,11 @@ class Dispatcher():
             "log": self.log,
             "wait": self.wait,
             "home": self.home,
-            "gcode": self.control_board.send_message,
             
             "goto": self.move_toolhead,
             
-            "set_temp": self.hotplate.set_temperature,
-            "wait_for_temp": self.hotplate.wait_for_temperature,
+            "set_temp": self.set_temperature,
+            "wait_for_temp": self.wait_for_temperature,
             
             "align_gripper": self.align_gripper,
             "open_gripper": self.gripper.open,
@@ -57,14 +57,18 @@ class Dispatcher():
             
             "extract": self.extract,
         }
+        
+        
+        # procedure coordination info
+        
+        self.vial = 0
+        
     
     def validate_moves(self, moves: list) -> bool:
         """Validates a list of moves by checking if the move exists in the dispatcher.
         Also checks if the number of args is correct
-
         ### Args:
-            moves (list): _description_
-
+            moves (list):
         ### Returns:
             bool: returns True if all moves are valid, False otherwise
         """
@@ -91,14 +95,11 @@ class Dispatcher():
                 valid = False
 
         return valid
-    
-    
 
 # --------- GENERAL MOVES --------
     def home(self):
         self.control_board.send_message("G28")
         self.gripper.open()
-        
         
     def kill(self):
         self.control_board.kill()
@@ -115,11 +116,18 @@ class Dispatcher():
         self.logger.info(f"Waiting for {wait_time_seconds} seconds")
         sleep(wait_time_seconds)
     
-    # --------- CONTROL BOARD MOVES --------
+    #  --------- HOTPLATE MOVES --------
+    def set_temperature(self, temperature_c: int):
+        self.hotplate.set_temperature(temperature_c)
+    
+    def wait_for_temperature(self, target_temperature: int, threshold: int):
+        while abs(self.hotplate.current_temperature_c - target_temperature) > threshold:
+            sleep(1)
+
+    # --------- TOOLHEAD MOVES --------
     def move_toolhead(self, x: float, y: float, z: float, speed: int = 1000):
         """Move the toolhead to the specified coordiantes """
-        self.control_board.send_message(f"G0 X{x} Y{y} Z{z} F{speed}")
-        self.control_board.finish_move()
+        self.toolhead.set_position(x,y,z)
 
     # --------- SPIN COATER MOVES --------
     def spin(self, timelist, speedlist):
@@ -134,6 +142,8 @@ class Dispatcher():
         self.spincoater.add_step(rpm, spin_time_seconds)
         
     # --------- GRIPPER MOVES --------
+    
+    
     def align_gripper(self):
         frame = self.camera.get_frame()
         angle = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
@@ -155,23 +165,45 @@ class Dispatcher():
         self.gripper.set_arm_angle(angle)
         
     # -------- PIPPETE MOVES --------
-    
-    def extract(self, volume_ul: int, dip_height_mm: float):
+    def extract(self, volume_ul: int):
             """ Assuming we are at the vial carousel, the system will extract fluid.
             The gantry will "dip" into the vial by the amount specified"""
             #TODO add a current location and check if thats possible
             
-            # calculate the distance needed to push out specified volume
-            distance_mm = volume_ul / self.current_pipette.DISPENSED_UL_PER_MM
-            # go to bottom of plunger
-            self.control_board.move_axes(["A"], self.current_pipette.PLUNGER_BOTTOM_MM, 300, False)
-            #lower into vial
-            self.toolhead.move()
-            #un press plunger
-            self.control_board.move_axes(["A"], distance_mm, 300, True)
-            #raise out of vial
-            self.control_board.move_axes(["Y"], 10, 300, True)
+            self.vial_carousel.remove_fluid(self.vial, volume_ul)
             
+            self.toolhead.move_axis("Y", -10, relative=True)
+            self.pippete_handler.draw_ul(volume_ul)
+            self.toolhead.move_axis("Y", 10, relative=True)
+            
+    def extract_from_vial(self, volume_ul, vial_num: int):
+        self.toolhead.move_axis("Z", 150) # move to top
+        
+        # TODO move over vial carousel opening
+        self.toolhead.move_axis("X", None)
+        self.toolhead.move_axis("Y", None)
+        self.toolhead.move_axis("Z", None)
+        
+        self.vial_carousel.set_vial(vial_num)
+
+        self.vial_carousel.remove_fluid(self.vial, volume_ul)
+            
+        self.toolhead.move_axis("Y", -10, relative=True)
+        self.pippete_handler.draw_ul(volume_ul)
+        self.toolhead.move_axis("Y", 10, relative=True)
+        pass
+            
+    def dispense_to_vial(self, vial_num: int):
+        self.toolhead.move_axis("Z", 150) # move to top
+        
+        # TODO move over vial carousel opening
+        self.toolhead.move_axis("X", None)
+        self.toolhead.move_axis("Y", None)
+        self.toolhead.move_axis("Z", None)
+        
+        self.vial_carousel.add_fluid()
+        self.vial_carousel.set_vial(vial_num)
+        
     def dispense(self, duration_s):
         """ Dispense all fluid in pippete, assuming there is any"""
         # calculate feedrate
@@ -180,7 +212,8 @@ class Dispatcher():
     def get_pippete(self, pippete_num: int):
         self.toolhead.set_position(900, 100, 50)
         
-        
+    # -------- VIAL CAROUSEL MOVES --------
+    def set_vial(self, vial_num):
+        self.vial_carousel.set_vial(vial_num)
     
     
-    # TODO add vial carousel tasks

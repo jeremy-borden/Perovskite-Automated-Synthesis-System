@@ -2,12 +2,63 @@ from drivers.controlboard_driver import ControlBoard
 from gpiozero import AngularServo
 
 class VialCarousel():
+    
+    VIAL_MAX_VOLUME_UL: int = 100000
+    VIALS: int = 12
     def __init__(self, control_board: ControlBoard, lid_servo: AngularServo):
         self.control_board = control_board
         self.lid_servo = lid_servo
         
         self.current_vial = 0
-        self.vial_volumes = [0]*12
+        self.vial_volumes_ul = [0]*self.VIALS
+        
+    
+    def remove_fluid(self, vial_num: int, volume_ul: int):
+        """ Removes fluid from the specified vial. Returns True if the 
+        entire volume can be removed, and removes it.Otherwise return 
+        False and do not change the fluid in the vial"""
+        #return if outside of vial range
+        if vial_num >= self.VIALS or vial_num < 0: 
+            return False
+        
+        if self.vial_volumes_ul[vial_num] - volume_ul < 0:
+            return False
+        
+        self.vial_volumes_ul[vial_num] -= volume_ul
+        return True
+    
+    def add_fluid(self, vial_num: int, volume_ul: int):
+        """ Adds fluid in the specified vial. Returns true if sum of volumes
+        do not exceed the max amount the vials can hold. Otherwise it retuns false"""
+        
+        if vial_num is None
+        
+        #return if outside of vial range
+        if vial_num >= self.VIALS or vial_num < 0: 
+            return False
+        if self.vial_volumes_ul[vial_num]+volume_ul > self.VIAL_MAX_VOLUME_UL:
+            return False
+        return True
+    
+    def set_fluid(self, vial_num: int, volume_ul: int):
+        """ Sets the amount of fluid in the specified vial. Returns true if volume
+        doesnt exceed the max amount the vials can hold. Otherwise it retuns false"""
+        #return if outside of vial range
+        if vial_num >= self.VIALS or vial_num < 0: 
+            return False
+        if volume_ul > self.VIAL_MAX_VOLUME_UL:
+            return False
+        
+        self.vial_volumes_ul[vial_num] = volume_ul
+        return True
+
+    def clear_fluid(self, vial_num: int):
+        #return if outside of vial range
+        if vial_num >= self.VIALS or vial_num < 0: 
+            return False
+        
+        self.vial_volumes_ul[vial_num] = 0
+        return True
         
     def open_lid(self):
         self.lid_servo.value=180
@@ -16,8 +67,12 @@ class VialCarousel():
         self.lid_servo.value=0
          
     def set_vial(self, vial_num):
-        self.open_lid()
         self.control_board.move_axis("A", 30*(self.current_vial - vial_num), 100)
         
         self.current_vial = vial_num
+        
+    def seal(self):
+        self.open_lid()
+        self.control_board.move_axis("A", 15, 100)
+        self.current_vial = None
         self.close_lid()
