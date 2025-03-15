@@ -81,6 +81,18 @@ class ProcedureBuilder(ctk.CTkFrame):
             padx=5, pady=5,
             sticky="nw")
         
+        # vary step button
+        self.vary_step_button = ctk.CTkButton(
+            master=self,
+            text="Vary Step",
+            width=80,
+            height=50,
+            command=self._add_variation)
+        self.vary_step_button.grid(
+            row=4, column=1,
+            padx=5, pady=5,
+            sticky="nw")
+        
         # export steps button
         self.export_button = ctk.CTkButton(
             master=self,
@@ -89,11 +101,11 @@ class ProcedureBuilder(ctk.CTkFrame):
             height=50,
             command=self._export)
         self.export_button.grid(
-            row=4, column=1,
+            row=5, column=1,
             padx=5, pady=5,
             sticky="nw")
         
-        
+        self.a_step = []
     
     
     def _deselect_step(self,event):
@@ -129,29 +141,63 @@ class ProcedureBuilder(ctk.CTkFrame):
         new_step = self.steps[self.step_dropdown.get()](self.step_frame)
         self._bind_step_widgets(new_step)
         self.step_list.append(new_step)
+        self.a_step.append(None)
         self._update()
     
     def _delete_step(self):
         if self.selected_step is None:
             return
         
-        
-        step = self.selected_step
-        self.step_list.remove(step)
+        if self.selected_step in self.step_list:
+            step = self.selected_step
+            
+            index = self.step_list.index(step)
+            v_step = self.a_step.pop(index)
+            self.step_list.remove(step)
+            
+            if(v_step is not None):
+                v_step.destroy()
+            step.destroy()
+            
+        elif self.selected_step in self.a_step:
+            index = self.a_step.index(self.selected_step)
+            self.a_step.pop(index).destroy()
         
         
         self.selected_step = None
         self._update()
-        step.destroy()
+        
         
     def _insert_step(self):
         if self.selected_step is None:
             return
+
+        index = self.step_list.index(self.selected_step)
+        new_step = self.steps[self.step_dropdown.get()](self.step_frame)
+        
+        self._bind_step_widgets(new_step)
+        self.step_list.insert(index, new_step)
+        self.a_step.insert(index, None)
+        self._update()
+        
+    def _add_variation(self):
+        if self.selected_step is None:
+            return
+        
+        if self.selected_step in self.a_step:
+            return
+        
+        index = self.step_list.index(self.selected_step)
+        if self.a_step[index] is not None:
+            return
+        
         
         new_step = self.steps[self.step_dropdown.get()](self.step_frame)
+        
+   
+        self.a_step.insert(index, new_step)
         self._bind_step_widgets(new_step)
-        index = self.step_list.index(self.selected_step)
-        self.step_list.insert(index, new_step)
+        
         self._update()
         
     def _export(self):
@@ -174,6 +220,15 @@ class ProcedureBuilder(ctk.CTkFrame):
         for i, step in enumerate(self.step_list):
             step.grid(
                 row=i, column=0,
+                padx=5,pady=5,
+                sticky="nw")
+            
+        for i, step in enumerate(self.a_step):
+            if step is None:
+                continue
+            
+            step.grid(
+                row=i, column=1,
                 padx=5,pady=5,
                 sticky="nw")
         
