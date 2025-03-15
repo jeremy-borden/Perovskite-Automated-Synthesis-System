@@ -16,7 +16,7 @@ class ProcedureBuilder(ctk.CTkFrame):
             master=master,
             border_color="#1f6aa5",
             border_width=2,
-            width=500)
+            width=600)
         
         self.step_list = []
         self.selected_step = None
@@ -31,10 +31,10 @@ class ProcedureBuilder(ctk.CTkFrame):
         
         self.step_frame = ctk.CTkScrollableFrame(
             master=self,
-            width=500,
+            width=600,
             height=600)
         self.step_frame.grid(
-            row=0, column=0, rowspan=5,
+            row=0, column=0, rowspan=7,
             padx=5,pady=5)
         
         self.step_frame.bind("<Button-1>", self._deselect_step)
@@ -50,8 +50,7 @@ class ProcedureBuilder(ctk.CTkFrame):
         self.add_step_button = ctk.CTkButton(
             master=self,
             text="Add Step",
-            width=80,
-            height=50,
+            width=80,height=50,
             command=self._add_step)
         self.add_step_button.grid(
             row=1, column=1,
@@ -61,8 +60,7 @@ class ProcedureBuilder(ctk.CTkFrame):
         self.insert_step_button = ctk.CTkButton(
             master=self,
             text="Insert Step",
-            width=80,
-            height=50,
+            width=80,height=50,
             command=self._insert_step)
         self.insert_step_button.grid(
             row=2, column=1,
@@ -73,8 +71,7 @@ class ProcedureBuilder(ctk.CTkFrame):
         self.delete_step_button = ctk.CTkButton(
             master=self,
             text="Delete Step",
-            width=80,
-            height=50,
+            width=80,height=50,
             command=self._delete_step)
         self.delete_step_button.grid(
             row=3, column=1,
@@ -85,8 +82,7 @@ class ProcedureBuilder(ctk.CTkFrame):
         self.vary_step_button = ctk.CTkButton(
             master=self,
             text="Vary Step",
-            width=80,
-            height=50,
+            width=80,height=50,
             command=self._add_variation)
         self.vary_step_button.grid(
             row=4, column=1,
@@ -97,11 +93,16 @@ class ProcedureBuilder(ctk.CTkFrame):
         self.export_button = ctk.CTkButton(
             master=self,
             text="Export\nProcedure",
-            width=80,
-            height=50,
+            width=80, height=50,
             command=self._export)
         self.export_button.grid(
             row=5, column=1,
+            padx=5, pady=5,
+            sticky="nw")
+  
+        self.loop_count = LabelEntry(self, "Loop Count: ")
+        self.loop_count.grid(
+            row=6, column=1,
             padx=5, pady=5,
             sticky="nw")
         
@@ -191,8 +192,8 @@ class ProcedureBuilder(ctk.CTkFrame):
         if self.a_step[index] is not None:
             return
         
-        
-        new_step = self.steps[self.step_dropdown.get()](self.step_frame)
+        step_type = type(self.selected_step)
+        new_step = step_type(self.step_frame)
         
    
         self.a_step.insert(index, new_step)
@@ -202,9 +203,18 @@ class ProcedureBuilder(ctk.CTkFrame):
         
     def _export(self):
         procedure = {"Procedure": []}
-        for steps in self.step_list:
-            for step in steps.get_steps():
-                procedure["Procedure"].append(step)
+        loops = self.loop_count.get_entry()
+        for loop_num in range(loops):
+            for steps, v_steps in zip(self.step_list, self.a_step):
+                if v_steps is not None: # if step should vary throughout procedures
+                    step = steps.get_steps()[0] # get step name
+                    for e1, e2 in zip(steps.get_steps()[1:], v_steps.get_steps()[1:]):
+                        
+                        step.append(e1 + (e2-e1)*(loop_num)/(loops-1)) #interpolate between first and final value
+                        
+                else:
+                    for step in steps.get_steps():
+                        procedure["Procedure"].append(step)
             
         file_path = filedialog.asksaveasfilename(
             defaultextension=("Yaml files","*.yml*"),
@@ -232,6 +242,7 @@ class ProcedureBuilder(ctk.CTkFrame):
                 padx=5,pady=5,
                 sticky="nw")
         
+# -------- STEPS --------
 class StepFrame(ctk.CTkFrame):
     def __init__(self, master, title: str = "Empty Step"):
         super().__init__(
@@ -268,15 +279,9 @@ class StepFrame(ctk.CTkFrame):
         """Method to be implemented by subclasses"""
         pass
         
-    
-        
-        
 class WaitStep(StepFrame):
     def __init__(self, master):
-        super().__init__(
-                master=master,
-                title="Wait",
-        )
+        super().__init__(master=master,title="Wait")
         
         self.wait_time = LabelEntry(self.step_frame, "Wait time:")
         self.wait_time.grid(row=0, column=0, padx=5, pady=5)
@@ -284,11 +289,8 @@ class WaitStep(StepFrame):
         
     def get_steps(self):
         wait_time: int = self.wait_time.get_entry()
-        d = ["wait", wait_time]
+        return ["wait", wait_time]
         
-        return [d]
-    
-    
 class HeatStep(StepFrame):
     def __init__(self, master):
         super().__init__(
@@ -315,7 +317,10 @@ class HeatStep(StepFrame):
         move = ["set_temp", target_temperature]
         return move
 
-
+class WaitForTemp(StepFrame):
+    def __init__(self, master):
+        super().__init__(master, "Wait For Temperature")
+        self.target_temperature = LabelEntry(self.step_frame, "")
 
 class MoveStep(StepFrame):
     def __init__(self, master):
