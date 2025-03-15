@@ -31,8 +31,6 @@ class VialCarousel():
         """ Adds fluid in the specified vial. Returns true if sum of volumes
         do not exceed the max amount the vials can hold. Otherwise it retuns false"""
         
-        if vial_num is None
-        
         #return if outside of vial range
         if vial_num >= self.VIALS or vial_num < 0: 
             return False
@@ -67,9 +65,11 @@ class VialCarousel():
         self.lid_servo.value=0
          
     def set_vial(self, vial_num):
+        self.open_lid()
         self.control_board.move_axis("A", 30*(self.current_vial - vial_num), 100)
         
         self.current_vial = vial_num
+        self.close_lid()
         
     def seal(self):
         self.open_lid()

@@ -45,10 +45,10 @@ class Dispatcher():
             "wait_for_temp": self.wait_for_temperature,
             
             "align_gripper": self.align_gripper,
-            "open_gripper": self.gripper.open,
-            "close_gripper": self.gripper.close,
+            "open_gripper": self.open_gripper,
+            "close_gripper": self.close_gripper,
             
-            "set_angle_gripper": self.gripper.set_arm_angle,
+            "set_angle_gripper": self.set_gripper_angle,
             
             "spin": self.spin,
             
@@ -142,7 +142,14 @@ class Dispatcher():
         self.spincoater.add_step(rpm, spin_time_seconds)
         
     # --------- GRIPPER MOVES --------
+    def open_gripper(self):
+        self.gripper.open()
+        
+    def close_gripper(self):
+        self.gripper.close()
     
+    def set_gripper_angle(self, angle):
+        self.gripper.set_arm_angle(angle)
     
     def align_gripper(self):
         frame = self.camera.get_frame()
@@ -163,6 +170,10 @@ class Dispatcher():
             
         self.logger.info(angle1)
         self.gripper.set_arm_angle(angle)
+        
+    def working_slide_to(self, location):
+        """ pick up the slide currently being worked on and move it to the specified location"""
+        
         
     # -------- PIPPETE MOVES --------
     def extract(self, volume_ul: int):
@@ -203,6 +214,10 @@ class Dispatcher():
         
         self.vial_carousel.add_fluid()
         self.vial_carousel.set_vial(vial_num)
+        self.toolhead.move_axis("Y", -10, relative=True)
+        self.pippete_handler.dispense_all(2)
+        self.toolhead.move_axis("Y", 10, relative=True)
+        
         
     def dispense(self, duration_s):
         """ Dispense all fluid in pippete, assuming there is any"""
