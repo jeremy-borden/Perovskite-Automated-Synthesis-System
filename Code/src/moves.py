@@ -152,7 +152,6 @@ class Dispatcher():
     
     def align_gripper(self):
         frame = self.camera.get_frame()
-        angle = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
         
         angle0 = None
         angle1 = None
@@ -160,15 +159,17 @@ class Dispatcher():
         while(angle0 is None or angle1 is None) or abs(angle1-angle0) > 5:
             self.logger.debug("Getting first angle")
             frame = self.camera.get_frame()
-            angle0 = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
+            angle0 = ImageProcessor.get_marker_angles(image=frame, marker_id=7) % 90
+            self.logger.info(f"Got Angle0: {int(angle0)}")
             sleep(1)
             self.logger.debug("Getting second angle")
             frame = self.camera.get_frame()
-            angle1 = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
+            angle1 = ImageProcessor.get_marker_angles(image=frame, marker_id=7) % 90
+            self.logger.info(f"Got Angle1: {int(angle1)}")
             sleep(1)
             
-        self.logger.info(angle1)
-        self.gripper.set_arm_angle(angle)
+        self.logger.info(int(angle0))
+        self.gripper.set_arm_angle(int(angle0))
         
     def working_slide_to(self, location):
         """ pick up the slide currently being worked on and move it to the specified location"""
