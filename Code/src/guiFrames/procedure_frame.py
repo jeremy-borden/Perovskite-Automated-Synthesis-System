@@ -139,15 +139,10 @@ class ProcedureFrame(ctk.CTkFrame):
 
     def _start_procedure(self):
         """ Callback to begin the procedure."""
-
-        loop_entry = self.num_procedures_entry.get()
-        if loop_entry is None or int(loop_entry) == 0:
-            return
-        
         if self.procedure_handler.started.is_set():
             return
         
-        self.procedure_handler.begin(int(loop_entry))
+        self.procedure_handler.begin()
 
     def _toggle_pause(self):
         """ Toggle the pause state of the procedure  """

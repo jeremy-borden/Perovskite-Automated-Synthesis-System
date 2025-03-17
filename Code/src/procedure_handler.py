@@ -19,7 +19,6 @@ class ProcedureHandler(threading.Thread):
 
         self.procedure = None
         self.current_step = 0
-        self.loop_count = 1
         
         self.paused = threading.Event()
         self.started = threading.Event()
@@ -80,13 +79,13 @@ class ProcedureHandler(threading.Thread):
             self.stop()
             
 
-    def begin(self, loop_count: int):
+    def begin(self):
         """Begin the procedure
         """
         if not self.procedure:
             self.logger.error("No procedure set")
             return
-        self.loop_count = loop_count
+   
         self.started.set()
         self.paused.clear()
         self.procedure_timer.start()
