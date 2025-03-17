@@ -225,9 +225,10 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
     
         for loop in range(loop_count):
             for step, variation_step in zip(self.step_list, self.variation_step_list):
+                partial_step = [step.function.__name__] # get step name
                 if variation_step is not None: # if step should vary throughout procedures
                     
-                    partial_step = [step.function.__name__] # get step name
+                    
  
                     for initial_value, final_value in zip(step.get_entries(), variation_step.get_entries()):
                 
@@ -236,10 +237,13 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
                             partial_step.append(initial_value)
                         else:
                             partial_step.append(initial_value + (final_value-initial_value)*(loop)/(loop_count-1)) #interpolate between first and final value
-                    procedure["Procedure"].append(partial_step)
-                else:
                     
-                    procedure["Procedure"].append(step.get_entries())
+                else:
+                    for entry in step.get_entries():
+
+                        partial_step.append(entry)
+                        
+                procedure["Procedure"].append(partial_step)
             
         file_path = filedialog.asksaveasfilename(
             defaultextension=("Yaml files","*.yml*"),
