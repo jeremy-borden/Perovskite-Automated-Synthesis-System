@@ -13,6 +13,7 @@ class Hotplate(threading.Thread):
     MAX_TEMPERATURE_C: int = 540
     
     def __init__(self, dac: DAC, adc: ADC):
+        super().__init__(name="Hotplate",daemon=True)
         self.dac = dac
         self.adc = adc
         
