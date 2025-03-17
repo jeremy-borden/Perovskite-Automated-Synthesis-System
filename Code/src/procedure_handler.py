@@ -46,35 +46,37 @@ class ProcedureHandler(threading.Thread):
         """Run the procedure
         """
         while True:
+            # wait until user has started procedure
             self.started.wait()
-            
+            # home gantry and initialize values
             self.dispatcher.home
+            self.current_step = 0
             
-            
-            # begin looping through each move
-            for loop in range(self.loop_count):
-                self.current_step = 0
-                for move in self.procedure:
-                    
-                    if self.paused.is_set():
-                        self.logger.debug("Paused")
-                        self.paused.wait()
-                        
-                    if not self.started.is_set():
-                        self.logger.debug("Stopping")
-                        break
-                    
-                    self.logger.debug(f"Executing move {self.current_step}")
-                    func_name = move[0]
-                    func_args = move[1:]
+            for move in self.procedure:
+                # if procedure is paused after finishing previos move
+                if self.paused.is_set():
+                    self.logger.debug("Paused")
+                    self.procedure_timer.pause()
+                    self.paused.wait()
+                # if procedure is stopped, break from the loop
+                if not self.started.is_set():
+                    self.logger.debug("Stopping")
+                    break
+                
+                self.logger.debug(f"Executing move {self.current_step}")
+                func_name = move[0]
+                func_args = move[1:]
 
-                    try:
-                        self.dispatcher.move_dict[func_name](*func_args)
-                    except Exception as e:
-                        self.logger.error(f"Error while running procedure: {e}")
-                        self.stop()
-                        
-                    self.current_step+=1
+                # try running the move, stopping if there are any errors
+                try:
+                    self.dispatcher.move_dict[func_name](*func_args)
+                except Exception as e:
+                    self.logger.error(f"Error while running procedure: {e}")
+                    break
+                self.logger.debug(f"Move Done")
+                self.current_step+=1
+            
+            self.logger.debug("Procedure Ended")
             self.stop()
             
 
@@ -88,13 +90,13 @@ class ProcedureHandler(threading.Thread):
         self.started.set()
         self.paused.clear()
         self.procedure_timer.start()
-        self.logger.info("Procedure started")
+        self.logger.info("Starting Procedure...")
 
     def stop(self):
         """Stop the procedure.
         """
         self.started.clear()
-        self.paused.set()
+        self.paused.clear()
         self.procedure_timer.pause()
         self.logger.info("Stopping procedure...")
         

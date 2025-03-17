@@ -2,8 +2,6 @@ import threading
 
 import os
 import sys
-
-from moves import MAX_TEMPERATURE
 pp=os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(pp)
 

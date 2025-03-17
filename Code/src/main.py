@@ -14,6 +14,7 @@ from drivers.spectrometer_driver import Spectrometer
 from drivers.adc_driver import ADC
 
 # -- OBJECT IMPORT --
+from guiFrames import procedure_builder_frame
 from objects.vial_carousel import VialCarousel
 from objects.infeed import Infeed
 from objects.hotplate import Hotplate
@@ -26,6 +27,7 @@ from guiFrames.procedure_frame import ProcedureFrame
 from guiFrames.info_frame import InfoFrame
 from guiFrames.camera_frame import CameraFrame
 from guiFrames.conection_frame import ConnectionFrame
+from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
 
 
 from procedure_handler import ProcedureHandler
@@ -75,22 +77,22 @@ if __name__ == "__main__":
     hotplate.start()
     
     # -- SPECTROMETER + INFEED --
-    spectrometer = Spectrometer(com_port="/dev/ttyACM0", logger=logger)
+    spectrometer = Spectrometer(com_port="/dev/ttyACM0")
     infeed_servo = AngularServo(pin=None, min_angle=0, max_angle=180,)
-    infeed = Infeed(servo=infeed_servo)
+    infeed = Infeed(infeed_servo)
     
     # -- VIAL CAROUSEL
     lid_servo = AngularServo(pin=None, min_angle=0, max_angle=270,)
     vial_carousel = VialCarousel(control_board, lid_servo)
     
-    dispatcher = Dispatcher(logger=logger,
-                            control_board=control_board,
-                            spincoater=spin_coater,
+    dispatcher = Dispatcher(toolhead=toolhead,
+                            spin_coater=spin_coater,
                             hotplate=hotplate,
                             camera=camera,
                             gripper=gripper,
-                            infeed=infeed)
-    
+                            infeed=infeed,
+                            spectrometer=spectrometer,
+                            vial_carousel=vial_carousel)
     
     procedure_handler = ProcedureHandler(logger=logger,dispatcher=dispatcher)
     
@@ -114,29 +116,25 @@ if __name__ == "__main__":
 
     # creating frames
     procedure_frame = ProcedureFrame(app, procedure_handler)
-    console_frame = ConsoleFrame(app, logger)
-    connection_frame = ConnectionFrame(master=app,control_board=control_board,
-                                       spin_coater=spin_coater,camera=camera,
-                                       spectrometer=spectrometer)
-    camera_frame = CameraFrame(master=app, camera=camera)
+    console_frame = ConsoleFrame(app)
+    connection_frame = ConnectionFrame(app, control_board,spin_coater,camera,spectrometer)
+    camera_frame = CameraFrame(app, camera)
     info_frame = InfoFrame(app, control_board)
+    procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict)
     
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
-    console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
-    info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
-    camera_frame.grid(row=1, column=1,rowspan=2, padx=5, pady=5,sticky="nsew")
     connection_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+    console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
+    camera_frame.grid(row=1, column=1,rowspan=2, padx=5, pady=5,sticky="nsew")
+    info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+    procedure_builder_frame.grid(row=2, column=0, columnspan=2, sticky="nsew")
     
     # run the gui
     app.mainloop()
     
     # -- CLEANUP --
-    logger.removeHandler(console_frame.console_handler)
-    
     control_board.disconnect()
+    spectrometer.disconnect()
     spin_coater.disconnect()
     camera.disconnect()
-    
-    
-    

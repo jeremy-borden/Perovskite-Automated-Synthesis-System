@@ -1,38 +1,29 @@
 import customtkinter as ctk
 from tkinter import filedialog
-import abc
-from time import sleep
+from inspect import signature
+import logging
 
 # get current directory so we can import from outside guiFrames folder
 import sys
 import os
-path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(path)
-from src.drivers.procedure_file_driver import ProcedureFile
+from drivers.procedure_file_driver import ProcedureFile
 
-class ProcedureBuilder(ctk.CTkFrame):
-    def __init__(self, master):
-        super().__init__(
-            master=master,
-            border_color="#1f6aa5",
-            border_width=2,
-            width=600)
-        
+class ProcedureBuilderFrame(ctk.CTkFrame):
+    def __init__(self, master, moves):
+        super().__init__(master=master,border_color="#1f6aa5",border_width=2,
+                         width=600)
+        self.logger=logging.getLogger("Main Logger")
         self.step_list = []
+        self.variation_step_list = []
         self.selected_step = None
+        self.moves = moves
         
-        self.steps = {
-            "Wait":WaitStep,
-            "Heat":HeatStep,
-            "Move":MoveStep,
-            "Move Fluid": MoveFluidStep,
-            "Spin": SpinStep}
-        
-        
+        # step holding frame
         self.step_frame = ctk.CTkScrollableFrame(
             master=self,
-            width=600,
-            height=600)
+            width=600,height=600)
         self.step_frame.grid(
             row=0, column=0, rowspan=7,
             padx=5,pady=5)
@@ -41,92 +32,72 @@ class ProcedureBuilder(ctk.CTkFrame):
         
         # step select dropdown
         self.step_dropdown = ctk.CTkOptionMenu(master=self,
-            width=80, height=50, values=list(self.steps.keys()))
+            width=120, height=50, values=list(self.moves.keys()))
         self.step_dropdown.grid(row=0, column=1,
             padx=5, pady=5,
-            sticky="nw")
+            sticky="nwe")
         
         # add step button
         self.add_step_button = ctk.CTkButton(
             master=self,
             text="Add Step",
-            width=80,height=50,
+            width=120,height=50,
             command=self._add_step)
         self.add_step_button.grid(
             row=1, column=1,
-            padx=5,pady=5, sticky="nw")
+            padx=5,pady=5, sticky="nwe")
         
         # insert step button
         self.insert_step_button = ctk.CTkButton(
             master=self,
             text="Insert Step",
-            width=80,height=50,
+            width=120,height=50,
             command=self._insert_step)
         self.insert_step_button.grid(
             row=2, column=1,
             padx=5, pady=5,
-            sticky="nw")
+            sticky="nwe")
         
         # delete step button
         self.delete_step_button = ctk.CTkButton(
             master=self,
             text="Delete Step",
-            width=80,height=50,
+            width=120,height=50,
             command=self._delete_step)
         self.delete_step_button.grid(
             row=3, column=1,
             padx=5, pady=5,
-            sticky="nw")
+            sticky="nwe")
         
         # vary step button
         self.vary_step_button = ctk.CTkButton(
             master=self,
             text="Vary Step",
-            width=80,height=50,
+            width=120,height=50,
             command=self._add_variation)
         self.vary_step_button.grid(
             row=4, column=1,
             padx=5, pady=5,
-            sticky="nw")
+            sticky="nwe")
         
         # export steps button
         self.export_button = ctk.CTkButton(
             master=self,
             text="Export\nProcedure",
-            width=80, height=50,
+            width=120, height=50,
             command=self._export)
         self.export_button.grid(
             row=5, column=1,
             padx=5, pady=5,
-            sticky="nw")
-  
-        self.loop_count = LabelEntry(self, "Loop Count: ")
+            sticky="nwe")
+
+        # Loop Count
+        self.loop_count = LabelEntry(self, "Loop Count: ", int)
+        self.loop_count.entry.insert(0,"1")
         self.loop_count.grid(
             row=6, column=1,
             padx=5, pady=5,
-            sticky="nw")
-        
-        self.a_step = []
-    
-    
-    def _deselect_step(self,event):
-        if self.selected_step is not None:
-            self.selected_step.configure(border_color="#1f6aa5")
-        self.selected_step = None
-    
-    def _select_step(self, event):
-        
-        if self.selected_step is not None:
-            self.selected_step.configure(border_color="#1f6aa5")
-        
-        widget = event.widget
-        while widget != self.step_frame:
-            if isinstance(widget, StepFrame):
-                self.selected_step = widget
-                break
-            widget = widget.master
-        
-        widget.configure(border_color="#edf556")
+            sticky="nwe")
         
     def _bind_step_widgets(self, step_frame):
         """Recursively bind click events to all widgets in step frame"""
@@ -136,85 +107,139 @@ class ProcedureBuilder(ctk.CTkFrame):
             child.bind('<Button-1>', lambda e: self._select_step(e,))
             if len(child.winfo_children()) > 0:
                 self._bind_step_widgets(child)
+    
+    
+    def _deselect_step(self,event):
+        """ Reset the border color of selected step if user clicks off"""
+        if self.selected_step is not None:
+            self.selected_step.configure(border_color="#1f6aa5")
+        self.selected_step = None
+    
+    def _select_step(self, event):
+        """ change the border color of selected step if user clicks on it"""
+        if self.selected_step is not None:
+            self.selected_step.configure(border_color="#1f6aa5")
+        
+        # user likely clicked on something within the frame, so we have to find the OG
+        # parent frame so we can change its color
+        widget = event.widget
+        while widget != self.step_frame:
+            if isinstance(widget, StepFrame):
+                self.selected_step = widget
+                break
+            widget = widget.master
+        
+        widget.configure(border_color="#edf556")
         
     def _add_step(self):
-        """ Add a new step, defaults to Wait"""
-        new_step = self.steps[self.step_dropdown.get()](self.step_frame)
+        """ Add a step to the steplist"""
+        # get the function we are making a step for
+        function = self.moves[self.step_dropdown.get()]
+        new_step = StepFrame(self.step_frame, function)
+        #bind click events to window and its children
         self._bind_step_widgets(new_step)
+        
+        # update lists and gui
         self.step_list.append(new_step)
-        self.a_step.append(None)
+        self.variation_step_list.append(None)
         self._update()
-    
+
+    def _insert_step(self):
+        """ Insert step before currently selected one"""
+        # prevent inserting after nothing
+        if self.selected_step is None:
+            return
+
+        
+        # get the function we are making a step for
+        function = self.moves[self.step_dropdown.get()]
+        new_step = StepFrame(self.step_frame, function)
+        #bind click events to window and its children
+        self._bind_step_widgets(new_step)
+        
+        #find index to insert step at
+        
+        # selected frame could be a variation so we need to check for that
+        if(self.selected_step in self.step_list):
+            index = self.step_list.index(self.selected_step)
+        else:
+            index = self.variation_step_list.index(self.selected_step)
+        
+        # update lists and gui
+        self.step_list.insert(index, new_step)
+        self.variation_step_list.insert(index, None)
+        self._update()
+        
+    def _add_variation(self):
+        # prevent adding varaint to nothing
+        if self.selected_step is None:
+            return
+        # prevent adding variant to variant
+        if self.selected_step in self.variation_step_list: 
+            return
+        # prevent adding additional variants
+        index = self.step_list.index(self.selected_step)
+        if self.variation_step_list[index] is not None:
+            return
+        
+        
+        function = self.selected_step.function
+        variation_step = StepFrame(self.step_frame, function)
+   
+        self.variation_step_list.insert(index, variation_step)
+        
+        self._bind_step_widgets(variation_step)
+        self._update()
+        
     def _delete_step(self):
+        """ Delete the currently selected step"""
         if self.selected_step is None:
             return
         
+        # if selected step is a normal step, delete it and any variations
         if self.selected_step in self.step_list:
             step = self.selected_step
             
             index = self.step_list.index(step)
-            v_step = self.a_step.pop(index)
+            v_step = self.variation_step_list.pop(index)
             self.step_list.remove(step)
             
             if(v_step is not None):
                 v_step.destroy()
             step.destroy()
-            
-        elif self.selected_step in self.a_step:
-            index = self.a_step.index(self.selected_step)
-            self.a_step.pop(index).destroy()
-        
+        # otherwise if selected step is varaint, jsut delete that
+        elif self.selected_step in self.variation_step_list:
+            index = self.variation_step_list.index(self.selected_step)
+            self.variation_step_list.pop(index).destroy()
         
         self.selected_step = None
         self._update()
         
-        
-    def _insert_step(self):
-        if self.selected_step is None:
-            return
-
-        index = self.step_list.index(self.selected_step)
-        new_step = self.steps[self.step_dropdown.get()](self.step_frame)
-        
-        self._bind_step_widgets(new_step)
-        self.step_list.insert(index, new_step)
-        self.a_step.insert(index, None)
-        self._update()
-        
-    def _add_variation(self):
-        if self.selected_step is None:
-            return
-        
-        if self.selected_step in self.a_step:
-            return
-        
-        index = self.step_list.index(self.selected_step)
-        if self.a_step[index] is not None:
-            return
-        
-        step_type = type(self.selected_step)
-        new_step = step_type(self.step_frame)
-        
-   
-        self.a_step.insert(index, new_step)
-        self._bind_step_widgets(new_step)
-        
-        self._update()
-        
     def _export(self):
         procedure = {"Procedure": []}
-        loops = self.loop_count.get_entry()
-        for loop_num in range(loops):
-            for steps, v_steps in zip(self.step_list, self.a_step):
-                if v_steps is not None: # if step should vary throughout procedures
-                    step = steps.get_steps()[0] # get step name
-                    for e1, e2 in zip(steps.get_steps()[1:], v_steps.get_steps()[1:]):
-                        
-                        step.append(e1 + (e2-e1)*(loop_num)/(loops-1)) #interpolate between first and final value
-                        
+        try:
+            loop_count = self.loop_count.get_entry()
+        except ValueError:
+            self.logger.error("Loop count must be > 0")
+            return
+    
+        for loop in range(loop_count):
+            for step, variation_step in zip(self.step_list, self.variation_step_list):
+                if variation_step is not None: # if step should vary throughout procedures
+                    
+                    partial_step = [step.function.__name__] # get step name
+ 
+                    for initial_value, final_value in zip(step.get_entries(), variation_step.get_entries()):
+                
+                        # skip interpolation and use the first value when entry isnt a number
+                        if type(initial_value) is not float and type(initial_value) is not int:
+                            partial_step.append(initial_value)
+                        else:
+                            partial_step.append(initial_value + (final_value-initial_value)*(loop)/(loop_count-1)) #interpolate between first and final value
+                    procedure["Procedure"].append(partial_step)
                 else:
-                    for step in steps.get_steps():
-                        procedure["Procedure"].append(step)
+                    
+                    procedure["Procedure"].append(step.get_entries())
             
         file_path = filedialog.asksaveasfilename(
             defaultextension=("Yaml files","*.yml*"),
@@ -222,9 +247,8 @@ class ProcedureBuilder(ctk.CTkFrame):
             filetypes=(("Yaml files","*.yml*"),))
         if file_path != "":
             ProcedureFile().Save(path=file_path, procedure=procedure)
+            self.logger.info("Procedure Succesfully Exported!")
             
-        
-        
     def _update(self):
         """ Update the step frame"""
         for i, step in enumerate(self.step_list):
@@ -233,7 +257,7 @@ class ProcedureBuilder(ctk.CTkFrame):
                 padx=5,pady=5,
                 sticky="nw")
             
-        for i, step in enumerate(self.a_step):
+        for i, step in enumerate(self.variation_step_list):
             if step is None:
                 continue
             
@@ -244,185 +268,147 @@ class ProcedureBuilder(ctk.CTkFrame):
         
 # -------- STEPS --------
 class StepFrame(ctk.CTkFrame):
-    def __init__(self, master, title: str = "Empty Step"):
+    def __init__(self, master, function):
         super().__init__(
-            master=master,
-            border_color="#1f6aa5",
-            border_width=2,
+            master=master,border_color="#1f6aa5",border_width=2,
             width=400,)
         self.master = master
-        self.index=0
+        self.function = function
+        self.entry_list = []
+        
+      
+        title = self.snake_to_title(function.__name__)
         
         # title
         self.title_label = ctk.CTkLabel(
-            master = self,
-            text=title,
+            master = self,text=title,
             width=250,
-            justify="center",
-            anchor="w",
-            font=("Arial", 20, "bold")
-        )
+            justify="center",anchor="w",
+            font=("Arial", 16, "bold"))
         self.title_label.grid(
             row=0, column=0,
             padx=5, pady=5,
             sticky="nw")
 
-        self.step_frame = ctk.CTkFrame(master=self,
-                                       width=350)
+        # main step frame
+        self.step_frame = ctk.CTkFrame(
+            master=self,
+            width=350)
         self.step_frame.grid(
             row=1, column=0, columnspan=2,
             padx=5, pady=5,
             sticky="nswe")
+        
+        self.generate_frame()
+        
+    def snake_to_title(self, snake_str):
+        return ' '.join(word.capitalize() for word in snake_str.split('_'))
     
-    @abc.abstractmethod
-    def get_steps(self):
-        """Method to be implemented by subclasses"""
-        pass
+    def get_entries(self):
+        entries = []
         
-class WaitStep(StepFrame):
-    def __init__(self, master):
-        super().__init__(master=master,title="Wait")
+        for entry in self.entry_list:
+            entries.append(entry.get_entry())
         
-        self.wait_time = LabelEntry(self.step_frame, "Wait time:")
-        self.wait_time.grid(row=0, column=0, padx=5, pady=5)
+        return entries
         
         
-    def get_steps(self):
-        wait_time: int = self.wait_time.get_entry()
-        return ["wait", wait_time]
+    def generate_frame(self):
+        func_sig = signature(self.function)
+        num_args = len(func_sig.parameters)
         
-class HeatStep(StepFrame):
-    def __init__(self, master):
-        super().__init__(
-                master=master,
-                title="Heat")
-        
-        # heat time
-        self.wait_time = LabelEntry(self.step_frame, "Heat Time: ")
-        self.wait_time.grid(row=0, column=0, padx=5,pady=5)
-        # heat temp
-        self.heat_temperature = LabelEntry(self.step_frame, "Heat Temperature: ")
-        self.heat_temperature.grid(row=1, column=0, padx=5,pady=5)
-        
-        
-        self.wait_for_temp_checkbox = ctk.CTkCheckBox(master=self.step_frame,
-            width=20,
-            height=20,
-            text="Wait for temperature")
-        self.wait_for_temp_checkbox.grid(row=0, column=1, padx=5,pady=5)
-
-        
-    def get_steps(self):
-        target_temperature = int(self.heat_temperature.get_entry())
-        move = ["set_temp", target_temperature]
-        return move
-
-class WaitForTemp(StepFrame):
-    def __init__(self, master):
-        super().__init__(master, "Wait For Temperature")
-        self.target_temperature = LabelEntry(self.step_frame, "")
-
-class MoveStep(StepFrame):
-    def __init__(self, master):
-        super().__init__(
-                master=master,
-                title="Move")
-        
-        self.x_coord = LabelEntry(self.step_frame, "X: ")
-        self.x_coord.grid(row=0, column=0, padx=5,pady=5)
-
-        self.y_coord = LabelEntry(self.step_frame, "Y: ")
-        self.y_coord.grid(row=1, column=0, padx=5,pady=5)
-        
-        self.z_coord = LabelEntry(self.step_frame, "Z: ")
-        self.z_coord.grid(row=2, column=0, padx=5,pady=5)
-        
-        
-class MoveFluidStep(StepFrame):
-    def __init__(self, master):
-        super().__init__(
-                master=master,
-                title="Mix")
-        
-        self.source_vial = LabelEntry(self.step_frame, "Source Vial: ")
-        self.source_vial.grid(row=0, column=0, padx=5, pady=5)
-        
-        self.fluid_amount_ul = LabelEntry(self.step_frame, "Fluid Amount (ul): ")
-        self.fluid_amount_ul.grid(row=1, column=0, padx=5, pady=5)
-        
-        self.destination = LabelEntry(self.step_frame, "Destination Vial: ")
-        self.destination.grid(row=2, column=0, padx=5, pady=5)
-        
-        self.mix_checkbox = ctk.CTkCheckBox(master=self.step_frame,
-            width=20,
-            height=20,
-            text="Mix after deposit")
-        self.mix_checkbox.grid(row=0, column=1, padx=5, pady=5)
-        
-        
-    def get_steps(self):
-        # vialcarousel move to self.source_vial
-        # gantry goto above self.source_vial
-        #gantry lower
-        #pippete extract self.fluid_amount_ul
-        #gantry raise
-        
-        # gantry goto above self.destination_vial
-        #gantry lower
-        # vialcarousel move to self.destination_vial
-        #pippete deposit
-        #gantry raise
-        
-        #if mix
-        #spin vc if possible or suck in and out with tip
-        
-        
-        return super().get_steps()
-    
-class SpinStep(StepFrame):
-    def __init__(self, master):
-        super().__init__(
-                master=master,
-                title="Spin")
-        
-        self.spin_rpm = LabelEntry(self.step_frame, "Spin RPM: ")
-        self.spin_rpm.grid(row=0, column=0, padx=5,pady=5)
-        
-        self.spin_duration = LabelEntry(self.step_frame, "Spin Duration (s): ")
-        self.spin_duration.grid(row=1, column=0, padx=5, pady=5)
-        
-    
-
-# spectrometer measure
-# save picture
-# Move Slide
-
+        for index, (name, param) in enumerate(func_sig.parameters.items()):
+            
+            name = self.snake_to_title(name) # reformat the funciton arg
+            entry = LabelEntry(self.step_frame, f"{name}: ", param.annotation)
+            entry.grid(row=index, column=0,
+                       padx=5, pady=5)
+             
+            self.entry_list.append(entry)
+            
 class LabelEntry(ctk.CTkFrame):
-    def __init__(self, master, label: str):
-        super().__init__(
-            master=master,width=200,)
+    def __init__(self, master, label: str, entry_type: type = str):
+        super().__init__(master=master,width=200)
+        self.entry_type = entry_type
         
+        # entry label
         self.label = ctk.CTkLabel(
             master=self,text=label,
-            width=100,
+            width=80,
             anchor="w")
         self.label.grid(
             row=0, column=0,
-            padx=5, pady=5,sticky="nw")
-        self.entry = ctk.CTkEntry(
-            master=self,placeholder_text="...",
-            width=100)
+            padx=5, pady=5,sticky="nwe")
+        
+        # create a proper input (checkbox or entry) based on entry type
+        if entry_type is bool:
+            self.entry = ctk.CTkCheckBox(
+                master=self, text="",
+                width=50,)
+        else:
+            self.entry = ctk.CTkEntry(
+                master=self,
+                width=50)
+            
         self.entry.grid(
             row=0, column=1,
-            padx=5, pady=5,sticky="nw")
-    def get_entry(self):
-        return self.entry.get()
-      
+            padx=5, pady=5,sticky="ne")
+        
+        # assign proper validation function based on entry type
+        if entry_type is int:
+            self.entry.configure(validate="key",
+                                 validatecommand=(self.register(self._validate_int), '%P'))
+        elif entry_type is float:
+            self.entry.configure(validate="key",
+                                 validatecommand=(self.register(self._validate_float), '%P'))
+
+    def get_entry(self,):
+        """ Return the entry formatted as its entry type. 
+        Raises a ValueError if the entry is empty"""
+        if self.entry.get().strip() == "":
+            raise ValueError
+
+        return self.entry_type(self.entry.get().strip())
+    
+    def _validate_float(self, P):
+        """ Validate that only floats are entered. """
+        if P.isdigit() or P == "" or (P.count('.') == 1 and P.replace('.', '').isdigit()):
+            return True
+        else:
+            return False
+        
+    def _validate_int(self, P):
+        """ Validate that only ints are entered. """
+        if P.isdigit() or P == "":
+            return True
+        else:
+            return False
+        
+# testing 
+class peepee():
+    def __init__(self):
+        
+        self.moves = {
+            "fardddd_yo": self.fardddd_yo,
+            "shit": self.shit
+        }
+        
+    def shit(self, a: int, b: str, bool_ean: bool):
+        pass
+    
+    def fardddd_yo(self, inbt: int, flot: float, str: str):
+        pass # gas
+    
+    def get_dick(self):
+        return self.moves
+        
 if __name__ == "__main__":
     app = ctk.CTk()
     app.geometry("1000x1000")
     app.configure()
-    f = ProcedureBuilder(app)
+    pee = peepee()
+    moves = pee.get_dick()
+    f = ProcedureBuilderFrame(app, moves)
     f.grid(
         row=0, column=0,
         padx=5, pady=5,

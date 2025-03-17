@@ -9,7 +9,7 @@ import os
 # get current directory so we can import from outside guiFrames folder
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(path)
-from src.drivers.procedure_file_driver import ProcedureFile
+from drivers.procedure_file_driver import ProcedureFile
 
 class ProcedureFrame(ctk.CTkFrame):
     """GUI Frame to display and control the procedure."""
@@ -85,20 +85,6 @@ class ProcedureFrame(ctk.CTkFrame):
             row=2, column=3,
             padx=5, pady=5, sticky="nw")
         
-        #number of procedures
-        self.num_procedures_label = ctk.CTkLabel(
-            master=self, text="Number of Procedures:")
-        self.num_procedures_label.grid(
-            row=3, column=0,
-            padx=5, pady=5, sticky="w")
-        
-        self.num_procedures_entry = ctk.CTkEntry(
-            master=self, width=80,
-            validate="key", validatecommand=(self.register(self._validate_num_procedures), '%P'))
-        self.num_procedures_entry.grid(
-            row=3, column=1,
-            padx=5, pady=5, sticky="w")
-        
        #import procedurs
         self.current_procedure = "default_procedure.yml"
         self.import_procedure_button = ctk.CTkButton(
@@ -116,13 +102,6 @@ class ProcedureFrame(ctk.CTkFrame):
 
         
         self._update()
-        
-    def _validate_num_procedures(self, P):
-        """ Validate that only numbers are entered. """
-        if P.isdigit() or P == "":
-            return True
-        else:
-            return False
         
     def _update(self):
         """ Update the frame """

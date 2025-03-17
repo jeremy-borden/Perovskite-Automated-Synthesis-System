@@ -1,5 +1,5 @@
 import yaml
-
+import logging
 
 class ProcedureFile:
     def Open(self, path: str):
@@ -14,4 +14,9 @@ class ProcedureFile:
         if not path.endswith(".yml"):
             path += ".yml"
         with open(path, 'w', encoding='utf-8') as output_file:
-            yaml.dump(procedure, output_file)
+            yaml.dump(procedure, output_file, default_flow_style=None, Dumper=ProcedureDumper)
+
+class ProcedureDumper(yaml.SafeDumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super(ProcedureDumper, self).increase_indent(flow, False)
+    

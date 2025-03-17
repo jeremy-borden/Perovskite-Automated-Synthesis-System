@@ -1,13 +1,7 @@
-from drivers.camera_driver import Camera
-from drivers.spincoater_driver import SpinCoater
-
-from image_processing import ImageProcessor
-
 from time import sleep
 from inspect import signature
 import logging
 
-from objects import vial_carousel
 from objects.toolhead import Toolhead
 from objects.hotplate import Hotplate
 from objects.gripper import Gripper
@@ -15,22 +9,27 @@ from objects.infeed import Infeed
 from objects.pippete import PipetteHandler
 from objects.vial_carousel import VialCarousel
 
-MAX_TEMPERATURE = 540 # TODO move to constants later
+from drivers.camera_driver import Camera
+from drivers.spincoater_driver import SpinCoater
+from drivers.spectrometer_driver import Spectrometer
+
+from image_processing import ImageProcessor
 
 class Dispatcher():
-    def __init__(self, spincoater: SpinCoater, hotplate: Hotplate, 
+    def __init__(self, spin_coater: SpinCoater, hotplate: Hotplate, 
                  camera: Camera, gripper: Gripper, infeed: Infeed, pippete_handler: PipetteHandler,
-                 toolhead: Toolhead, vial_carousel: VialCarousel):
+                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer):
         self.logger = logging.getLogger("Main Logger")
         
         self.toolhead = toolhead
         self.infeed = infeed
         self.pippete_handler = pippete_handler
-        self.spincoater = spincoater
+        self.spin_coater = spin_coater
         self.camera = camera
         self.gripper = gripper
         self.hotplate = hotplate
         self.vial_carousel = vial_carousel
+        self.spectrometer = spectrometer
         
         ImageProcessor.set_detector()
 
@@ -103,8 +102,8 @@ class Dispatcher():
         
     def kill(self):
         self.control_board.kill()
-        self.spincoater.stop()
-        self.spincoater.clear_steps()
+        self.spin_coater.stop()
+        self.spin_coater.clear_steps()
         self.gripper.detatch_servos()
         
     def log(self, message: str):
@@ -131,15 +130,15 @@ class Dispatcher():
 
     # --------- SPIN COATER MOVES --------
     def spin(self, timelist, speedlist):
-        self.spincoater.clear_steps()
+        self.spin_coater.clear_steps()
         for time, speed in zip(timelist, speedlist):
-            self.spincoater.add_step(speed, time)
-        self.spincoater.run() 
+            self.spin_coater.add_step(speed, time)
+        self.spin_coater.run() 
         
     def add_spincoater_step(self, rpm: int, spin_time_seconds: int):
         """ Command the spincoater to spin at a specified speed for a specified time"""
         
-        self.spincoater.add_step(rpm, spin_time_seconds)
+        self.spin_coater.add_step(rpm, spin_time_seconds)
         
     # --------- GRIPPER MOVES --------
     def open_gripper(self):
