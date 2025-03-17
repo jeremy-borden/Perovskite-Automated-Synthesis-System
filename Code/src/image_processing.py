@@ -20,7 +20,7 @@ class ImageProcessor():
             return None
         
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        
+        gray_image = (255-gray_image)
         corners, ids, rejected = ImageProcessor.aruco_detector.detectMarkers(gray_image)
         
         if ids is None:                                 
