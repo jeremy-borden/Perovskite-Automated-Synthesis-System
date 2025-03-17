@@ -52,7 +52,7 @@ class Dispatcher():
             "spin": self.spin,
             
             "open_infeed": self.open_infeed,
-            "close_infeed": self.infeed.close,
+            "close_infeed": self.close_infeed,
             
             "extract": self.extract,
         }
@@ -229,5 +229,11 @@ class Dispatcher():
     # -------- VIAL CAROUSEL MOVES --------
     def set_vial(self, vial_num):
         self.vial_carousel.set_vial(vial_num)
-    
+        
+    # -------- INFEED MOVES --------
+    def open_infeed(self):
+        pass
+     
+    def close_infeed(self):
+        pass
     
