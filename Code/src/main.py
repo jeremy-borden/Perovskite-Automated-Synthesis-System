@@ -62,8 +62,8 @@ if __name__ == "__main__":
     gripper = Gripper(arm_servo=arm_servo, finger_servo=finger_servo)
     
     # -- PIPETTE HANDLER --
-    tip_eject_servo = AngularServo(pin=None, min_angle=0, max_angle=270,)
-    grabber_servo = AngularServo(pin=None, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+    tip_eject_servo = AngularServo(pin=27, min_angle=0, max_angle=270,)
+    grabber_servo = AngularServo(pin=22, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
     pipettes = [Pipette(200, 35, 20, 15, None),
                 Pipette(1000, 35, 20, 15, None)]
     pipette_handler = PipetteHandler(logger=logger, control_board=control_board,
@@ -78,11 +78,11 @@ if __name__ == "__main__":
     
     # -- SPECTROMETER + INFEED --
     spectrometer = Spectrometer(com_port="/dev/ttyACM0")
-    infeed_servo = AngularServo(pin=None, min_angle=0, max_angle=180,)
+    infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,)
     infeed = Infeed(infeed_servo)
     
     # -- VIAL CAROUSEL
-    lid_servo = AngularServo(pin=None, min_angle=0, max_angle=270,)
+    lid_servo = AngularServo(pin=24, min_angle=0, max_angle=270,)
     vial_carousel = VialCarousel(control_board, lid_servo)
     
     dispatcher = Dispatcher(toolhead=toolhead,
