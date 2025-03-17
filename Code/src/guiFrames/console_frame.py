@@ -98,5 +98,5 @@ class ConsoleLogHandler(logging.StreamHandler):
         self.console = console
 
     def emit(self, record):
-        self.console.msg_q.put(self.format(record))
+        self.console.log_queue.put(self.format(record))
     
