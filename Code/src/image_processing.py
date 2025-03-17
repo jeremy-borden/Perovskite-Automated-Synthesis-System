@@ -47,7 +47,7 @@ class ImageProcessor():
         return angle
 
     def set_detector():
-        dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
+        dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4x4_50)
         parameters = cv2.aruco.DetectorParameters()
         ImageProcessor.aruco_detector = cv2.aruco.ArucoDetector(dictionary, parameters)
         

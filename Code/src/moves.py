@@ -38,10 +38,10 @@ class Dispatcher():
             "wait": self.wait,
             "home": self.home,
             
-            "goto": self.move_toolhead,
+            "move_toolhead": self.move_toolhead,
             
-            "set_temp": self.set_temperature,
-            "wait_for_temp": self.wait_for_temperature,
+            "set_temperature": self.set_temperature,
+            "wait_for_temperature": self.wait_for_temperature,
             
             "align_gripper": self.align_gripper,
             "open_gripper": self.open_gripper,
@@ -51,7 +51,7 @@ class Dispatcher():
             
             "spin": self.spin,
             
-            "open_infeed": self.infeed.open,
+            "open_infeed": self.open_infeed,
             "close_infeed": self.infeed.close,
             
             "extract": self.extract,
@@ -152,7 +152,7 @@ class Dispatcher():
     
     def align_gripper(self):
         frame = self.camera.get_frame()
-        angle = ImageProcessor.get_marker_angles(image=frame, marker_id=3)
+        angle = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
         
         angle0 = None
         angle1 = None
