@@ -92,7 +92,8 @@ if __name__ == "__main__":
                             gripper=gripper,
                             infeed=infeed,
                             spectrometer=spectrometer,
-                            vial_carousel=vial_carousel)
+                            vial_carousel=vial_carousel,
+                            pippete_handler=pipette_handler)
     
     procedure_handler = ProcedureHandler(logger=logger,dispatcher=dispatcher)
     
