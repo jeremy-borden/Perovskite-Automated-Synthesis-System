@@ -129,7 +129,7 @@ if __name__ == "__main__":
     console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
     camera_frame.grid(row=1, column=1,rowspan=2, padx=5, pady=5,sticky="nsew")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
-    procedure_builder_frame.grid(row=2, column=0, columnspan=2, sticky="nsew")
+    procedure_builder_frame.grid(row=0, column=2, rowspan=3, sticky="nsew")
     
     # run the gui
     app.mainloop()
