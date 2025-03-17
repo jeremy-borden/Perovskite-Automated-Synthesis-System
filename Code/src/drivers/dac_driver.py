@@ -27,11 +27,16 @@ import adafruit_mcp4725
 class DAC():
     def __init__(self):
         i2c = busio.I2C(board.SCL, board.SDA)
-        self.dac = adafruit_mcp4725.MCP4725(i2c)
-    
+        try:
+            self.dac = adafruit_mcp4725.MCP4725(i2c)
+        except ValueError as e:
+            self.dac = None
     
     def set_value(self, value: float):
         """Set the voltage of the DAC. Values are clamped between 0 (min) and 1 (max)"""
+        if self.dac is None:
+            return
+        
         if level < 0:
             level = 0
         elif level > 1:
