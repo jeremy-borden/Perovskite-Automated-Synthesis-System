@@ -18,7 +18,7 @@ class Hotplate(threading.Thread):
         self.dac = dac
         self.adc = adc
         
-        self.current_temperature_c = 0
+        self._current_temperature_c = 0
         self.target_temperature_c = 0
         self.logger = logging.getLogger("Main Logger")
     def set_temperature(self, temperature_c: int):
@@ -30,10 +30,10 @@ class Hotplate(threading.Thread):
         self.dac.set_value(level)
         
     def get_temperature(self):
-        return self.current_temperature_c
+        return self._current_temperature_c
             
     def run(self):
         """Continuously read from the ADC to update temperature"""
         while True:
-            self.current_temperature_c = self.adc.get_temperature()
+            self._current_temperature_c = self.adc.get_temperature()
             sleep(1)

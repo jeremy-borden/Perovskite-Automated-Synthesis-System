@@ -38,8 +38,6 @@ class DAC():
             self.logger.error(f"Could not connect to DAC: {e}")
             self.dac = None
 
-       
-        
     def set_value(self, value: float):
         """Set the voltage of the DAC. Values are clamped between 0 (min) and 1 (max)"""
         if self.dac is None:
