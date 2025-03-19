@@ -3,7 +3,7 @@ import smbus2
 
 class DAC():
     def __init__(self, resolution_bits: int = 12):
-        self.bus = SMBus(1)
+        self.bus = smbus2.SMBus(1)
         self.address = 0x60
         self.resolution_bits = resolution_bits
         
