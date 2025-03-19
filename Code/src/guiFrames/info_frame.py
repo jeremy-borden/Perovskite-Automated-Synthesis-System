@@ -87,5 +87,4 @@ class InfoFrame(ctk.CTkFrame):
             text=f"Vial | {vial}")
 
         self.after(1000, self.update_information)
-        self.logger.debug("updated")
         
