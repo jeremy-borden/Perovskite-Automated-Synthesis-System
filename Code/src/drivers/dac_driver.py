@@ -1,5 +1,4 @@
 import logging
-from smbus2 import SMBus
 
 # class DAC():
 #     def __init__(self, address, resolution_bits: int = 12):
@@ -39,7 +38,7 @@ class DAC():
         """Set the voltage of the DAC. Values are clamped between 0 (min) and 1 (max)"""
         if self.dac is None:
             return
-        
+        self.logger.debug("hi")
         if level < 0:
             level = 0
         elif level > 1:

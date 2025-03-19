@@ -120,6 +120,7 @@ class Dispatcher():
     
     #  --------- HOTPLATE MOVES --------
     def set_temperature(self, temperature_c: int):
+        self.logger.debug("hi")
         self.hotplate.set_temperature(temperature_c)
     
     def wait_for_temperature(self, target_temperature: int, threshold: int):

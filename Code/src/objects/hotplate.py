@@ -1,3 +1,4 @@
+import logging
 import threading
 
 import os
@@ -19,7 +20,7 @@ class Hotplate(threading.Thread):
         
         self.current_temperature_c = 0
         self.target_temperature_c = 0
-        
+        self.logger = logging.getLogger("Main Logger")
     def set_temperature(self, temperature_c: int):
         if temperature_c > self.MAX_TEMPERATURE_C:
             return
@@ -27,7 +28,7 @@ class Hotplate(threading.Thread):
         level = temperature_c/self.MAX_TEMPERATURE_C
         self.target_temperature_c = temperature_c
         self.dac.set_value(level)
-        
+        self.logger.debug("hi")
     def get_temperature(self):
         return self.current_temperature_c
             
