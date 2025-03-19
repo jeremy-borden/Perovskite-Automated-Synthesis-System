@@ -3,6 +3,7 @@ import smbus2
 
 class DAC():
     def __init__(self, resolution_bits: int = 12):
+        self.logger = logging.getLogger("Main Logger")
         self.bus = smbus2.SMBus(1)
         self.address = 0x60
         self.resolution_bits = resolution_bits
@@ -15,7 +16,7 @@ class DAC():
             level = 1
         
         data = int(level * (pow(2, self.resolution_bits) - 1))
-        
+        self.logger.debug(f"data: {data}")
         # somehow this works (up to 200C) and i have no idea why
         high_byte = (data >> 8) & 0x0F  # Upper 4 bits
         low_byte = data & 0xFF  # Lower 8 bits
