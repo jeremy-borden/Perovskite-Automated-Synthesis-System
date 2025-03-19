@@ -22,30 +22,30 @@ class DAC():
         self.bus.write_i2c_block_data(self.address, high_byte, [low_byte])
 
 # adafruit library version
-import board
-import busio
-import adafruit_mcp4725
-class DAC():
-    def __init__(self):
-        self.logger = logging.getLogger("Main Logger")
-        i2c = busio.I2C(board.SCL, board.SDA)
-        try:
-            self.dac = adafruit_mcp4725.MCP4725(i2c)
-        except ValueError as e:
-            self.logger.error(f"Could not connect to DAC: {e}")
-            self.dac = None
+# import board
+# import busio
+# import adafruit_mcp4725
+# class DAC():
+#     def __init__(self):
+#         self.logger = logging.getLogger("Main Logger")
+#         i2c = busio.I2C(board.SCL, board.SDA)
+#         try:
+#             self.dac = adafruit_mcp4725.MCP4725(i2c)
+#         except ValueError as e:
+#             self.logger.error(f"Could not connect to DAC: {e}")
+#             self.dac = None
 
        
         
-    def set_value(self, value: float):
-        """Set the voltage of the DAC. Values are clamped between 0 (min) and 1 (max)"""
-        if self.dac is None:
-            return
-        self.logger.debug("hi")
-        if level < 0:
-            level = 0
-        elif level > 1:
-            level = 1
-        self.logger.debug(value)
-        self.dac.normalized_value = value
+#     def set_value(self, value: float):
+#         """Set the voltage of the DAC. Values are clamped between 0 (min) and 1 (max)"""
+#         if self.dac is None:
+#             return
+#         self.logger.debug("hi")
+#         if level < 0:
+#             level = 0
+#         elif level > 1:
+#             level = 1
+#         self.logger.debug(value)
+#         self.dac.normalized_value = value
 
