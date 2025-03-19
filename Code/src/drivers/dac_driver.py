@@ -26,14 +26,15 @@ import busio
 import adafruit_mcp4725
 class DAC():
     def __init__(self):
+        self.logger = logging.getLogger("Main Logger")
         i2c = busio.I2C(board.SCL, board.SDA)
         try:
-            self.dac = adafruit_mcp4725.MCP4725(i2c)
+            self.dac = adafruit_mcp4725.MCP4725(i2c, 0x62)
         except ValueError as e:
             self.logger.error(f"Could not connect to DAC: {e}")
             self.dac = None
 
-        self.logger = logging.getLogger("Main Logger")
+       
         
     def set_value(self, value: float):
         """Set the voltage of the DAC. Values are clamped between 0 (min) and 1 (max)"""
