@@ -27,6 +27,7 @@ import logging
 import board
 import busio
 import adafruit_mcp4725
+
 class DAC():
     def __init__(self):
         self.logger = logging.getLogger("Main Logger")
@@ -43,11 +44,13 @@ class DAC():
         """Set the voltage of the DAC. Values are clamped between 0 (min) and 1 (max)"""
         if self.dac is None:
             return
-        self.logger.debug("hi")
+        
         if value < 0:
             value = 0
         elif value > 1:
             value = 1
+        self.logger.debug(f"value is: {self.dac.raw_value}")
         self.logger.debug(value)
         self.dac.normalized_value = value
+        
 
