@@ -28,7 +28,7 @@ class Hotplate(threading.Thread):
         level = temperature_c/self.MAX_TEMPERATURE_C
         self.target_temperature_c = temperature_c
         self.dac.set_value(level)
-        self.logger.debug("hi")
+        
     def get_temperature(self):
         return self.current_temperature_c
             

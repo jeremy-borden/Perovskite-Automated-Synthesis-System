@@ -13,6 +13,7 @@ class ADC():
             cs = digitalio.DigitalInOut(board.D8)
             cs.direction = digitalio.Direction.OUTPUT
             self.adc = adafruit_max31856.MAX31856(spi,cs, ThermocoupleType.K)
+            self.adc.temperature_thresholds = (-1.5, 30.8)
             
         except Exception as e:
             self.logger.error("Failed to connect to ADC")
