@@ -33,7 +33,7 @@ class ADC():
         #t = self.adc.unpack_temperature()
         #return t
         try:
-             temp = self.adc.temperature
+             temp = self.adc.unpack_temperature()
              return temp
         except Exception as e:
             self.logger.error(f"Failed to read temperature: {e}")
