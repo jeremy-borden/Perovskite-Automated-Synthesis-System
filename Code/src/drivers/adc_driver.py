@@ -22,7 +22,7 @@ class ADC():
             return
         
         for k in self.adc.fault:
-            self.logger.debug(f"{k}:")
+            self.logger.debug(f"{k}: {self.adc.fault[k]}")
         
         self.adc.initiate_one_shot_measurement()
         while(self.adc.oneshot_pending):
