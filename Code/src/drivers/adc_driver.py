@@ -24,5 +24,5 @@ class ADC():
         while(self.adc.oneshot_pending):
             pass
         t = self.adc.unpack_temperature()
-        
+        self.logger.debug(f"Temp: {t}")
         return t
