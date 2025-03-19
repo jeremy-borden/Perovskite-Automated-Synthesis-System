@@ -21,7 +21,7 @@ class ADC():
         if self.adc is None:
             return
         
-        for k,v in self.adc.fault:
+        for k in self.adc.fault:
             self.logger.debug(f"{k}:{v}")
         
         self.adc.initiate_one_shot_measurement()
