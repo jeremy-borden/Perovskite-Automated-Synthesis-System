@@ -23,6 +23,7 @@
 #         self.bus.write_i2c_block_data(self.address, high_byte, [low_byte])
 
 # adafruit library version
+import logging
 import board
 import busio
 import adafruit_mcp4725
