@@ -30,6 +30,7 @@ class DAC():
         try:
             self.dac = adafruit_mcp4725.MCP4725(i2c)
         except ValueError as e:
+            self.logger.error(f"Could not connect to DAC: {e}")
             self.dac = None
 
         self.logger = logging.getLogger("Main Logger")
