@@ -1,3 +1,4 @@
+import logging
 from smbus2 import SMBus
 
 # class DAC():
@@ -31,7 +32,9 @@ class DAC():
             self.dac = adafruit_mcp4725.MCP4725(i2c)
         except ValueError as e:
             self.dac = None
-    
+
+        self.logger = logging.getLogger("Main Logger")
+        
     def set_value(self, value: float):
         """Set the voltage of the DAC. Values are clamped between 0 (min) and 1 (max)"""
         if self.dac is None:
@@ -41,6 +44,6 @@ class DAC():
             level = 0
         elif level > 1:
             level = 1
-        
+        self.logger.debug(value)
         self.dac.normalized_value = value
 
