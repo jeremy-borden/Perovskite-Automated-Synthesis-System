@@ -20,12 +20,15 @@ class ADC():
             self.logger.error("Failed to connect to ADC")
             self.adc = None
     
-    def _set_continuous_mode(self)  
+    def _set_continuous_mode(self):
         try:
             cr0 = self.adc._read_u8(0x00)
             cr0 |= 0x80
             self.adc._write_u8(0x00, cr0)
             self.logger.debug("ADC set to continuous mode (CMODE=1)")  
+        except Exception as e:
+            self.logger.error(e)
+            
     def get_temperature(self):
         
         if self.adc is None:
@@ -40,9 +43,13 @@ class ADC():
             #pass
         #t = self.adc.unpack_temperature()
         
-        # try:
-        #     temp =
-        while(self.adc.conversion_mode_pending):
-            pass
-        t = self.adc.unpack_temperature()
-        return t
+        try:
+             temp = self.adc.temperature
+             return temp
+        except Exception as e:
+            self.logger.error(f"Failed to read temperature: {e}")
+            return None
+        #while(self.adc.conversion_mode_pending):
+            #pass
+        #t = self.adc.unpack_temperature()
+        #return t
