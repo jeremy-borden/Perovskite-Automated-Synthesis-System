@@ -44,10 +44,10 @@ class DAC():
         if self.dac is None:
             return
         self.logger.debug("hi")
-        if level < 0:
-            level = 0
-        elif level > 1:
-            level = 1
+        if value < 0:
+            value = 0
+        elif value > 1:
+            value = 1
         self.logger.debug(value)
         self.dac.normalized_value = value
 
