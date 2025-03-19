@@ -9,7 +9,7 @@ class ADC():
         self.logger = logging.getLogger("Main Logger")
         try:
             spi = board.SPI()
-            cs = digitalio.DigitalInOut(board.D5)
+            cs = digitalio.DigitalInOut(board.D8)
             cs.direction = digitalio.Direction.OUTPUT
             self.adc = adafruit_max31856.MAX31856(spi,cs)
         except Exception as e:
