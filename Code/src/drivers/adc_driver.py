@@ -1,6 +1,7 @@
 import board
 import digitalio
 import adafruit_max31856
+from adafruit_max31856 import ThermocoupleType
 import logging
 
 
@@ -11,7 +12,7 @@ class ADC():
             spi = board.SPI()
             cs = digitalio.DigitalInOut(board.D5)
             #cs.direction = digitalio.Direction.OUTPUT
-            self.adc = adafruit_max31856.MAX31856(spi,cs)
+            self.adc = adafruit_max31856.MAX31856(spi,cs, ThermocoupleType.K)
         except Exception as e:
             self.logger.error("Failed to connect to ADC")
             self.adc = None
