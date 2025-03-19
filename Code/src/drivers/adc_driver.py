@@ -17,7 +17,12 @@ class ADC():
             self.adc = None
         
     def get_temperature(self):
+        
         if self.adc is None:
             return
+        self.adc.initiate_one_shot_measurement()
+        while(self.adc.oneshot_pending):
+            pass
+        t = self.adc.unpack_temperature()
         
-        return self.adc.temperature
+        return t
