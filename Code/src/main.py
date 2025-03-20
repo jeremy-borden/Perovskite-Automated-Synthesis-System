@@ -1,64 +1,99 @@
 import logging
 from tkinter import PhotoImage
 import customtkinter as ctk
-from PIL import Image
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
-from time import sleep
-from objects.infeed import Infeed
-from objects.hotplate import Hotplate
-from objects.gripper import Gripper
 
-from guiFrames.console_frame import ConsoleFrame
-from guiFrames.procedure_frame import ProcedureFrame
-from guiFrames.info_frame import InfoFrame
-from guiFrames.camera_frame import CameraFrame
-from guiFrames.conection_frame import ConnectionFrame
-
+# -- DRIVER IMPORT --
 from drivers.controlboard_driver import ControlBoard
 from drivers.spincoater_driver import SpinCoater
 from drivers.dac_driver import DAC
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 from drivers.spectrometer_driver import Spectrometer
+from drivers.adc_driver import ADC
+
+# -- OBJECT IMPORT --
+from guiFrames import procedure_builder_frame
+from objects.vial_carousel import VialCarousel
+from objects.infeed import Infeed
+from objects.hotplate import Hotplate
+from objects.gripper import Gripper
+from objects.pippete import Pipette, PipetteHandler
+from objects.toolhead import Toolhead
+# -- GUI IMPORT --
+from guiFrames.console_frame import ConsoleFrame
+from guiFrames.procedure_frame import ProcedureFrame
+from guiFrames.info_frame import InfoFrame
+from guiFrames.camera_frame import CameraFrame
+from guiFrames.conection_frame import ConnectionFrame
+from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
+
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
 
 if __name__ == "__main__":
-    # --------INITIALIZATION--------
+    #enable software pwm
+    Device.pin_factory = PiGPIOFactory()
+    
+    # -- LOGGING --
     logger = logging.getLogger("Main Logger")
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     logger.addHandler(console_handler)
     logger.setLevel(logging.DEBUG)
     
-    #enable software pwm
-    Device.pin_factory = PiGPIOFactory()
-    
-    # initialize peripherals
+    # -- CONTROL BOARD --
     control_board = ControlBoard(com_port="/dev/ttyACM0",logger=logger)
-    spincoater= SpinCoater(com_port="/dev/ttyACM1",logger=logger)
-    spectrometer = Spectrometer(com_port="/dev/ttyACM0", logger=logger)
+    
+    # -- TOOLHEAD --
+    toolhead = Toolhead(control_board=control_board)
+    
+    # -- SPIN COATER --
+    spin_coater= SpinCoater(com_port="/dev/ttyACM1",logger=logger)
+
+    # -- CAMERA --
     camera = Camera(logger=logger)
 
-    # initialize objects
+    # -- GRIPPER --
+    arm_servo = AngularServo(pin=17, min_angle=0, max_angle=270,)
+    finger_servo = AngularServo(pin=18, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+    gripper = Gripper(arm_servo=arm_servo, finger_servo=finger_servo)
     
-    gripper = Gripper(arm_servo=AngularServo(pin=17, min_angle=0, max_angle=270, ),
-                      finger_servo=AngularServo(pin=18, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000))
+    # -- PIPETTE HANDLER --
+    tip_eject_servo = AngularServo(pin=27, min_angle=0, max_angle=270,)
+    grabber_servo = AngularServo(pin=22, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+    pipettes = [Pipette(200, 35, 20, 15, None),
+                Pipette(1000, 35, 20, 15, None)]
+    pipette_handler = PipetteHandler(logger=logger, control_board=control_board,
+                                     tip_eject_servo=tip_eject_servo, grabber_servo=grabber_servo,
+                                     pipettes=pipettes)
     
-    dac = DAC(0x60)
-    hotplate = Hotplate(max_temperature=540, dac=dac)
-    infeed = Infeed(servo=AngularServo(pin=18, min_angle=0, max_angle=180,))
+    # -- HOTPLATE --
+    dac = DAC()
+    adc = ADC()
+    hotplate = Hotplate(dac=dac, adc=adc)
+    hotplate.start()
     
-    dispatcher = Dispatcher(logger=logger,
-                            control_board=control_board,
-                            spincoater=spincoater,
+    # -- SPECTROMETER + INFEED --
+    spectrometer = Spectrometer(com_port="/dev/ttyACM0")
+    infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,)
+    infeed = Infeed(infeed_servo)
+    
+    # -- VIAL CAROUSEL
+    lid_servo = AngularServo(pin=24, min_angle=0, max_angle=270,)
+    vial_carousel = VialCarousel(control_board, lid_servo)
+    
+    dispatcher = Dispatcher(toolhead=toolhead,
+                            spin_coater=spin_coater,
                             hotplate=hotplate,
                             camera=camera,
                             gripper=gripper,
-                            infeed=infeed)
-    
+                            infeed=infeed,
+                            spectrometer=spectrometer,
+                            vial_carousel=vial_carousel,
+                            pippete_handler=pipette_handler)
     
     procedure_handler = ProcedureHandler(logger=logger,dispatcher=dispatcher)
     
@@ -70,54 +105,37 @@ if __name__ == "__main__":
     else:
         logger.warning("Default procedure not found")
 
-
-
-    # --------GUI--------
+    # -- GUI --
     app = ctk.CTk()
     ctk.set_appearance_mode("dark")
-    app.geometry("1000x1000")
+    app.geometry("1200x1000")
     app.title("ECD 515 - Perovskite Automated Synthesis System")
+    
+    # trying to make an icon 
     icon = PhotoImage(file="guiImages/logo.png")
-    app.wm_iconphoto(False, icon)
+    app.wm_iconphoto(True, icon)
 
+    # creating frames
     procedure_frame = ProcedureFrame(app, procedure_handler)
-    procedure_frame.grid(
-        row=0, column=0,
-        padx=5, pady=5,sticky="nsew")
-
-    console_frame = ConsoleFrame(app, logger)
-    console_frame.grid(
-        row=1, column=0,
-        padx=5, pady=5,sticky="nsew")
-
-    connection_frame = ConnectionFrame(master=app,
-                                       control_board=control_board,
-                                       spin_coater=spincoater,
-                                       camera=camera,
-                                       spectrometer=spectrometer)
-    connection_frame.grid(
-        row=0, column=1,
-        padx=5, pady=5, sticky="nsew")
-
-    camera_frame = CameraFrame(master=app, camera=camera)
-    camera_frame.grid(
-        row=1, column=1,rowspan=2,
-        padx=5, pady=5,sticky="nsew")
-
-    info_frame = InfoFrame(app, control_board)
-    info_frame.grid(
-        row=2, column=0,
-        padx=5, pady=5, sticky="nsew")
-
+    console_frame = ConsoleFrame(app)
+    connection_frame = ConnectionFrame(app, control_board,spin_coater,camera,spectrometer)
+    camera_frame = CameraFrame(app, camera)
+    info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
+    procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict)
+    
+    # putting the frames on the gui
+    procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
+    connection_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+    console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
+    camera_frame.grid(row=1, column=1,rowspan=2, padx=5, pady=5,sticky="nsew")
+    info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+    procedure_builder_frame.grid(row=0, column=2, rowspan=3, sticky="nsew")
+    
     # run the gui
     app.mainloop()
     
-    # --------CLEANUP--------
-    logger.removeHandler(console_frame.console_handler)
-    
+    # -- CLEANUP --
     control_board.disconnect()
-    spincoater.disconnect()
+    spectrometer.disconnect()
+    spin_coater.disconnect()
     camera.disconnect()
-    
-    
-    

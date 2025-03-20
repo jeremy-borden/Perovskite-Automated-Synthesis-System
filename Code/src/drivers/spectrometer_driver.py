@@ -21,8 +21,8 @@ logging.basicConfig(level=logging.INFO)
 class Spectrometer:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, com_port: str, logger: logging.Logger, integration_time=1000):
-        self.logger = logger
+    def __init__(self, com_port: str, integration_time=1000):
+        self.logger = logging.getLogger("Main Logger")
         self.com_port = com_port
         self.integration_time = integration_time
         self.serial = None
@@ -76,6 +76,8 @@ class Spectrometer:
         self.measurements[measurement_type] = intensities
         self.logger.info(f"Read {len(intensities)} intensity values for {measurement_type}.")
 
+#TODO please move all methods that dont specifically implement spectrometer 
+# commands or otherwise can be decoupled to another file, perhaps like image processor
     def plot_spectra(self):
         """Plot the collected spectra"""
         plt.figure(figsize=(8, 5))
@@ -107,6 +109,7 @@ class Spectrometer:
         df.to_csv(filename, index=False)
         self.logger.info(f"All spectra data saved to {filename}")
 
+# TODO move this one to moves
 # Automated Measurement Sequence
 def automated_measurement():
     """Runs a full measurement cycle (Background, Reference, Sample) and saves the data"""

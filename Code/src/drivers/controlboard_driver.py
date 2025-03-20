@@ -83,37 +83,27 @@ class ControlBoard():
         self.reader_thread.write(message.encode("utf-8"))
         self.logger.debug(f"Sending message: {message}")
         
-    def move_axes(self, axes: str, distances: float, speeds: int, relative: bool = False):
+    def move_axis(self, axis: str, distance_mm: float, feedrate_mm_per_minute: int = None, relative: bool = False):
         """ Takes in a list of axes, distances and speeds to move the gantry"""
-        
-        
-        if not isinstance(axes, list):
-            axes = [axes]
-        if not isinstance(distances, list):
-            distances = [distances]
-        if not isinstance(speeds, list):
-            speeds = [speeds]
-            
-        if len(axes) != len(distances) or len(axes) != len(speeds):
-            raise "Inputs must have the same length"
-            
+        if axis not in self.positions.keys():
+            raise f"Invalid axis {axis}"
+  
         if relative:
             self.send_message("G90")
         else:
             self.send_message("G91")
-            
-        for axis, distance, speed in zip(axes, distances, speeds):
-            if axis not in self.positions.keys():
-                raise f"Invalid axis {axis}"
-            
-            self.send_message(f"G0 {axis}{distance} F{speed}")
-            
+        
+        if feedrate_mm_per_minute:
+            self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
+        else:
+            self.send_message(f"G0 {axis}{distance_mm}")
 
-    def finish_move(self):
+    def finish_moves(self):
         """Wait for the move to finish"""
         if not self.is_connected():
             self.logger.error("Serial is not connected")
             return
+        
         self.send_message("M400")
         self.received_ok.clear()
         self.logger.debug("Waiting for move to finish")

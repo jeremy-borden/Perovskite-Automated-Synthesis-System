@@ -1,6 +1,6 @@
 import threading
 import logging
-
+from time import sleep
 import cv2
 import customtkinter as ctk
 
@@ -50,6 +50,7 @@ class Camera(threading.Thread):
             self.release.clear()
    
             while self.is_connected():
+                sleep(0.0)
                 try:
                     ret, frame = self.video_capture.read()
                     if ret is True:

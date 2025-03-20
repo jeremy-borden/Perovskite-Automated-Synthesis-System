@@ -6,14 +6,11 @@ from queue import Queue
 class ConsoleFrame(ctk.CTkFrame):
     """ GUI Frame to display the console log """
     
-    def __init__(self, master, logger: logging.Logger):
-        super().__init__(
-            master=master,
-            border_color="#1f6aa5",
-            border_width=2)
+    def __init__(self, master):
+        super().__init__(master=master,border_color="#1f6aa5",border_width=2)
         
-        self.logger = logger
-        self.msg_q = Queue()
+        self.logger = logging.getLogger("Main Logger")
+        self.log_queue = Queue()
         self.console_handler = ConsoleLogHandler(self)
         self.console_handler.setFormatter(logging.Formatter('%(levelname)s\t%(asctime)s: %(message)s'))
         self.logger.addHandler(self.console_handler)
@@ -52,13 +49,17 @@ class ConsoleFrame(ctk.CTkFrame):
         self.console.tag_config("ERROR", foreground="red")
         
         self._update()
-        
+    
+    def destroy(self):
+        """ Override the destroy method to perform cleanup tasks """
+        self.logger.removeHandler(self.console_handler)
+        super().destroy()
         
     def _update(self):
-        while not self.msg_q.empty():
-            msg = self.msg_q.get()
+        while not self.log_queue.empty():
+            msg = self.log_queue.get()
             self.write_to_console(msg)
-            self.msg_q.task_done()
+            self.log_queue.task_done()
             self.console.see("end")
             
             
@@ -97,5 +98,5 @@ class ConsoleLogHandler(logging.StreamHandler):
         self.console = console
 
     def emit(self, record):
-        self.console.msg_q.put(self.format(record))
+        self.console.log_queue.put(self.format(record))
     
