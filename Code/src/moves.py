@@ -55,6 +55,9 @@ class Dispatcher():
             "close_infeed": self.close_infeed,
             
             "extract": self.extract,
+
+            "measure_spectrum": self.measure_spectrum,
+            "automated_measurement": self.automated_measurement,
         }
         
         
@@ -117,10 +120,11 @@ class Dispatcher():
     
     #  --------- HOTPLATE MOVES --------
     def set_temperature(self, temperature_c: int):
+        self.logger.debug("hi")
         self.hotplate.set_temperature(temperature_c)
     
     def wait_for_temperature(self, target_temperature: int, threshold: int):
-        while abs(self.hotplate.current_temperature_c - target_temperature) > threshold:
+        while abs(self.hotplate._current_temperature_c - target_temperature) > threshold:
             sleep(1)
 
     # --------- TOOLHEAD MOVES --------
@@ -226,7 +230,53 @@ class Dispatcher():
         
     def get_pippete(self, pippete_num: int):
         self.toolhead.set_position(900, 100, 50)
+
+    # -------- SPECTROMETER MOVES --------
+
+    def measure_spectrum(self, measurement_type: str):
+        """
+        Captures a spectrum using the spectrometer and stores the data.
         
+        Args:
+            measurement_type (str): Label for the measurement (e.g., 'Background', 'Reference', 'Sample')
+        """
+        if not self.spectrometer:
+            self.logger.error("Spectrometer is not initialized.")
+            return
+
+        self.logger.info(f"Starting spectrometer measurement: {measurement_type}")
+
+        # Request wavelengths if not already retrieved
+        if not hasattr(self, "wavelengths") or not self.wavelengths:
+            self.logger.info("Retrieving wavelength data...")
+            self.spectrometer.send_command("<wavs?>")
+            self.wavelengths = self.spectrometer.read_wavelengths()
+
+        # Capture intensity data
+        self.logger.info("Capturing spectrum intensity data...")
+        self.spectrometer.send_command("<read:1>")
+        intensities = self.spectrometer.read_spectrum()
+
+        # Store the measurement
+        if not hasattr(self, "measurements"):
+            self.measurements = {}
+
+        self.measurements[measurement_type] = {
+            "wavelengths": self.wavelengths,
+            "intensities": intensities
+        }
+
+        self.logger.info(f"Measurement '{measurement_type}' captured successfully.")
+
+    def automated_measurement(self):
+        """Runs the full spectrometer measurement process."""
+        measurement_types = ["Background", "Reference", "Sample"]
+        
+        for measurement in measurement_types:
+            self.measure_spectrum(measurement)
+
+        self.logger.info("All spectrometer measurements completed successfully.")
+    
     # -------- VIAL CAROUSEL MOVES --------
     def set_vial(self, vial_num):
         self.vial_carousel.set_vial(vial_num)

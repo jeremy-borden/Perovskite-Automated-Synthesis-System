@@ -1,3 +1,4 @@
+import logging
 import customtkinter as ctk
 from queue import Queue
 import os
@@ -17,7 +18,7 @@ class InfoFrame(ctk.CTkFrame):
             master=master,
             border_color="#1f6aa5",
             border_width=2)
-
+        self.logger = logging.getLogger("Main Logger")
         self.control_board = control_board
         self.hotplate = hotplate
         self.pipette_handler = pipette_handler
@@ -86,3 +87,4 @@ class InfoFrame(ctk.CTkFrame):
             text=f"Vial | {vial}")
 
         self.after(1000, self.update_information)
+        
