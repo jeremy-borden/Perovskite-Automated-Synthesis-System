@@ -31,15 +31,23 @@ class ADC():
             if self.adc.fault[k] is True:
                 #self.logger.debug(f"{k}: {self.adc.fault[k]}")
                 print(f"Thermocouple fault detected: {k} -> {self.adc.fault[k]}")
+                
+        self.adc.auto_convert = False  # Disable auto-conversion
+        self.adc.start_one_shot_measurement()  # Force a new measurement
+        sleep(0.1)  # Wait for ADC to complete measurement
+        temp = self.adc.unpack_temperature()
+    
+        print(f"Fresh Read: {temp} C")  # Debug output
+        return temp
         
-        self.adc.initiate_one_shot_measurement()
-        while(self.adc.oneshot_pending):
-            pass
-        #t = self.adc.unpack_temperature()
-        #return t
-        try:
-             temp = self.adc.unpack_temperature()
-             return temp
-        except Exception as e:
-            self.logger.error(f"Failed to read temperature: {e}")
-            return None
+        #self.adc.initiate_one_shot_measurement()
+       # while(self.adc.oneshot_pending):
+            #pass
+        ##t = self.adc.unpack_temperature()
+        ##return t
+        #try:
+             #temp = self.adc.unpack_temperature()
+             #return temp
+       # except Exception as e:
+            #self.logger.error(f"Failed to read temperature: {e}")
+            #return None
