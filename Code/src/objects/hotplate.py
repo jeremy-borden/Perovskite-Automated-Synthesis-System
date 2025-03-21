@@ -36,4 +36,5 @@ class Hotplate(threading.Thread):
         """Continuously read from the ADC to update temperature"""
         while True:
             self._current_temperature_c = self.adc.get_temperature()
+            print(f"Temperature Read: {self.current_temperature_c} C")
             sleep(1)
