@@ -1,4 +1,5 @@
 import board
+import time
 import digitalio
 import adafruit_max31856
 from adafruit_max31856 import ThermocoupleType
@@ -34,7 +35,7 @@ class ADC():
                 
         self.adc.auto_convert = False  # Disable auto-conversion
         self.adc.initiate_one_shot_measurement()  # Force a new measurement
-        sleep(0.1)  # Wait for ADC to complete measurement
+        time.sleep(0.1)  # Wait for ADC to complete measurement
         temp = self.adc.unpack_temperature()
     
         print(f"Fresh Read: {temp} C")  # Debug output
