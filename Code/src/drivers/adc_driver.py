@@ -33,7 +33,7 @@ class ADC():
                 print(f"Thermocouple fault detected: {k} -> {self.adc.fault[k]}")
                 
         self.adc.auto_convert = False  # Disable auto-conversion
-        self.adc.start_one_shot_measurement()  # Force a new measurement
+        self.adc.initiate_one_shot_measurement()  # Force a new measurement
         sleep(0.1)  # Wait for ADC to complete measurement
         temp = self.adc.unpack_temperature()
     
