@@ -26,7 +26,8 @@ class ADC():
         
         for k in self.adc.fault:
             if self.adc.fault[k] is True:
-                self.logger.debug(f"{k}: {self.adc.fault[k]}")
+                #self.logger.debug(f"{k}: {self.adc.fault[k]}")
+                print(f"Thermocouple fault detected: {k} -> {self.adc.fault[k]}")
         
         self.adc.initiate_one_shot_measurement()
         while(self.adc.oneshot_pending):
