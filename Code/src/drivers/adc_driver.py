@@ -21,9 +21,12 @@ class ADC():
             
     def get_temperature(self):
         
+        #if self.adc is None:
+            #return
         if self.adc is None:
-            return
-        
+            self.logger.error("ADC initialization failed!")
+            print("ERROR: ADC failed to initialize")    
+            
         for k in self.adc.fault:
             if self.adc.fault[k] is True:
                 #self.logger.debug(f"{k}: {self.adc.fault[k]}")
