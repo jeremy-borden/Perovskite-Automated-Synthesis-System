@@ -20,7 +20,7 @@ class ImageProcessor():
             return None
         
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        
+        gray_image = (255-gray_image)
         corners, ids, rejected = ImageProcessor.aruco_detector.detectMarkers(gray_image)
         
         if ids is None:                                 
@@ -47,7 +47,7 @@ class ImageProcessor():
         return angle
 
     def set_detector():
-        dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
+        dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
         parameters = cv2.aruco.DetectorParameters()
         ImageProcessor.aruco_detector = cv2.aruco.ArucoDetector(dictionary, parameters)
         
