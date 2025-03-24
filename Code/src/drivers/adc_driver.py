@@ -4,10 +4,28 @@ import digitalio
 import adafruit_max31856
 from adafruit_max31856 import ThermocoupleType
 import logging
+import smbus
 
+I2C_ADDR = 0x08  # Arduino's I2C address
 
 class ADC():
     def __init__(self):
+        self.logger = logging.getLogger("Main Logger")
+        self.bus = smbus.SMBus(1)  # Use I2C bus 1 for Raspberry Pi
+        self.temperature = None
+
+    def get_temperature(self):
+        try:
+            # Request 2 bytes from Arduino
+            data = self.bus.read_i2c_block_data(I2C_ADDR, 0, 2)
+            temp = (data[0] << 8) | data[1]  # Convert bytes to integer
+            self.temperature = temp / 100.0  # Convert back to float
+            return self.temperature
+        except Exception as e:
+            self.logger.error(f"I2C Read Error: {e}")
+            return None
+            
+    '''def __init__(self):
         self.logger = logging.getLogger("Main Logger")
         try:
             spi = board.SPI()
@@ -53,3 +71,5 @@ class ADC():
        # except Exception as e:
             #self.logger.error(f"Failed to read temperature: {e}")
             #return None
+'''
+    
