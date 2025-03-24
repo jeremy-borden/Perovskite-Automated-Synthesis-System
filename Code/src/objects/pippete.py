@@ -61,10 +61,6 @@ class PipetteHandler():
         
     #     self.control_board.move_axis("B",  volume_ul*ul_per_mm, feedrate)
         
-
-        
-        
-        
     def flush_pippete(self):
         """Presses the pippete beyond its normal limit to ensure all fluid is purged.
             The actuator then returns to the bottom of the plunger"""
@@ -107,6 +103,14 @@ class PipetteHandler():
     def detatch_servos(self):
         self.tip_eject_servo.detach()
         self.tip_eject_servo.detach()
+        
+        
+        
+class TipHolder():
+    def __init__(self):
+        self.rows = 5
+        self.columns = 10
+        
 
         
 if __name__ == "__main__":
