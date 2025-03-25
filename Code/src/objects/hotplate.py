@@ -18,8 +18,8 @@ class Hotplate(threading.Thread):
         self.dac = dac
         self.adc = adc
         
-        self._current_temperature_c = 20
-        self.target_temperature_c = 20
+        self._current_temperature_c = 0
+        self.target_temperature_c = 0
         self.logger = logging.getLogger("Main Logger")
     def set_temperature(self, temperature_c: int):
         if temperature_c > self.MAX_TEMPERATURE_C:
