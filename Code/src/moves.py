@@ -230,6 +230,9 @@ class Dispatcher():
         
     def get_pippete(self, pippete_num: int):
         self.toolhead.set_position(900, 100, 50)
+        
+    def eject_tip(self):
+        self.pippete_handler.eject_tip()
 
     # -------- SPECTROMETER MOVES --------
 
