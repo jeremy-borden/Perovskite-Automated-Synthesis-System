@@ -28,7 +28,7 @@ from guiFrames.info_frame import InfoFrame
 from guiFrames.camera_frame import CameraFrame
 from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
-#from guiFrames.spectrometer_frame import SpectrometerFrame
+from guiFrames.spectrometer_frame import SpectrometerFrame
 
 
 

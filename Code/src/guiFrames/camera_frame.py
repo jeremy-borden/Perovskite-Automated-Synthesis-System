@@ -8,7 +8,6 @@ import os
 pp=os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(pp)
 from src.drivers.camera_driver import Camera
-from src.drivers.spectrometer_driver import Spectrometer
 
 class CameraFrame(ctk.CTkFrame):
     def __init__(self, master, camera: Camera):
