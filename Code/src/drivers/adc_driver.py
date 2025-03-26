@@ -32,7 +32,7 @@ import busio
 import digitalio
 import adafruit_max31856
 
-class ADCDriver:
+class ADC():
     def __init__(self):
         """Initialize SPI connection to MAX31856"""
         self.spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
