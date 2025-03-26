@@ -1,3 +1,5 @@
 Procedure:
   - ["close_gripper"]
-  - ["wait",  2 ]
+  - ["wait",  1 ]
+  - ["open_gripper"]
+  - ["wait",  1 ]
