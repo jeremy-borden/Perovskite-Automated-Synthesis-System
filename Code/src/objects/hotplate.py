@@ -12,7 +12,7 @@ from drivers.dac_driver import DAC
 from time import sleep
 
 
-
+'''
 class Hotplate(threading.Thread):
     MAX_TEMPERATURE_C: int = 540
     
@@ -42,10 +42,17 @@ class Hotplate(threading.Thread):
             print(f"Temperature Read: {self._current_temperature_c} C")
             sleep(1)
             '''
-class Hotplate:
-    def __init__(self):
-        self.adc = ADCDriver()
-        self._current_temperature_c = 0.0
+class Hotplate(threading.Thread)
+    MAX_TEMPERATURE_C: int = 540
+    
+    def __init__(self, dac: DAC, adc: ADC):
+        super().__init__(name="Hotplate",daemon=True)
+        self.dac = dac
+        self.adc = adc
+        
+        self._current_temperature_c = 0
+        self.target_temperature_c = 0
+        self.logger = logging.getLogger("Main Logger")
 
     def get_temperature(self):
         return self._current_temperature_c
@@ -60,4 +67,4 @@ class Hotplate:
 if __name__ == "__main__":
     hotplate = Hotplate()
     hotplate.run()
-'''
+
