@@ -11,7 +11,7 @@ from drivers.adc_driver import ADC
 from drivers.dac_driver import DAC
 from time import sleep
 
-'''
+
 
 class Hotplate(threading.Thread):
     MAX_TEMPERATURE_C: int = 540
