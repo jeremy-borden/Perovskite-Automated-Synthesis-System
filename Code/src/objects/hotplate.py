@@ -42,7 +42,7 @@ class Hotplate(threading.Thread):
             print(f"Temperature Read: {self._current_temperature_c} C")
             sleep(1)
             '''
-class Hotplate(threading.Thread)
+class Hotplate(threading.Thread):
     MAX_TEMPERATURE_C: int = 540
     
     def __init__(self, dac: DAC, adc: ADC):
