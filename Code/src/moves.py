@@ -168,7 +168,7 @@ class Dispatcher():
         
             angle0 = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
             if angle0 is not None:
-                angle0 = abs(0-angle0) % 90
+                angle0 = angle0 % 90
             
             self.logger.info(f"Got Angle0: {angle0}")
             sleep(1)
@@ -176,13 +176,13 @@ class Dispatcher():
             frame = self.camera.get_frame()
             angle1 = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
             if angle1 is not None:
-                angle1 = abs(0-angle1) % 90 
+                angle1 = angle1 % 90 
             self.logger.info(f"Got Angle1: {angle1}")
             sleep(1)
             
         self.logger.info(int(angle0))
         
-        angle0 = (angle0 + 45)
+        angle0 = angle0 + 10
         self.gripper.set_arm_angle(int(angle0))
         
     def working_slide_to(self, location):
