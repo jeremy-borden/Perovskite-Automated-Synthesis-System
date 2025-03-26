@@ -60,4 +60,4 @@ class Hotplate:
 if __name__ == "__main__":
     hotplate = Hotplate()
     hotplate.run()
-
+'''
