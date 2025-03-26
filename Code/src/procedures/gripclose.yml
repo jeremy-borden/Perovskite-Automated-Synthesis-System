@@ -3,3 +3,5 @@ Procedure:
   - ["wait",  1 ]
   - ["open_gripper"]
   - ["wait",  1 ]
+  - ["close_gripper"]
+  - ["wait",  1 ]
