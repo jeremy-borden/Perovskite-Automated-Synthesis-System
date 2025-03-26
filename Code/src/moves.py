@@ -168,7 +168,7 @@ class Dispatcher():
         
             angle0 = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
             if angle0 is not None:
-                angle0 =(angle0 + 45) % 90
+                angle0 = -angle0 % 90
             
             self.logger.info(f"Got Angle0: {angle0}")
             sleep(1)
@@ -176,7 +176,7 @@ class Dispatcher():
             frame = self.camera.get_frame()
             angle1 = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
             if angle1 is not None:
-                angle1 = (angle1 + 45) % 90
+                angle1 = -angle1 % 90
             self.logger.info(f"Got Angle1: {angle1}")
             sleep(1)
             
