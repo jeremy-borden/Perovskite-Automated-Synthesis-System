@@ -1,3 +1,4 @@
+'''
 import board
 import time
 import digitalio
@@ -24,7 +25,34 @@ class ADC():
         except Exception as e:
             self.logger.error(f"I2C Read Error: {e}")
             return None
-            
+ '''   
+import time
+import board
+import busio
+import digitalio
+import adafruit_max31856
+
+class ADCDriver:
+    def __init__(self):
+        """Initialize SPI connection to MAX31856"""
+        self.spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+        self.cs = digitalio.DigitalInOut(board.D8)  # Chip Select (GPIO8 / CE0)
+        self.cs.direction = digitalio.Direction.OUTPUT
+
+        self.max31856 = adafruit_max31856.MAX31856(self.spi, self.cs)
+
+    def get_temperature(self):
+        """Read temperature from the MAX31856 ADC"""
+        return self.max31856.temperature
+
+if __name__ == "__main__":
+    adc = ADCDriver()
+    
+    while True:
+        temp = adc.get_temperature()
+        print(f"Temperature: {temp:.2f}°C")
+        time.sleep(1)
+
     '''def __init__(self):
         self.logger = logging.getLogger("Main Logger")
         try:

@@ -6,9 +6,12 @@ import sys
 pp=os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(pp)
 
+
 from drivers.adc_driver import ADC
 from drivers.dac_driver import DAC
 from time import sleep
+
+'''
 
 class Hotplate(threading.Thread):
     MAX_TEMPERATURE_C: int = 540
@@ -38,3 +41,23 @@ class Hotplate(threading.Thread):
             self._current_temperature_c = self.adc.get_temperature()
             print(f"Temperature Read: {self._current_temperature_c} C")
             sleep(1)
+            '''
+class Hotplate:
+    def __init__(self):
+        self.adc = ADCDriver()
+        self._current_temperature_c = 0.0
+
+    def get_temperature(self):
+        return self._current_temperature_c
+
+    def run(self):
+        """Continuously read from the ADC to update temperature"""
+        while True:
+            self._current_temperature_c = self.adc.get_temperature()
+            print(f"Temperature Read: {self._current_temperature_c:.2f} C")
+            time.sleep(1)
+
+if __name__ == "__main__":
+    hotplate = Hotplate()
+    hotplate.run()
+
