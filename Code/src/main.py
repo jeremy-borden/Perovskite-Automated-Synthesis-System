@@ -59,7 +59,7 @@ if __name__ == "__main__":
     camera = Camera(logger=logger)
 
     # -- GRIPPER --
-    arm_servo = AngularServo(pin=17, min_angle=0, max_angle=270, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+    arm_servo = AngularServo(pin=17, min_angle=0, max_angle=270, min_pulse_width=0.5/1000, max_pulse_width=2/1000)
     finger_servo = AngularServo(pin=18, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
     gripper = Gripper(arm_servo=arm_servo, finger_servo=finger_servo)
     
