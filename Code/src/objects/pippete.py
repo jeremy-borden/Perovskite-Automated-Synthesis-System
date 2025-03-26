@@ -90,7 +90,7 @@ class PipetteHandler():
         self.control_board.move_axis("B",  volume_ul*ul_per_mm, feedrate, True)
         
     def eject_tip(self):
-        self.tip_eject_servo.angle = 30
+        self.tip_eject_servo.angle = 60
         sleep(0.5)
         self.tip_eject_servo.angle = 0
          
