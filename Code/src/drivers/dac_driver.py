@@ -33,7 +33,7 @@ class DAC():
         self.logger = logging.getLogger("Main Logger")
         i2c = busio.I2C(board.SCL, board.SDA)
         try:
-            self.dac = adafruit_mcp4725.MCP4725(i2c, address=0x62)
+            self.dac = adafruit_mcp4725.MCP4725(i2c, address=0x60)
         except ValueError as e:
             self.logger.error(f"Could not connect to DAC: {e}")
             self.dac = None
