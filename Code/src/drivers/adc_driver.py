@@ -6,7 +6,7 @@ from adafruit_max31856 import ThermocoupleType
 import logging
 import smbus
 
-I2C_ADDR = 0x09  # Arduino's I2C address
+I2C_ADDR = 0x08  # Arduino's I2C address
 
 class ADC():
     def __init__(self):
