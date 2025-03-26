@@ -46,7 +46,7 @@ class ADC():
         return self.max31856.temperature
 
 if __name__ == "__main__":
-    adc = ADCDriver()
+    adc = ADC()
     
     while True:
         temp = adc.get_temperature()
