@@ -164,13 +164,20 @@ class Dispatcher():
         while(angle0 is None or angle1 is None) or abs(angle1-angle0) > 5:
             self.logger.debug("Getting first angle")
             frame = self.camera.get_frame()
-            angle0 = ImageProcessor.get_marker_angles(image=frame, marker_id=7) % 90
-            self.logger.info(f"Got Angle0: {int(angle0)}")
+            
+        
+            angle0 = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
+            if angle0 is not None:
+                angle0 = angle0 % 90
+            
+            self.logger.info(f"Got Angle0: {angle0}")
             sleep(1)
             self.logger.debug("Getting second angle")
             frame = self.camera.get_frame()
-            angle1 = ImageProcessor.get_marker_angles(image=frame, marker_id=7) % 90
-            self.logger.info(f"Got Angle1: {int(angle1)}")
+            angle1 = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
+            if angle1 is not None:
+                angle1 = angle1 % 90
+            self.logger.info(f"Got Angle1: {angle1}")
             sleep(1)
             
         self.logger.info(int(angle0))
