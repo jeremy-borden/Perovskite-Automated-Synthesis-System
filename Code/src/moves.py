@@ -55,6 +55,7 @@ class Dispatcher():
             "close_infeed": self.close_infeed,
             
             "extract": self.extract,
+            "eject_tip": self.eject_tip,
 
             "measure_spectrum": self.measure_spectrum,
             "automated_measurement": self.automated_measurement,
