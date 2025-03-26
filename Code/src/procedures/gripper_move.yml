@@ -5,6 +5,4 @@ Procedure:
   - ["wait",  1 ]
   - ["set_gripper_angle", 180]
   - ["wait",  1 ]
-  - ["set_gripper_angle", 270]
-  - ["wait",  1 ]
   - ["set_gripper_angle", 0]
