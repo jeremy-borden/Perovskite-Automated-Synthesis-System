@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import logging
-from src.data_processor import plot_spectra, save_all_to_csv  
+from data_processor import plot_spectra, save_all_to_csv  
 
 
 # debugging
