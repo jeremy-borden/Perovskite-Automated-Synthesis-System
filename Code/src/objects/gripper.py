@@ -6,7 +6,7 @@ class Gripper():
         self.finger_servo = finger_servo
         
     def open(self):
-        self.finger_servo.angle = 10
+        self.finger_servo.angle = 13
     
     def close(self):
         self.finger_servo.angle = 0
