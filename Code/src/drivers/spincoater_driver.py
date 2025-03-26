@@ -53,7 +53,7 @@ class SpinCoater():
         self.reader_thread.daemon = True
         self.reader_thread.start()
         
-    def send_message(self, message: str):
+    def send_command(self, message: str):
         if self.serial is None:
             self.logger.error("Serial is not connected")
             return
