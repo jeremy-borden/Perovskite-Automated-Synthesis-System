@@ -78,7 +78,7 @@ class Hotplate(threading.Thread):
             return None
         '''
 
-def get_temperature():
+    def get_temperature():
         command = "GET_TEMP\n"  # Ensure newline character is sent
         ser.write(command.encode())  # Convert string to bytes & send
         ser.flush()  # Ensure immediate sending
@@ -110,21 +110,21 @@ def get_temperature():
         return self._current_temperature_c
         '''
 
- def set_temperature(self, temperature):
+     def set_temperature(self, temperature):
         """Send set temperature to Arduino"""
         self.target_temperature_c = temperature
         command = f"SET_TEMP {temperature}\n"
         self.serial_port.write(command.encode())
 
- def run(self):
+     def run(self):
         """Continuously update the temperature"""
         while True:
             self.get_temperature()
             print(f"Actual Temperature: {self._current_temperature_c:.2f} C")
             time.sleep(1)
 
-if __name__ == "__main__":
-    hotplate = Hotplate()
-    hotplate.set_temperature(50)  # Example: Set temp to 50°C
-    hotplate.run()
+    if __name__ == "__main__":
+        hotplate = Hotplate()
+        hotplate.set_temperature(50)  # Example: Set temp to 50°C
+        hotplate.run()
 
