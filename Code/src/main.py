@@ -134,7 +134,7 @@ if __name__ == "__main__":
     camera_frame.grid(row=1, column=1,rowspan=2, padx=5, pady=5,sticky="nsew")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
     procedure_builder_frame.grid(row=0, column=2, rowspan=2, sticky="nsew")
-    spectrometer_frame.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
+    spectrometer_frame.grid(row=3, column=0, padx=10, pady=10, sticky="nsew")
  
     
     # run the gui
