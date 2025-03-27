@@ -65,29 +65,30 @@ class Hotplate(threading.Thread):
         self.logger = logging.getLogger("Main Logger")
         time.sleep(2)
 
-    def get_temperature():
-        command = "GET_TEMP\n"  # Ensure newline character is sent
-        ser.write(command.encode())  # Convert string to bytes & send
-        ser.flush()  # Ensure immediate sending
+    def get_temperature(self):
+        pass
+        # command = "GET_TEMP\n"  # Ensure newline character is sent
+        # ser.write(command.encode())  # Convert string to bytes & send
+        # ser.flush()  # Ensure immediate sending
 
-        print(f"Sent: {command.strip()}")  # Debug: Print what was sent
+        # print(f"Sent: {command.strip()}")  # Debug: Print what was sent
 
-        response = ser.readline()  # Read response from Arduino
-        print(f"Raw Response: {response}")  # Debug: Print raw response
+        # response = ser.readline()  # Read response from Arduino
+        # print(f"Raw Response: {response}")  # Debug: Print raw response
 
-        response = response.decode().strip()  # Convert bytes to string & clean up
+        # response = response.decode().strip()  # Convert bytes to string & clean up
     
-        if response.startswith("TEMP:"):
-            return float(response.split(":")[1])  # Extract temperature
-        else:
-            print("Error: Invalid temperature data received:", response)
-            return None
+        # if response.startswith("TEMP:"):
+        #     return float(response.split(":")[1])  # Extract temperature
+        # else:
+        #     print("Error: Invalid temperature data received:", response)
+        #     return None
 
-        while True:
-            temperature = get_temperature()
-            if temperature is not None:
-                print(f"Temperature: {temperature} C")
-            time.sleep(1)
+        # while True:
+        #     temperature = get_temperature()
+        #     if temperature is not None:
+        #         print(f"Temperature: {temperature} C")
+        #     time.sleep(1)
 
         '''
         try:
@@ -110,8 +111,8 @@ class Hotplate(threading.Thread):
             print(f"Actual Temperature: {self._current_temperature_c:.2f} C")
             time.sleep(1)
 
-if __name__ == "__main__":
-    hotplate = Hotplate()
-    hotplate.set_temperature(50)  # Example: Set temp to 50°C
-    hotplate.run()
+# if __name__ == "__main__":
+#     hotplate = Hotplate()
+#     hotplate.set_temperature(50)  # Example: Set temp to 50°C
+#     hotplate.run()
 
