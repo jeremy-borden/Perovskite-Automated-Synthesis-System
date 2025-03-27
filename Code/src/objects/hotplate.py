@@ -64,19 +64,6 @@ class Hotplate(threading.Thread):
         self.target_temperature_c = 0
         self.logger = logging.getLogger("Main Logger")
         time.sleep(2)
-        '''
-    def get_temperature(self):
-        """Read actual temperature from Arduino"""
-       
-       self.serial_port.write(b"GET_TEMP\n")  # Request temperature from Arduino
-        response = self.serial_port.readline().decode().strip()
-
-        if response.startswith("TEMP:"):
-            return float(response.split(":")[1])
-        else:
-            print("Invalid response:", response)
-            return None
-'''
 
     def get_temperature():
         command = "GET_TEMP\n"  # Ensure newline character is sent
@@ -110,20 +97,20 @@ class Hotplate(threading.Thread):
         return self._current_temperature_c
         '''
 
-     def set_temperature(self, temperature):
+    def set_temperature(self, temperature):
         """Send set temperature to Arduino"""
         self.target_temperature_c = temperature
         command = f"SET_TEMP {temperature}\n"
         self.serial_port.write(command.encode())
 
-     def run(self):
+    def run(self):
         """Continuously update the temperature"""
         while True:
             self.get_temperature()
             print(f"Actual Temperature: {self._current_temperature_c:.2f} C")
             time.sleep(1)
 
- if __name__ == "__main__":
+if __name__ == "__main__":
     hotplate = Hotplate()
     hotplate.set_temperature(50)  # Example: Set temp to 50°C
     hotplate.run()
