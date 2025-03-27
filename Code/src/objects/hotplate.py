@@ -67,7 +67,8 @@ class Hotplate(threading.Thread):
 
     def get_temperature(self):
         """Read actual temperature from Arduino"""
-       ''' self.serial_port.write(b"GET_TEMP\n")  # Request temperature from Arduino
+       ''' 
+       self.serial_port.write(b"GET_TEMP\n")  # Request temperature from Arduino
         response = self.serial_port.readline().decode().strip()
 
         if response.startswith("TEMP:"):
@@ -75,7 +76,7 @@ class Hotplate(threading.Thread):
         else:
             print("Invalid response:", response)
             return None
-'''
+        '''
 
     def get_temperature():
         command = "GET_TEMP\n"  # Ensure newline character is sent
@@ -95,11 +96,11 @@ class Hotplate(threading.Thread):
             print("Error: Invalid temperature data received:", response)
             return None
 
-    while True:
-        temperature = get_temperature()
-        if temperature is not None:
-            print(f"Temperature: {temperature} C")
-        time.sleep(1)
+        while True:
+            temperature = get_temperature()
+            if temperature is not None:
+                print(f"Temperature: {temperature} C")
+            time.sleep(1)
 
             '''
         try:
