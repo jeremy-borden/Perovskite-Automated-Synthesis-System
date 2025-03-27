@@ -64,7 +64,7 @@ class Hotplate(threading.Thread):
         self.target_temperature_c = 0
         self.logger = logging.getLogger("Main Logger")
         time.sleep(2)
-'''
+        '''
     def get_temperature(self):
         """Read actual temperature from Arduino"""
        
@@ -76,7 +76,7 @@ class Hotplate(threading.Thread):
         else:
             print("Invalid response:", response)
             return None
-        '''
+'''
 
     def get_temperature():
         command = "GET_TEMP\n"  # Ensure newline character is sent
