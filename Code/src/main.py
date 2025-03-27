@@ -47,7 +47,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     
     # -- CONTROL BOARD --
-    control_board = ControlBoard(com_port="/dev/ttyACM0",logger=logger)
+    control_board = ControlBoard(com_port="/dev/ttyACM2",logger=logger)
     
     # -- TOOLHEAD --
     toolhead = Toolhead(control_board=control_board)
