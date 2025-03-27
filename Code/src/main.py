@@ -47,7 +47,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     
     # -- CONTROL BOARD --
-    control_board = ControlBoard(com_port="/dev/ttyACM0",logger=logger)
+    control_board = ControlBoard(com_port="/dev/ttyACM1",logger=logger)
     
     # -- TOOLHEAD --
     toolhead = Toolhead(control_board=control_board)
@@ -75,11 +75,12 @@ if __name__ == "__main__":
     # -- HOTPLATE --
     dac = DAC()
     adc = ADC()
-    hotplate = Hotplate(dac=dac, adc=adc)
+    hotplate = Hotplate(serial_port="/dev/ttyACM1", baud_rate=115200)
     hotplate.start()
     
     # -- SPECTROMETER + INFEED --
     spectrometer = Spectrometer(com_port="/dev/ttyACM0")
+    spectrometer.connect()
     infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,)
     infeed = Infeed(infeed_servo)
     
@@ -124,7 +125,7 @@ if __name__ == "__main__":
     camera_frame = CameraFrame(app, camera)
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
     procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict)
-    #spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
+    spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
     
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
@@ -133,7 +134,8 @@ if __name__ == "__main__":
     camera_frame.grid(row=1, column=1,rowspan=2, padx=5, pady=5,sticky="nsew")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
     procedure_builder_frame.grid(row=0, column=2, rowspan=2, sticky="nsew")
-    #spectrometer_frame.grid(row=3, column=2, padx=10, pady=10) 
+    spectrometer_frame.grid(row=3, column=0, padx=10, pady=10, sticky="nsew")
+ 
     
     # run the gui
     app.mainloop()

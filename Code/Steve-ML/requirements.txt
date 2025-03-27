@@ -1,0 +1,13 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+scikit-optimize
+bayesian-optimization
+tqdm
+category-encoders
+shap
+plotly
+openpyxl
+scipy
