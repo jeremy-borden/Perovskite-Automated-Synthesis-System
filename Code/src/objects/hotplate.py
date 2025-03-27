@@ -123,8 +123,8 @@ class Hotplate(threading.Thread):
             print(f"Actual Temperature: {self._current_temperature_c:.2f} C")
             time.sleep(1)
 
-    if __name__ == "__main__":
-        hotplate = Hotplate()
-        hotplate.set_temperature(50)  # Example: Set temp to 50°C
-        hotplate.run()
+ if __name__ == "__main__":
+    hotplate = Hotplate()
+    hotplate.set_temperature(50)  # Example: Set temp to 50°C
+    hotplate.run()
 
