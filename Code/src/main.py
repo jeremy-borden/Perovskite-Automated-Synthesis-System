@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # -- HOTPLATE --
     dac = DAC()
     adc = ADC()
-    hotplate = Hotplate(serial_port="/dev/ttyACM0", baud_rate=115200)
+    hotplate = Hotplate(serial_port="/dev/ttyACM1", baud_rate=115200)
     hotplate.start()
     
     # -- SPECTROMETER + INFEED --
