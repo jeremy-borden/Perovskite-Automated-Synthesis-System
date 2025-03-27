@@ -102,7 +102,7 @@ class Hotplate(threading.Thread):
                 print(f"Temperature: {temperature} C")
             time.sleep(1)
 
-            '''
+        '''
         try:
             self._current_temperature_c = float(response)
         except ValueError:
