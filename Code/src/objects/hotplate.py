@@ -78,7 +78,7 @@ class Hotplate(threading.Thread):
             return None
         '''
 
-    def get_temperature():
+def get_temperature():
         command = "GET_TEMP\n"  # Ensure newline character is sent
         ser.write(command.encode())  # Convert string to bytes & send
         ser.flush()  # Ensure immediate sending
