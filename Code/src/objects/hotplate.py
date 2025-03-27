@@ -41,7 +41,7 @@ class Hotplate(threading.Thread):
             self._current_temperature_c = self.adc.get_temperature()
             print(f"Temperature Read: {self._current_temperature_c} C")
             sleep(1)
-            '''
+'''
 class Hotplate(threading.Thread):
     MAX_TEMPERATURE_C: int = 540
     
@@ -62,7 +62,7 @@ class Hotplate(threading.Thread):
         while True:
             self._current_temperature_c = self.adc.get_temperature()
             print(f"Temperature Read: {self._current_temperature_c:.2f} C")
-            time.sleep(1)
+            sleep(1)
 
 if __name__ == "__main__":
     hotplate = Hotplate()
