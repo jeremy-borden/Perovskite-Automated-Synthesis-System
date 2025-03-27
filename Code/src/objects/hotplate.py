@@ -110,13 +110,13 @@ def get_temperature():
         return self._current_temperature_c
         '''
 
-    def set_temperature(self, temperature):
+ def set_temperature(self, temperature):
         """Send set temperature to Arduino"""
         self.target_temperature_c = temperature
         command = f"SET_TEMP {temperature}\n"
         self.serial_port.write(command.encode())
 
-    def run(self):
+ def run(self):
         """Continuously update the temperature"""
         while True:
             self.get_temperature()
