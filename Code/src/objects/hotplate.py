@@ -68,11 +68,19 @@ class Hotplate(threading.Thread):
         """Read actual temperature from Arduino"""
         self.serial_port.write(b"GET_TEMP\n")  # Request temperature from Arduino
         response = self.serial_port.readline().decode().strip()
+
+        if response.startswith("TEMP:"):
+            return float(response.split(":")[1])
+        else:
+            print("Invalid response:", response)
+            return None
+            '''
         try:
             self._current_temperature_c = float(response)
         except ValueError:
             self.logger.error(f"Invalid temperature data: {response}")
         return self._current_temperature_c
+        '''
 
     def set_temperature(self, temperature):
         """Send set temperature to Arduino"""
