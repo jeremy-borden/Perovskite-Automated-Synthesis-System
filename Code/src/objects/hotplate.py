@@ -64,10 +64,10 @@ class Hotplate(threading.Thread):
         self.target_temperature_c = 0
         self.logger = logging.getLogger("Main Logger")
         time.sleep(2)
-
+'''
     def get_temperature(self):
         """Read actual temperature from Arduino"""
-       ''' 
+       
        self.serial_port.write(b"GET_TEMP\n")  # Request temperature from Arduino
         response = self.serial_port.readline().decode().strip()
 
