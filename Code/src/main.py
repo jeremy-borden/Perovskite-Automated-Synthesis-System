@@ -53,7 +53,7 @@ if __name__ == "__main__":
     toolhead = Toolhead(control_board=control_board)
     
     # -- SPIN COATER --
-    spin_coater= SpinCoater(com_port="/dev/ttyACM1",logger=logger)
+    spin_coater= SpinCoater(com_port="/dev/ttyACM0",logger=logger)
 
     # -- CAMERA --
     camera = Camera(logger=logger)
