@@ -22,7 +22,7 @@ sys.path.append(pp)
 class Hotplate(threading.Thread):
     MAX_TEMPERATURE_C = 540
 
-    def __init__(self, serial_port="/dev/ttyACM0", baud_rate=115200):
+    def __init__(self, serial_port="/dev/ttyACM1", baud_rate=115200):
         super().__init__(name="Hotplate", daemon=True)
         self.serial_port = serial.Serial(serial_port, baud_rate, timeout=1)
         self._current_temperature_c = 0
