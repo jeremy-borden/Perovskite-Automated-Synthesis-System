@@ -58,6 +58,9 @@ class Hotplate(threading.Thread):
         self.target_temperature_c = temperature
         command = f"SET_TEMP {temperature}\n"
         try:
+            self.serial_port.flushInput()  # Clears the input buffer
+            time.sleep(0.1)  # Small delay to ensure clean communication
+
             self.serial_port.write(command.encode())
             self.serial_port.flush()  # Ensure data is sent immediately
             time.sleep(0.1)  # Small delay to allow Arduino to process
