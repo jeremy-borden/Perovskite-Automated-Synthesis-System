@@ -34,7 +34,7 @@ class Hotplate(threading.Thread):
         self.logger.info("Hotplate initialized and serial connection established.")
 
     def get_temperature(self):
-        """Read actual temperature from Arduino via serial."""
+    """Read actual temperature from Arduino via serial."""
         try:
             self.serial_port.write(b"GET_TEMP\n")
             response = self.serial_port.readline().decode().strip()
