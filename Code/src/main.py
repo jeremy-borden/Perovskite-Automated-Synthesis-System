@@ -53,7 +53,7 @@ if __name__ == "__main__":
     toolhead = Toolhead(control_board=control_board)
     
     # -- SPIN COATER --
-    spin_coater= SpinCoater(com_port="/dev/ttyACM0",logger=logger)
+    spin_coater= SpinCoater(com_port="/dev/ttyACM1",logger=logger)
 
     # -- CAMERA --
     camera = Camera(logger=logger)
@@ -75,11 +75,11 @@ if __name__ == "__main__":
     # -- HOTPLATE --
     dac = DAC()
     adc = ADC()
-    hotplate = Hotplate(serial_port="/dev/ttyACM1", baud_rate=115200)
+    hotplate = Hotplate(serial_port="/dev/ttyACM0", baud_rate=115200)
     hotplate.start()
     #hotplate = None
     # -- SPECTROMETER + INFEED --
-    spectrometer = Spectrometer(com_port="/dev/ttyACM0")
+    spectrometer = Spectrometer(com_port="/dev/ttyACM1")
     spectrometer.connect()
     infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,)
     infeed = Infeed(infeed_servo)
