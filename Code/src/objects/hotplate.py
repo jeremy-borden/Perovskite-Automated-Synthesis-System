@@ -34,7 +34,7 @@ class Hotplate(threading.Thread):
         self.logger.info("Hotplate initialized and serial connection established.")
 
     def get_temperature(self):
-    """Read actual temperature from Arduino via serial."""
+        """Read actual temperature from Arduino via serial."""
         try:
             self.serial_port.write(b"GET_TEMP\n")
             response = self.serial_port.readline().decode().strip()
@@ -50,7 +50,7 @@ class Hotplate(threading.Thread):
         return self._current_temperature_c
         
     def set_temperature(self, temperature):
-    """Send set temperature to Arduino and verify response."""
+        """Send set temperature to Arduino and verify response."""
         if temperature > self.MAX_TEMPERATURE_C:
             self.logger.warning(f"Temperature {temperature} exceeds max limit of {self.MAX_TEMPERATURE_C}°C")
             return
