@@ -48,21 +48,7 @@ class Hotplate(threading.Thread):
             self.logger.error(f"Error reading temperature: {e}")
 
         return self._current_temperature_c
-'''
-    def set_temperature(self, temperature):
-        """Send set temperature to Arduino."""
-        if temperature > self.MAX_TEMPERATURE_C:
-            self.logger.warning(f"Temperature {temperature} exceeds max limit of {self.MAX_TEMPERATURE_C}°C")
-            return
-
-        self.target_temperature_c = temperature
-        command = f"SET_TEMP {temperature}\n"
-        try:
-            self.serial_port.write(command.encode())
-            self.logger.info(f"Sent target temperature: {temperature}°C")
-        except Exception as e:
-            self.logger.error(f"Error sending temperature command: {e}")
-'''            
+        
     def set_temperature(self, temperature):
     """Send set temperature to Arduino and verify response."""
         if temperature > self.MAX_TEMPERATURE_C:
