@@ -26,11 +26,11 @@ class ControlBoard():
 
         self.received_ok = threading.Event()
 
-    def connect(self):
+    def connect(self, acmnum):
         """Connect to the control board and start the reader thread."""
         if self.is_connected():
             self.logger.error("Control board is already connected")
-        
+        self.com_port = "/dev/ttyACM" + str(acmnum)
         
         try:
             self.serial = serial.Serial(self.com_port, 115200, timeout=None)
