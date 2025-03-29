@@ -136,6 +136,7 @@ class ControlBoardLineReader(serial.threaded.LineReader):
                 # extract the number that comes after the prefix and before the next space
                 number = (line.split(substr)[1]).split(" ")[0]
                 self.control_board[key] = float(number)
+                self.logger.debug(number)
                 
             
             
