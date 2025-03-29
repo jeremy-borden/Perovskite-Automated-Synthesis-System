@@ -67,7 +67,7 @@ class ConnectionFrame(ctk.CTkFrame):
         self.control_board_status_label.grid(row=3, column=0, padx=5, pady=5, sticky="nw")
         
         self.control_board_usb_num = ctk.CTkEntry(master=self)
-        self.control_board_usb_num.grid(row=2, column=1, padx=5, pady=5, sticky="nw")
+        self.control_board_usb_num.grid(row=4, column=0, padx=5, pady=5, sticky="nw")
         
         # spincoater
         spincoater_image = ctk.CTkImage(
