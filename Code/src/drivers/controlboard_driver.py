@@ -26,17 +26,16 @@ class ControlBoard():
 
         self.received_ok = threading.Event()
 
-    def connect(self):
+    def connect(self, acmnum):
         """Connect to the control board and start the reader thread."""
         if self.is_connected():
             self.logger.error("Control board is already connected")
-        
+        self.com_port = "/dev/ttyACM" + str(acmnum)
         
         try:
             self.serial = serial.Serial(self.com_port, 115200, timeout=None)
             self._begin_reader_thread()
             self.logger.info(f"Connected to control board on port {self.com_port}")
-            self.send_message("M501") # Load settings saved in eeprom
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to control board: {e}")
     
@@ -129,20 +128,20 @@ class ControlBoardLineReader(serial.threaded.LineReader):
         """Process each received line."""
         line = line.strip()
         self.logger.debug(f"Received: {line}")
+        
+        #check if we recieve position data
+        received_position_data = True
+        for prefix in self.POSITION_PREFIXS:
+            if prefix not in line:
+                received_position_data = False
+                
         if line == "ok":
             self.control_board.received_ok.set()  # Set the event when "DONE" is received
-        elif all(substr in self.POSITION_PREFIXS for substr in line): # if these substrings are present we know the board is sending positional data
+        elif received_position_data:
             for substr, key in zip(self.POSITION_PREFIXS, self.control_board.positions):
                 # extract the number that comes after the prefix and before the next space
                 number = (line.split(substr)[1]).split(" ")[0]
-                self.control_board[key] = float(number)
-            
-            
-        # if "B:" in line: # 
-        #     # Extract the temperature from the line "B:{temp} ..."
-        #     temp = line.split("B:")[1]
-        #     temp = temp.split(" ")[0]
-        #     self.control_board.hotplate_temperature = float(temp)
+                self.control_board.positions[key] = float(number)
             
     def connection_lost(self, exc):
         """Handle the loss of connection."""
@@ -151,3 +150,5 @@ class ControlBoardLineReader(serial.threaded.LineReader):
         else:
             self.logger.info("Serial connection closed")
         self.control_board.disconnect()
+
+

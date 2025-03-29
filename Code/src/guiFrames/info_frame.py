@@ -67,9 +67,10 @@ class InfoFrame(ctk.CTkFrame):
         self.update_information()
         
     def update_information(self):
-        current_temperature = self.hotplate.get_temperature()
-        target_temperature  = self.hotplate.target_temperature_c
-        self.hotplate_label.configure(text=f"Hotplate Temperature | {current_temperature}/{target_temperature}")
+        if self.hotplate is not None:
+            current_temperature = self.hotplate.get_temperature()
+            target_temperature  = self.hotplate.target_temperature_c
+            self.hotplate_label.configure(text=f"Hotplate Temperature | {current_temperature}/{target_temperature}")
         
         x=self.control_board.positions["X"]
         y=self.control_board.positions["Y"]
