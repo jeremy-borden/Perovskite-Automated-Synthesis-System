@@ -47,7 +47,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     
     # -- CONTROL BOARD --
-    control_board = ControlBoard(com_port="/dev/ttyACM0",logger=logger)
+    control_board = ControlBoard(com_port="/dev/ttyACM1",logger=logger)
     
     # -- TOOLHEAD --
     toolhead = Toolhead(control_board=control_board)
@@ -75,11 +75,11 @@ if __name__ == "__main__":
     # -- HOTPLATE --
     dac = DAC()
     adc = ADC()
-    #hotplate = Hotplate(serial_port="/dev/ttyACM1", baud_rate=115200)
-    #hotplate.start()
-    hotplate = None
+    hotplate = Hotplate(serial_port="/dev/ttyACM0", baud_rate=115200)
+    hotplate.start()
+    #hotplate = None
     # -- SPECTROMETER + INFEED --
-    spectrometer = Spectrometer(com_port="/dev/ttyACM0")
+    spectrometer = Spectrometer(com_port="/dev/ttyACM1")
     spectrometer.connect()
     infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,)
     infeed = Infeed(infeed_servo)
