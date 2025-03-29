@@ -28,7 +28,7 @@ class Hotplate(threading.Thread):
         self._current_temperature_c = 0
         self.target_temperature_c = 0
         self.logger = logging.getLogger("Main Logger")
-        logging.basicConfig(level=logging.INFO)
+
 
         time.sleep(2)  # Allow time for Arduino to reset
         self.logger.info("Hotplate initialized and serial connection established.")
