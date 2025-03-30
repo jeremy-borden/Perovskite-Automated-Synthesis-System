@@ -76,3 +76,5 @@ class SpectrometerFrame(ctk.CTkFrame):
                 self.status_label.configure(text="No data received.")
         except Exception as e:
             self.status_label.configure(text=f"Error: {str(e)}")
+            
+        self.after(1000, self.update_plot)
