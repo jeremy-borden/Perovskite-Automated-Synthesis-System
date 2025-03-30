@@ -43,6 +43,7 @@ class Hotplate(threading.Thread):
     def send_message(self, message: str):
         try:
             self.serial.write(message.encode()) # utf-8
+            time.sleep(0.2)
             response = self.serial.readline().decode().strip()
             if (response is not None and not ""):
                 self.logger.debug(f"Raw response: {response}")
@@ -56,6 +57,7 @@ class Hotplate(threading.Thread):
         
         try:
             self.serial.write(b"GET_TEMP\n") # utf-8
+            time.sleep(0.2)
             response = self.serial.readline().decode().strip()
             #self.logger.debug(f"Raw response: {response}")
 
