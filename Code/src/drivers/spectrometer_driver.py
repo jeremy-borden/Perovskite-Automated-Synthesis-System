@@ -80,6 +80,8 @@ class Spectrometer:
         self.measurements[measurement_type] = intensities
         self.logger.info(f"Read {len(intensities)} intensity values for {measurement_type}.")
 
+        return intensities
+
 
 """1. Connects to the spectrometer
 
