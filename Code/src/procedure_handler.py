@@ -11,10 +11,10 @@ class ProcedureHandler(threading.Thread):
     """This class controls the main procedure thread, which calls functions .
     """
 
-    def __init__(self, logger: logging.Logger, dispatcher: Dispatcher):
+    def __init__(self, dispatcher: Dispatcher):
         super().__init__(name="ProcedureHandler",daemon=True)
         
-        self.logger = logger
+        self.logger = logging.getLogger("Main Logger")
         self.dispatcher = dispatcher
 
         self.procedure = None
@@ -52,11 +52,14 @@ class ProcedureHandler(threading.Thread):
             self.current_step = 0
             
             for move in self.procedure:
-                # if procedure is paused after finishing previos move
+                # if procedure is paused after finishing previous move
                 if self.paused.is_set():
                     self.logger.debug("Paused")
                     self.procedure_timer.pause()
-                    self.paused.wait()
+                    while self.paused.is_set():
+                        if not self.started.is_set():
+                            break
+                    
                 # if procedure is stopped, break from the loop
                 if not self.started.is_set():
                     self.logger.debug("Stopping")

@@ -14,10 +14,8 @@ from objects.vial_carousel import VialCarousel
 
 class InfoFrame(ctk.CTkFrame):
     def __init__(self, master, control_board: ControlBoard, hotplate: Hotplate, pipette_handler: PipetteHandler, vial_carousel: VialCarousel):
-        super().__init__(
-            master=master,
-            border_color="#1f6aa5",
-            border_width=2)
+        super().__init__(master=master,border_color="#1f6aa5",border_width=2)
+        
         self.logger = logging.getLogger("Main Logger")
         self.control_board = control_board
         self.hotplate = hotplate
@@ -67,11 +65,13 @@ class InfoFrame(ctk.CTkFrame):
         self.update_information()
         
     def update_information(self):
+        # Hotplate temperature
         if self.hotplate is not None:
-            current_temperature = self.hotplate.get_temperature()
+            current_temperature = self.hotplate.current_temperature_c
             target_temperature  = self.hotplate.target_temperature_c
             self.hotplate_label.configure(text=f"Hotplate Temperature | {current_temperature}/{target_temperature}")
         
+        # Toolhead Position
         x=self.control_board.positions["X"]
         y=self.control_board.positions["Y"]
         z=self.control_board.positions["Z"]

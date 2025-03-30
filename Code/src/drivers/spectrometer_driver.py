@@ -23,19 +23,21 @@ logging.basicConfig(level=logging.INFO)
 class Spectrometer:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, com_port: str, integration_time=1000):
+    def __init__(self, integration_time=1000):
         self.logger = logging.getLogger("Main Logger")
-        self.com_port = com_port
         self.integration_time = integration_time
         self.serial = None
         self.wavelengths = []
         self.measurements = {}  # to store intensities for Background, Reference, and Sample
 
-    def connect(self):
+    def connect(self, port_num):
         """Establish connection to the spectrometer"""
+        
+        
+        port = "/dev/ttyACM" + str(port_num)
         try:
-            self.serial = serial.Serial(self.com_port, baudrate=115200, timeout=3)
-            self.logger.info(f"Connected to spectrometer on {self.com_port}")
+            self.serial = serial.Serial(port, baudrate=115200, timeout=3)
+            self.logger.info(f"Connected to spectrometer on {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to spectrometer: {e}")
 
@@ -77,6 +79,8 @@ class Spectrometer:
         # Store the collected data
         self.measurements[measurement_type] = intensities
         self.logger.info(f"Read {len(intensities)} intensity values for {measurement_type}.")
+
+        return intensities
 
 
 """1. Connects to the spectrometer

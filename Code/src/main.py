@@ -3,16 +3,12 @@ from tkinter import PhotoImage
 import customtkinter as ctk
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
-
 # -- DRIVER IMPORT --
 from drivers.controlboard_driver import ControlBoard
 from drivers.spincoater_driver import SpinCoater
-from drivers.dac_driver import DAC
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 from drivers.spectrometer_driver import Spectrometer
-from drivers.adc_driver import ADC
-
 # -- OBJECT IMPORT --
 from guiFrames import procedure_builder_frame
 from objects.vial_carousel import VialCarousel
@@ -30,8 +26,6 @@ from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
 from guiFrames.spectrometer_frame import SpectrometerFrame
 
-
-
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
 
@@ -47,16 +41,16 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     
     # -- CONTROL BOARD --
-    control_board = ControlBoard(com_port="/dev/ttyACM1",logger=logger)
+    control_board = ControlBoard()
     
     # -- TOOLHEAD --
     toolhead = Toolhead(control_board=control_board)
     
     # -- SPIN COATER --
-    spin_coater= SpinCoater(com_port="/dev/ttyACM1",logger=logger)
+    spin_coater= SpinCoater()
 
     # -- CAMERA --
-    camera = Camera(logger=logger)
+    camera = Camera()
 
     # -- GRIPPER --
     arm_servo = AngularServo(pin=17, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
@@ -68,25 +62,20 @@ if __name__ == "__main__":
     grabber_servo = AngularServo(pin=22, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
     pipettes = [Pipette(200, 35, 20, 15, None),
                 Pipette(1000, 35, 20, 15, None)]
-    pipette_handler = PipetteHandler(logger=logger, control_board=control_board,
+    pipette_handler = PipetteHandler(control_board=control_board,
                                      tip_eject_servo=tip_eject_servo, grabber_servo=grabber_servo,
                                      pipettes=pipettes)
     
     # -- HOTPLATE --
-    dac = DAC()
-    adc = ADC()
-    hotplate = Hotplate(serial_port="/dev/ttyACM0", baud_rate=115200)
-    hotplate.start()
-    #hotplate = None
+    hotplate = Hotplate()
     # -- SPECTROMETER + INFEED --
-    spectrometer = Spectrometer(com_port="/dev/ttyACM1")
-    spectrometer.connect()
+    spectrometer = Spectrometer()
+  
     infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,)
     infeed = Infeed(infeed_servo)
     
-    # -- VIAL CAROUSEL
-    lid_servo = AngularServo(pin=24, min_angle=0, max_angle=270,)
-    vial_carousel = VialCarousel(control_board, lid_servo)
+    # -- VIAL CAROUSEL --
+    vial_carousel = VialCarousel(control_board)
     
     dispatcher = Dispatcher(toolhead=toolhead,
                             spin_coater=spin_coater,
@@ -98,7 +87,7 @@ if __name__ == "__main__":
                             vial_carousel=vial_carousel,
                             pippete_handler=pipette_handler)
     
-    procedure_handler = ProcedureHandler(logger=logger,dispatcher=dispatcher)
+    procedure_handler = ProcedureHandler(dispatcher=dispatcher)
     
     # --------LOAD DEFAULT PROCEDURE--------
     procedure_config = ProcedureFile().Open("procedures/default_procedure.yml")
@@ -121,7 +110,7 @@ if __name__ == "__main__":
     # creating frames
     procedure_frame = ProcedureFrame(app, procedure_handler)
     console_frame = ConsoleFrame(app)
-    connection_frame = ConnectionFrame(app, control_board,spin_coater,camera,spectrometer)
+    connection_frame = ConnectionFrame(app, control_board,spin_coater,hotplate,camera,spectrometer)
     camera_frame = CameraFrame(app, camera)
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
     procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict)
@@ -131,10 +120,10 @@ if __name__ == "__main__":
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
     connection_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
     console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
-    camera_frame.grid(row=1, column=1,rowspan=2, padx=5, pady=5,sticky="nsew")
+    camera_frame.grid(row=1, column=2, padx=5, pady=5,sticky="nsew")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
-    procedure_builder_frame.grid(row=0, column=2, rowspan=2, sticky="nsew")
-    spectrometer_frame.grid(row=3, column=0, padx=10, pady=10, sticky="nsew")
+    procedure_builder_frame.grid(row=1, column=1, rowspan=2, sticky="nsew")
+    spectrometer_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
  
     
     # run the gui

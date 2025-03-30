@@ -12,26 +12,24 @@ import threading
 
 class SpinCoater():
     """ Class to control the spin coater """
-    def __init__(self, com_port: str, logger: logging.Logger):
-        self.com_port = com_port
-        self.logger = logger
-
+    def __init__(self):
+        self.logger = logging.getLogger("Main Logger")
         self.serial = None
         self.reader_thread = None
         
         self.done = threading.Event()
         
-    def connect(self):
+    def connect(self, port_num):
         if self.is_connected():
             self.logger.error("Spin Coater is already connected")
             return
-
+        port = "/dev/ttyACM"+str(port_num)
         try:
-            self.serial = serial.Serial(self.com_port, 9600, timeout=None)
+            self.serial = serial.Serial(port, 9600, timeout=None)
             self._begin_reader_thread()
             self.set_pc_mode()
             self.logger.info(
-                f"Connected to spincoater on port {self.com_port}")
+                f"Connected to spincoater on port {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to spincoater: {e}")
                
