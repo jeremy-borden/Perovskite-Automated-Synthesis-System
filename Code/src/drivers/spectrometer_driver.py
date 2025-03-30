@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 class Spectrometer:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, integration_time=1000):
+    def __init__(self, integration_time=2000):
         self.logger = logging.getLogger("Main Logger")
         self.integration_time = integration_time
         self.serial = None
