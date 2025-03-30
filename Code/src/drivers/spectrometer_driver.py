@@ -77,6 +77,14 @@ class Spectrometer:
         """Read spectral intensity for a given measurement type"""
         self.send_command("<read:1>")
         raw_data = self.serial.read(3204)
+        
+        print(f"[DEBUG] Raw data length: {len(raw_data)}")
+        
+        if len(raw_data) < 3204:
+            self.logger.warning("Incomplete spectrum data received.")
+            return np.array([])
+
+        
         intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
 
         # Store the collected data
