@@ -75,7 +75,7 @@ class ConnectionFrame(ctk.CTkFrame):
         
         self.command_entry_destination = ctk.CTkOptionMenu(
             master=self,
-            values=["Control Board", "Spincoater", "Spectrometer"],
+            values=["Control Board", "Spincoater", "Hotplate", "Spectrometer"],
             width=150,
             command=self._set_command_destination
         )
