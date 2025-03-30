@@ -58,11 +58,13 @@ class SpectrometerFrame(ctk.CTkFrame):
         try:
             self.status_label.configure(text="Measurement in Progress...")
 
+            wavelengths = self.spectrometer.read_wavelengths()
+            
             self.spectrometer.send_command("<read:1>")
             intensities = self.spectrometer.read_spectrum("live")
-            wavelengths = self.spectrometer.read_wavelengths()
+            
 
-            if intensities is not None and wavelengths is not None:
+            if intensities is not None and wavelengths is not None and len(intensities) == len(wavelengths):
                 self.ax.clear()
                 self.ax.plot(wavelengths, intensities, color='blue', label="PL Spectrum")
                 self.ax.set_title("Intensity vs Wavelength")
