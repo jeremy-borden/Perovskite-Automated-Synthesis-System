@@ -7,7 +7,7 @@ import os
 # get current directory so we can import from outside guiFrames folder
 pp=os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(pp)
-from src.drivers.camera_driver import Camera
+from drivers.camera_driver import Camera
 
 class CameraFrame(ctk.CTkFrame):
     def __init__(self, master, camera: Camera):
