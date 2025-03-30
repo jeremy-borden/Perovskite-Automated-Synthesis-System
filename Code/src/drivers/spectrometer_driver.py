@@ -75,6 +75,8 @@ class Spectrometer:
         self.send_command("<read:1>")
         raw_data = self.serial.read(3204)
         intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
+        
+        return self.wavelengths
 
         # Store the collected data
         self.measurements[measurement_type] = intensities
