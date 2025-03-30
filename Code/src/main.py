@@ -120,10 +120,10 @@ if __name__ == "__main__":
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
     connection_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
     console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
-    camera_frame.grid(row=1, column=1, padx=5, pady=5,sticky="nsew")
+    camera_frame.grid(row=1, column=2, padx=5, pady=5,sticky="nsew")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
-    procedure_builder_frame.grid(row=0, column=2, rowspan=2, sticky="nsew")
-    spectrometer_frame.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
+    procedure_builder_frame.grid(row=1, column=1, rowspan=2, sticky="nsew")
+    spectrometer_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
  
     
     # run the gui
