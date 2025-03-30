@@ -70,6 +70,9 @@ class Spectrometer:
         self.wavelengths = np.fromstring(response, sep=',')
         self.logger.info(f"Read {len(self.wavelengths)} wavelength values.")
 
+        return self.wavelengths
+
+
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
         self.send_command("<read:1>")
