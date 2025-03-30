@@ -36,7 +36,7 @@ class Spectrometer:
         
         port = "/dev/ttyACM" + str(port_num)
         try:
-            self.serial = serial.Serial(port, baudrate=115200, timeout=3)
+            self.serial = serial.Serial(port, baudrate=115200, timeout=5)
             self.logger.info(f"Connected to spectrometer on {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to spectrometer: {e}")
@@ -76,6 +76,8 @@ class Spectrometer:
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
         self.send_command("<read:1>")
+        self.serial.reset_input_buffer()
+        time.sleep(0.5)
         raw_data = self.serial.read(3204)
         
         print(f"[DEBUG] Raw data length: {len(raw_data)}")
