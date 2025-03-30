@@ -268,7 +268,7 @@ class Dispatcher():
         # Capture intensity data
         self.logger.info("Capturing spectrum intensity data...")
         self.spectrometer.send_command("<read:1>")
-        intensities = self.spectrometer.read_spectrum()
+        intensities = self.spectrometer.read_spectrum(measurement_type)
 
         # Store the measurement
         if not hasattr(self, "measurements"):
