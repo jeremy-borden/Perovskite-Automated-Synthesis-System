@@ -104,7 +104,7 @@ class ConnectionFrame(ctk.CTkFrame):
         self.spin_coater_connection.set_connection_status(self.spin_coater.is_connected())
         self.hotplate_connection.set_connection_status(self.hotplate.is_connected())
         self.spectrometer_connection.set_connection_status(self.spectrometer.is_connected())
-        self.camera.set_connection_status(self.camera.is_connected())
+        self.camera_connection.set_connection_status(self.camera.is_connected())
 
         self.after(1000, self._update)
 
