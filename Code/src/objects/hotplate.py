@@ -40,9 +40,9 @@ class Hotplate(threading.Thread):
     def is_connected(self) -> bool:
         return self.serial is not None and self.serial.is_open
 
-    def send_message(self, message):
+    def send_message(self, message: str):
         try:
-            self.serial.write(message) # utf-8
+            self.serial.write(message.encode()) # utf-8
             response = self.serial.readline().decode().strip()
             if (response is not None and not ""):
                 self.logger.debug(f"Raw response: {response}")
