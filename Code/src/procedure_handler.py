@@ -11,10 +11,10 @@ class ProcedureHandler(threading.Thread):
     """This class controls the main procedure thread, which calls functions .
     """
 
-    def __init__(self, logger: logging.Logger, dispatcher: Dispatcher):
+    def __init__(self, dispatcher: Dispatcher):
         super().__init__(name="ProcedureHandler",daemon=True)
         
-        self.logger = logger
+        self.logger = logging.getLogger("Main Logger")
         self.dispatcher = dispatcher
 
         self.procedure = None

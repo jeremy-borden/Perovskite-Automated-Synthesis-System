@@ -11,11 +11,10 @@ import serial.threaded
 class ControlBoard():
     """Class to control the Octopus v1.1 control board"""
 
-    def __init__(self, com_port: str, logger: logging.Logger):
+    def __init__(self):
 
-        self.logger = logger
-        self.com_port = com_port
-        
+        self.logger = logging.getLogger("Main Logger")
+
         self.positions = {"X": 0,
                           "Y": 0,
                           "Z": 0,
@@ -26,23 +25,22 @@ class ControlBoard():
 
         self.received_ok = threading.Event()
 
-    def connect(self, acmnum):
+    def connect(self, port_num):
         """Connect to the control board and start the reader thread."""
         if self.is_connected():
             self.logger.error("Control board is already connected")
-        self.com_port = "/dev/ttyACM" + str(acmnum)
+        port = "/dev/ttyACM" + str(port_num)
         
         try:
-            self.serial = serial.Serial(self.com_port, 115200, timeout=None)
+            self.serial = serial.Serial(port, 115200, timeout=None)
             self._begin_reader_thread()
-            self.logger.info(f"Connected to control board on port {self.com_port}")
+            self.logger.info(f"Connected to control board on port {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to control board: {e}")
     
     def disconnect(self):
         if not self.is_connected():
             return
-        
         self.serial.close()
         self.logger.debug("Control Board Disconnected")
             

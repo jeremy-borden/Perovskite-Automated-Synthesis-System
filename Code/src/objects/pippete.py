@@ -21,12 +21,13 @@ class Pipette:
 class PipetteHandler():
     ACTUATOR_MAX_HEIGHT_MM: int
     
-    def __init__(self, logger: logging.Logger, control_board: ControlBoard, tip_eject_servo: AngularServo, grabber_servo: AngularServo, pipettes: list):
+    def __init__(self, control_board: ControlBoard, tip_eject_servo: AngularServo, grabber_servo: AngularServo, pipettes: list):
+        self.logger = logging.getLogger("Main Logger")
+        
         self.control_board = control_board
         self.tip_eject_servo = tip_eject_servo
         self.grabber_servo = grabber_servo
         self.pipettes = pipettes
-        self.logger = logger
         
         self.current_pipette: Pipette = None
         self.current_fluid_volume_ul = 0

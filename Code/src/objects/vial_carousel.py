@@ -1,13 +1,11 @@
 from drivers.controlboard_driver import ControlBoard
-from gpiozero import AngularServo
 
 class VialCarousel():
     
     VIAL_MAX_VOLUME_UL: int = 100000
     VIALS: int = 12
-    def __init__(self, control_board: ControlBoard, lid_servo: AngularServo):
+    def __init__(self, control_board: ControlBoard):
         self.control_board = control_board
-        self.lid_servo = lid_servo
         
         self.current_vial = 0
         self.vial_volumes_ul = [0]*self.VIALS
@@ -58,21 +56,7 @@ class VialCarousel():
         self.vial_volumes_ul[vial_num] = 0
         return True
         
-    def open_lid(self):
-        self.lid_servo.value=180
-        
-    def close_lid(self):
-        self.lid_servo.value=0
-         
     def set_vial(self, vial_num):
-        self.open_lid()
         self.control_board.move_axis("A", 30*(self.current_vial - vial_num), 100)
-        
         self.current_vial = vial_num
-        self.close_lid()
-        
-    def seal(self):
-        self.open_lid()
-        self.control_board.move_axis("A", 15, 100)
-        self.current_vial = None
-        self.close_lid()
+

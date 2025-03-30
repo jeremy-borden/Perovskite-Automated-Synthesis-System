@@ -6,12 +6,10 @@ import customtkinter as ctk
 
 
 class Camera(threading.Thread):
-    def __init__(self, logger: logging.Logger):
-        super().__init__(
-            name="Camera",
-            daemon=True)
+    def __init__(self):
+        super().__init__(name="Camera",daemon=True)
 
-        self.logger = logger
+        self.logger = logging.getLogger("Main Logger")
 
         self.video_capture = None
         self.frame = None

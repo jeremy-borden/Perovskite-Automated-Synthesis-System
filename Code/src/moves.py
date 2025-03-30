@@ -125,7 +125,7 @@ class Dispatcher():
         self.hotplate.set_temperature(temperature_c)
     
     def wait_for_temperature(self, target_temperature: int, threshold: int):
-        while abs(self.hotplate._current_temperature_c - target_temperature) > threshold:
+        while abs(self.hotplate.current_temperature_c - target_temperature) > threshold:
             sleep(1)
 
     # --------- TOOLHEAD MOVES --------
