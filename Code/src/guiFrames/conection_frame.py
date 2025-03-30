@@ -148,6 +148,8 @@ class ConnectionFrame(ctk.CTkFrame):
             self.spin_coater.send_message(value)
         elif self.command_destination == "Spectrometer":
             self.spectrometer.send_message(value)
+        elif self.command_destination == "Hotplate":
+            self.hotplate.send_message(value)
             
 class NameLater(ctk.CTkFrame):
     def __init__(self, master, image_path, command, default_port: int = 0):

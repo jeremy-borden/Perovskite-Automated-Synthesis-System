@@ -10,7 +10,7 @@ float target_temperature = 0.0;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Arduino Ready");
+  
 
   if (!thermocouple.begin()) {
     Serial.println("MAX31856 not found. Check wiring!");
@@ -20,6 +20,8 @@ void setup() {
   thermocouple.setThermocoupleType(MAX31856_TCTYPE_K);
 
   dac.begin(0x60); // Initialize DAC with I2C address 0x60
+  dac.setVoltage(0, true);
+  Serial.println("Arduino Ready");
 }
 
 void loop() {
