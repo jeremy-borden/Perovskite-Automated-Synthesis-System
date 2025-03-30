@@ -70,7 +70,7 @@ if __name__ == "__main__":
     hotplate = Hotplate()
     # -- SPECTROMETER + INFEED --
     spectrometer = Spectrometer()
-    spectrometer.connect()
+  
     infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,)
     infeed = Infeed(infeed_servo)
     
