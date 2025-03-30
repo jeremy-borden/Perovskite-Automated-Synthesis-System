@@ -47,7 +47,7 @@ class Hotplate(threading.Thread):
             if (response is not None and not ""):
                 self.logger.debug(f"Raw response: {response}")
         except Exception as e:
-            self.logger.error(f"Failed to send message")
+            self.logger.error(f"Failed to send message: {e}")
             
     def get_temperature(self):
         """Read actual temperature from Arduino via serial."""
@@ -57,7 +57,7 @@ class Hotplate(threading.Thread):
         try:
             self.serial.write(b"GET_TEMP\n") # utf-8
             response = self.serial.readline().decode().strip()
-            self.logger.debug(f"Raw response: {response}")
+            #self.logger.debug(f"Raw response: {response}")
 
             if response.startswith("TEMP:"):
                 self.current_temperature_c = float(response.split(":")[1])
