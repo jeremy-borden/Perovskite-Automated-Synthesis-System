@@ -3,14 +3,12 @@ from tkinter import PhotoImage
 import customtkinter as ctk
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
-
 # -- DRIVER IMPORT --
 from drivers.controlboard_driver import ControlBoard
 from drivers.spincoater_driver import SpinCoater
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 from drivers.spectrometer_driver import Spectrometer
-
 # -- OBJECT IMPORT --
 from guiFrames import procedure_builder_frame
 from objects.vial_carousel import VialCarousel
@@ -27,8 +25,6 @@ from guiFrames.camera_frame import CameraFrame
 from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
 from guiFrames.spectrometer_frame import SpectrometerFrame
-
-
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher

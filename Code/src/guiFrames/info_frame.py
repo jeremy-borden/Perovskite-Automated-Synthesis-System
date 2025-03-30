@@ -14,10 +14,8 @@ from objects.vial_carousel import VialCarousel
 
 class InfoFrame(ctk.CTkFrame):
     def __init__(self, master, control_board: ControlBoard, hotplate: Hotplate, pipette_handler: PipetteHandler, vial_carousel: VialCarousel):
-        super().__init__(
-            master=master,
-            border_color="#1f6aa5",
-            border_width=2)
+        super().__init__(master=master,border_color="#1f6aa5",border_width=2)
+        
         self.logger = logging.getLogger("Main Logger")
         self.control_board = control_board
         self.hotplate = hotplate
