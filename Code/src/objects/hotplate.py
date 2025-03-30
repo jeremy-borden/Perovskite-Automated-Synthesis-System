@@ -24,7 +24,7 @@ class Hotplate(threading.Thread):
 
     def __init__(self, serial_port="/dev/ttyACM0", baud_rate=115200):
         super().__init__(name="Hotplate", daemon=True)
-        self.serial_port = serial.Serial(serial_port, baud_rate, timeout=1)
+        self.serial = None
         self._current_temperature_c = 0
         self.target_temperature_c = 0
         self.logger = logging.getLogger("Main Logger")
@@ -32,12 +32,34 @@ class Hotplate(threading.Thread):
 
         time.sleep(2)  # Allow time for Arduino to reset
         self.logger.info("Hotplate initialized and serial connection established.")
+        
+    def connect(self):
+        """Connect to the control board and start the reader thread."""
+        if self.is_connected():
+            self.logger.error("Hotplate is already connected")
+        
+        
+        try:
+            self.serial = serial.Serial(self.com_port, 115200, timeout=None)
+            self.logger.info(f"Connected to hotplate on port {self.com_port}")
+        except serial.SerialException as e:
+            self.logger.error(f"Error connecting to hotplate: {e}")
+    
+    def disconnect(self):
+        if not self.is_connected():
+            return
+        
+        self.serial.close()
+        self.logger.debug("Hotplate Disconnected")
+            
+    def is_connected(self) -> bool:
+        return self.serial is not None and self.serial.is_open
 
     def get_temperature(self):
         """Read actual temperature from Arduino via serial."""
         try:
-            self.serial_port.write(b"GET_TEMP\n")
-            response = self.serial_port.readline().decode().strip()
+            #self.serial.write(b"GET_TEMP\n")
+            response = self.serial.readline().decode().strip()
             self.logger.debug(f"Raw response: {response}")
 
             if response.startswith("TEMP:"):
@@ -58,15 +80,15 @@ class Hotplate(threading.Thread):
         self.target_temperature_c = temperature
         command = f"SET_TEMP {temperature}\n"
         try:
-            self.serial_port.flushInput()  # Clears the input buffer
+            self.serial.flushInput()  # Clears the input buffer
             time.sleep(0.1)  # Small delay to ensure clean communication
 
-            self.serial_port.write(command.encode())
-            self.serial_port.flush()  # Ensure data is sent immediately
+            self.serial.write(command.encode())
+            self.serial.flush()  # Ensure data is sent immediately
             time.sleep(0.1)  # Small delay to allow Arduino to process
         
         # Read response from Arduino
-            response = self.serial_port.readline().decode().strip()
+            response = self.serial.readline().decode().strip()
             if response.startswith("TARGET SET"):
                 self.logger.info(f"Confirmed target temperature: {response}")
             else:

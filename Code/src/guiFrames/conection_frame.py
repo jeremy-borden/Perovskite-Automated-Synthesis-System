@@ -51,7 +51,7 @@ class ConnectionFrame(ctk.CTkFrame):
         self.connect_control_board_button = ctk.CTkButton(
             master=self,
             text="Connect",
-            width=100,
+            width=60,
             height=30,
             command=self._connect_control_board
         )
@@ -65,6 +65,9 @@ class ConnectionFrame(ctk.CTkFrame):
             height=20,
             font=("Arial", 10))
         self.control_board_status_label.grid(row=3, column=0, padx=5, pady=5, sticky="nw")
+        
+        self.control_board_usb_num = ctk.CTkEntry(master=self)
+        self.control_board_usb_num.grid(row=10, column=0, padx=5, pady=5, sticky="nw")
         
         # spincoater
         spincoater_image = ctk.CTkImage(
@@ -236,10 +239,12 @@ class ConnectionFrame(ctk.CTkFrame):
         self.after(1000, self._update)
 
     def _connect_control_board(self):
-        self.control_board.connect()
+        n = self.control_board_usb_num.get()
+        self.control_board.connect(n)
         self.connect_control_board_button.configure(state="disabled")
     
     def _connect_spincoater(self):
+        
         self.spin_coater.connect()
         self.connect_spincoater_button.configure(state="disabled")
         
