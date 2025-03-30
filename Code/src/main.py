@@ -70,7 +70,7 @@ if __name__ == "__main__":
     hotplate = Hotplate()
     # -- SPECTROMETER + INFEED --
     spectrometer = Spectrometer()
-     spectrometer.connect(1) 
+    spectrometer.connect(1) 
     
 
   
