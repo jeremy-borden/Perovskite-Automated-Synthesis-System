@@ -83,10 +83,11 @@ class Spectrometer:
             self.logger.warning("Spectrometer not connected.")
             return np.array([])
             
-        self.serial.reset_input_buffer()
         
         self.send_command(f"<itime:{self.integration_time}>")
         time.sleep(0.5)
+
+        self.serial.reset_input_buffer()
         
         self.serial.write(b"<read:1>\n")
         time.sleep(0.5)
@@ -115,7 +116,6 @@ class Spectrometer:
         # Store the collected data
         self.measurements[measurement_type] = intensities
         self.logger.info(f"Read {len(intensities)} intensity values for {measurement_type}.")
-
         return intensities
 
 
