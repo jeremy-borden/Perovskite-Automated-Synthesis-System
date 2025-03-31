@@ -77,7 +77,6 @@ class Spectrometer:
 
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
-        response = self.send_command("<read:1>")
         print(f"[TEST] Response from <read:1>: {response}")
 
         if not self.is_connected():
