@@ -79,9 +79,9 @@ class Spectrometer:
         """Read spectral intensity for a given measurement type"""
         self.serial.reset_input_buffer()
         self.serial.write(b"<read:1>\n")
-        time.sleep(0.5)
-        raw_data = self.serial.read(3204)
+        time.sleep(1.0)
         
+        raw_data = self.serial.read(3204)
         print(f"[DEBUG] Raw data length: {len(raw_data)}")
         
         if len(raw_data) < 3204:
