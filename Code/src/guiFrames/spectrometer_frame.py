@@ -57,8 +57,10 @@ class SpectrometerFrame(ctk.CTkFrame):
 
         try:
             self.status_label.configure(text="Measurement in Progress...")
-
-            wavelengths = self.spectrometer.read_wavelengths()
+            if not self.spectrometer.wavelengths:
+                 wavelengths = self.spectrometer.read_wavelengths()
+            else:
+                wavelengths = self.spectrometer.wavelengths
             
             self.spectrometer.send_command("<read:1>")
             intensities = self.spectrometer.read_spectrum("live")
