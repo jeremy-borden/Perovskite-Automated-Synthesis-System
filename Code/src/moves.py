@@ -295,7 +295,10 @@ class Dispatcher():
         for measurement in measurement_types:
             self.measure_spectrum(measurement)
             sleep(1.0) 
-
+            
+        save_all_to_csv(self.measurements, self.wavelengths)
+        plot_spectra(self.measurements, self.wavelengths)
+        
         self.logger.info("All spectrometer measurements completed successfully.")
     
     # -------- VIAL CAROUSEL MOVES --------
