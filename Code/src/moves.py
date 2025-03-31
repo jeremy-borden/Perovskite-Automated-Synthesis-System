@@ -294,6 +294,7 @@ class Dispatcher():
         
         for measurement in measurement_types:
             self.measure_spectrum(measurement)
+            sleep(1.0) 
 
         self.logger.info("All spectrometer measurements completed successfully.")
     
