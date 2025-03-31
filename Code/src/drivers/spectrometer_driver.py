@@ -82,6 +82,10 @@ class Spectrometer:
             return np.array([])
             
         self.serial.reset_input_buffer()
+        
+        self.send_command(f"<itime:{self.integration_time}>")
+        time.sleep(0.3)
+        
         self.serial.write(b"<read:1>\n")
         time.sleep(0.3)
         
