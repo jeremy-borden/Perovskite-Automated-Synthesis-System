@@ -260,7 +260,7 @@ class Dispatcher():
         self.logger.info(f"Starting spectrometer measurement: {measurement_type}")
 
         # Request wavelengths if not already retrieved
-        if not hasattr(self, "wavelengths") or not self.wavelengths:
+        if not hasattr(self, "wavelengths") or not isinstance(self.wavelengths, np.ndarray) or self.wavelengths.size == 0:
             self.logger.info("Retrieving wavelength data...")
             self.spectrometer.send_command("<wavs?>")
             self.wavelengths = self.spectrometer.read_wavelengths()
@@ -271,8 +271,13 @@ class Dispatcher():
         intensities = self.spectrometer.read_spectrum(measurement_type)
 
         # Store the measurement
-        if not hasattr(self, "measurements"):
-            self.measurements = {}
+        if isinstance(intensities, np.ndarray) and intensities.size > 0 and \
+            isinstance(self.wavelengths, np.ndarray) and self.wavelengths.size > 0 and \
+            intensities.shape == self.wavelengths.shape:
+
+                
+             if not hasattr(self, "measurements"):
+                self.measurements = {}
 
         self.measurements[measurement_type] = {
             "wavelengths": self.wavelengths,
@@ -280,7 +285,9 @@ class Dispatcher():
         }
 
         self.logger.info(f"Measurement '{measurement_type}' captured successfully.")
-
+        else:
+            self.logger.warning(f"Incomplete data for measurement '{measurement_type}'. Skipping.")
+        
     def automated_measurement(self):
         """Runs the full spectrometer measurement process."""
         measurement_types = ["Background", "Reference", "Sample"]
