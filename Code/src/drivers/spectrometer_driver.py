@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 class Spectrometer:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, integration_time=2000):
+    def __init__(self, integration_time=5000):
         self.logger = logging.getLogger("Main Logger")
         self.integration_time = integration_time
         self.serial = None
@@ -84,10 +84,10 @@ class Spectrometer:
         self.serial.reset_input_buffer()
         
         self.send_command(f"<itime:{self.integration_time}>")
-        time.sleep(0.3)
+        time.sleep(0.5)
         
         self.serial.write(b"<read:1>\n")
-        time.sleep(0.3)
+        time.sleep(0.5)
         
         raw_data = self.serial.read(3204)
         
