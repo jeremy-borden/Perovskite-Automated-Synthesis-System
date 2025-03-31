@@ -62,7 +62,7 @@ class SpectrometerFrame(ctk.CTkFrame):
             else:
                 wavelengths = self.spectrometer.wavelengths
             
-            self.spectrometer.send_command("<read:1>")
+            
             intensities = self.spectrometer.read_spectrum("live")
 
 
