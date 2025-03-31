@@ -284,7 +284,7 @@ class Dispatcher():
             "intensities": intensities
         }
 
-        self.logger.info(f"Measurement '{measurement_type}' captured successfully.")
+            self.logger.info(f"Measurement '{measurement_type}' captured successfully.")
         else:
             self.logger.warning(f"Incomplete data for measurement '{measurement_type}'. Skipping.")
         
