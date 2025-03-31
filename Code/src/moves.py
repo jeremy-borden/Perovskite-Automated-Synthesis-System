@@ -1,6 +1,7 @@
 from time import sleep
 from inspect import signature
 import logging
+import numpy as np
 
 from objects.toolhead import Toolhead
 from objects.hotplate import Hotplate
