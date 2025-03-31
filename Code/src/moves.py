@@ -279,10 +279,10 @@ class Dispatcher():
             if not hasattr(self, "measurements"):
                 self.measurements = {}
 
-        self.measurements[measurement_type] = {
-            "wavelengths": self.wavelengths,
-            "intensities": intensities
-        }
+            self.measurements[measurement_type] = {
+                "wavelengths": self.wavelengths,
+                "intensities": intensities
+            }
 
             self.logger.info(f"Measurement '{measurement_type}' captured successfully.")
         else:
