@@ -272,11 +272,11 @@ class Dispatcher():
 
         # Store the measurement
         if isinstance(intensities, np.ndarray) and intensities.size > 0 and \
-            isinstance(self.wavelengths, np.ndarray) and self.wavelengths.size > 0 and \
-            intensities.shape == self.wavelengths.shape:
+           isinstance(self.wavelengths, np.ndarray) and self.wavelengths.size > 0 and \
+           intensities.shape == self.wavelengths.shape:
 
                 
-             if not hasattr(self, "measurements"):
+            if not hasattr(self, "measurements"):
                 self.measurements = {}
 
         self.measurements[measurement_type] = {
