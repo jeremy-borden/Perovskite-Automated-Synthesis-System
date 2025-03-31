@@ -66,7 +66,7 @@ class SpectrometerFrame(ctk.CTkFrame):
             intensities = self.spectrometer.read_spectrum("live")
             
 
-            if intensities is not None and wavelengths is not None and len(intensities) == len(wavelengths):
+            if intensities.size > 0 and wavelengths.size > 0 and len(intensities) == len(wavelengths):
                 self.ax.clear()
                 self.ax.plot(wavelengths, intensities, color='blue', label="PL Spectrum")
                 self.ax.set_title("Intensity vs Wavelength")
