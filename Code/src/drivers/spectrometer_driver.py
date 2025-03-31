@@ -15,6 +15,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import logging
 import time
+import app
 from data_processor import plot_spectra, save_all_to_csv  
 
 
