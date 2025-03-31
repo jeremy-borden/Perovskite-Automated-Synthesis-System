@@ -263,7 +263,6 @@ class Dispatcher():
         # Request wavelengths if not already retrieved
         if not hasattr(self, "wavelengths") or not isinstance(self.wavelengths, np.ndarray) or self.wavelengths.size == 0:
             self.logger.info("Retrieving wavelength data...")
-            self.spectrometer.send_command("<wavs?>")
             self.wavelengths = self.spectrometer.read_wavelengths()
 
         # Capture intensity data
