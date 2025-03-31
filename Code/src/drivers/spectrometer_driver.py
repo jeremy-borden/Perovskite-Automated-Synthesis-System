@@ -77,11 +77,16 @@ class Spectrometer:
 
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
+        if not self.is_connected():
+            self.logger.warning("Spectrometer not connected.")
+            return np.array([])
+            
         self.serial.reset_input_buffer()
         self.serial.write(b"<read:1>\n")
-        time.sleep(1.0)
+        time.sleep(0.3)
         
         raw_data = self.serial.read(3204)
+        
         print(f"[DEBUG] Raw data length: {len(raw_data)}")
         
         if len(raw_data) < 3204:
