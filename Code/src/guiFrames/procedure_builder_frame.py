@@ -36,6 +36,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.step_dropdown.grid(row=0, column=1,
             padx=5, pady=5,
             sticky="nwe")
+   
         
         # add step button
         self.add_step_button = ctk.CTkButton(
@@ -88,7 +89,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             command=self._export)
         self.export_button.grid(
             row=5, column=1,
-            padx=5, pady=5,
+            padx=5, pady=5, 
             sticky="nwe")
 
         # Loop Count
@@ -101,9 +102,14 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         
     def _bind_step_widgets(self, step_frame):
         """Recursively bind click events to all widgets in step frame"""
+        
         step_frame.bind('<Button-1>', lambda e: self._select_step(e,))
         
         for child in step_frame.winfo_children():
+            # Skip binding for checkboxes since it disables them
+            if isinstance(child, ctk.CTkCheckBox):
+                continue
+            
             child.bind('<Button-1>', lambda e: self._select_step(e,))
             if len(child.winfo_children()) > 0:
                 self._bind_step_widgets(child)
@@ -233,7 +239,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
                     for initial_value, final_value in zip(step.get_entries(), variation_step.get_entries()):
                 
                         # skip interpolation and use the first value when entry isnt a number
-                        if type(initial_value) is not float and type(initial_value) is not int:
+                        if (type(initial_value) is not float) and (type(initial_value) is not int):
                             partial_step.append(initial_value)
                         else:
                             partial_step.append(initial_value + (final_value-initial_value)*(loop)/(loop_count-1)) #interpolate between first and final value
@@ -297,7 +303,7 @@ class StepFrame(ctk.CTkFrame):
         # main step frame
         self.step_frame = ctk.CTkFrame(
             master=self,
-            width=350)
+            width=200, height=20)
         self.step_frame.grid(
             row=1, column=0, columnspan=2,
             padx=5, pady=5,
@@ -344,10 +350,10 @@ class LabelEntry(ctk.CTkFrame):
             row=0, column=0,
             padx=5, pady=5,sticky="nwe")
         
-        # create a proper input (checkbox or entry) based on entry type
+        # create input (checkbox or entry) based on entry type
         if entry_type is bool:
             self.entry = ctk.CTkCheckBox(
-                master=self, text="",
+                master=self, text="", 
                 width=50,)
         else:
             self.entry = ctk.CTkEntry(
@@ -394,7 +400,8 @@ class peepee():
         
         self.moves = {
             "fardddd_yo": self.fardddd_yo,
-            "shit": self.shit
+            "shit": self.shit,
+            "nothing": self.nothing
         }
         
     def shit(self, a: int, b: str, bool_ean: bool):
@@ -402,6 +409,9 @@ class peepee():
     
     def fardddd_yo(self, inbt: int, flot: float, str: str):
         pass # gas
+    
+    def nothing(self):
+        pass
     
     def get_dick(self):
         return self.moves
