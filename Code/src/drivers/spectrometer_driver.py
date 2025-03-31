@@ -77,7 +77,7 @@ class Spectrometer:
 
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
-        print(f"[TEST] Response from <read:1>: {response}")
+        print("[TEST] Triggering <read:1>...")
 
         if not self.is_connected():
             self.logger.warning("Spectrometer not connected.")
