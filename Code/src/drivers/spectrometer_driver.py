@@ -56,6 +56,7 @@ class Spectrometer:
         """Send a command to the spectrometer and return the response"""
         if self.is_connected():
             self.serial.write((command + "\n").encode())
+            time.sleep(0.1)
             response = self.serial.readline().decode().strip()
             self.logger.info(f"Sent: {command}, Received: {response}")
             return response
@@ -76,7 +77,7 @@ class Spectrometer:
 
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
-        self.send_command("<read:1>")
+        self.serial.write(b"<read:1>\n"
         self.serial.reset_input_buffer()
         time.sleep(0.5)
         raw_data = self.serial.read(3204)
