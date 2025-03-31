@@ -77,7 +77,7 @@ class Spectrometer:
 
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
-        self.serial.write(b"<read:1>\n"
+        self.serial.write(b"<read:1>\n")
         self.serial.reset_input_buffer()
         time.sleep(0.5)
         raw_data = self.serial.read(3204)
