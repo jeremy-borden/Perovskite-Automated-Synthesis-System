@@ -77,6 +77,9 @@ class Spectrometer:
 
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
+        response = self.send_command("<read:1>")
+        print(f"[TEST] Response from <read:1>: {response}")
+
         if not self.is_connected():
             self.logger.warning("Spectrometer not connected.")
             return np.array([])
@@ -88,7 +91,13 @@ class Spectrometer:
         
         self.serial.write(b"<read:1>\n")
         time.sleep(0.5)
-        
+
+        while True:
+            line = self.serial.readline()
+            if not line or b"<" not in line:
+                break
+            self.logger.debug(f"Flushed echo: {line.decode(errors='ignore').strip()}")
+            
         raw_data = self.serial.read(3204)
         
         print(f"[DEBUG] Raw data length: {len(raw_data)}")
