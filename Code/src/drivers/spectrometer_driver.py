@@ -97,8 +97,11 @@ class Spectrometer:
             self.logger.warning("Incomplete spectrum data received.")
             return np.array([])
 
-        
-        intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
+        try:
+            intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
+        except Exception as e:
+            self.logger.error(f"Failed to parse intensity data: {e}")
+            return np.array([])
 
         # Store the collected data
         self.measurements[measurement_type] = intensities
