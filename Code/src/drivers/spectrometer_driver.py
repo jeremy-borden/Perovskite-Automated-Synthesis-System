@@ -88,15 +88,6 @@ class Spectrometer:
         self.send_command("<read:1>")
         time.sleep(0.5)
 
-
-        while self.serial.in_waiting:
-            line = self.serial.readline()
-            if b"<" in line:
-                self.logger.debug(f"Flushed echo: {line.decode(errors='ignore').strip()}")
-                break
-            else:
-                break
-            
         raw_data = self.serial.read(3204)
         
         print(f"[DEBUG] Raw data length: {len(raw_data)}")
