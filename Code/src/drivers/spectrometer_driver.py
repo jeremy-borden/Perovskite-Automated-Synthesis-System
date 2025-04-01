@@ -89,14 +89,15 @@ class Spectrometer:
 
         self.serial.reset_input_buffer()
         
-        self.serial.write(b"<read:1>\n")
-        time.sleep(0.5)
+        self.send_command("<read:1>")
 
-        while True:
+        while self.serial.in_waiting:
             line = self.serial.readline()
-            if not line or b"<" not in line:
+            if b"<" in line:
+                self.logger.debug(f"Flushed echo: {line.decode(errors='ignore').strip()}")
                 break
-            self.logger.debug(f"Flushed echo: {line.decode(errors='ignore').strip()}")
+            else:
+                break
             
         raw_data = self.serial.read(3204)
         
