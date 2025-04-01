@@ -83,13 +83,11 @@ class Spectrometer:
             self.logger.warning("Spectrometer not connected.")
             return np.array([])
             
-        
+        self.serial.reset_input_buffer()
         self.send_command(f"<itime:{self.integration_time}>")
+        self.send_command("<read:1>")
         time.sleep(0.5)
 
-        self.serial.reset_input_buffer()
-        
-        self.send_command("<read:1>")
 
         while self.serial.in_waiting:
             line = self.serial.readline()
