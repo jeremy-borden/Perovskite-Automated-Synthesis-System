@@ -57,7 +57,8 @@ class SpectrometerFrame(ctk.CTkFrame):
 
         try:
             self.status_label.configure(text="Measurement in Progress...")
-            if not self.spectrometer.wavelengths:
+            if not isinstance(self.spectrometer.wavelengths, np.ndarray) or self.spectrometer.wavelengths.size == 0:
+
                  wavelengths = self.spectrometer.read_wavelengths()
             else:
                 wavelengths = self.spectrometer.wavelengths
