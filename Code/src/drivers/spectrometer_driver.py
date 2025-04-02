@@ -85,7 +85,7 @@ class Spectrometer:
             
         self.serial.reset_input_buffer()
         self.send_command(f"<itime:{self.integration_time}>")
-        self.send_command("<read:1>")
+        self.serial.write(b"<read:1>\n")
         time.sleep(0.5)
 
         raw_data = self.serial.read(3204)
