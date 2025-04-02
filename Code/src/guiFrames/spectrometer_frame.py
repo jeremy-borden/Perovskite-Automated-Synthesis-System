@@ -39,7 +39,7 @@ class SpectrometerFrame(ctk.CTkFrame):
         self.status_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
         # Matplotlib figure for plotting
-        self.figure, self.ax = plt.subplots(figsize=(5, 3))
+        self.figure, self.ax = plt.subplots(figsize=(4.8, 2.6))
         self.ax.set_title("Intensity vs Wavelength")
         self.ax.set_xlabel("Wavelength (nm)")
         self.ax.set_ylabel("Intensity")
