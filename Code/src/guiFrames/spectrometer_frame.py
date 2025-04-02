@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sys
 import os
+import numpy as np
 
 # get current directory so we can import from outside guiFrames folder
 pp = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
