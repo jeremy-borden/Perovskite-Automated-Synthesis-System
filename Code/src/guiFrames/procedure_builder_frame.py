@@ -11,7 +11,7 @@ sys.path.append(path)
 from drivers.procedure_file_driver import ProcedureFile
 
 class ProcedureBuilderFrame(ctk.CTkFrame):
-    def __init__(self, master, moves):
+    def __init__(self, master, moves, procedure_handler):
         super().__init__(master=master,border_color="#1f6aa5",border_width=2,
                          width=600)
         self.logger=logging.getLogger("Main Logger")
@@ -19,6 +19,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.variation_step_list = []
         self.selected_step = None
         self.moves = moves
+        self.procedure_handler = procedure_handler
         
         # step holding frame
         self.step_frame = ctk.CTkScrollableFrame(
@@ -90,6 +91,17 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.export_button.grid(
             row=5, column=1,
             padx=5, pady=5, 
+            sticky="nwe")
+        
+        # quick run button
+        self.quick_run_button = ctk.CTkButton(
+            master=self,
+            text="Quick Run",
+            width=120, height=50,
+            command=self._quick_run)
+        self.quick_run_button.grid(
+            row=6, column=1,
+            padx=5, pady=5,
             sticky="nwe")
 
         # Loop Count
@@ -221,7 +233,20 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.selected_step = None
         self._update()
         
-    def _export(self):
+    def _quick_run(self):
+        """Quickly run the procedure without exporting."""
+        
+        procedure = self._get_procedure()
+        self.procedure_handler.set_procedure(procedure["Procedure"])
+        self.procedure_handler.begin()
+        self.logger.info("Quick Run started!")
+        
+    def _get_procedure(self):
+        """Returns a runnable procedure list of moves
+
+        Returns:
+            _type_: _description_
+        """
         procedure = {"Procedure": []}
         try:
             loop_count = self.loop_count.get_entry()
@@ -233,23 +258,21 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             for step, variation_step in zip(self.step_list, self.variation_step_list):
                 partial_step = [step.function.__name__] # get step name
                 if variation_step is not None: # if step should vary throughout procedures
-                    
-                    
- 
                     for initial_value, final_value in zip(step.get_entries(), variation_step.get_entries()):
-                
                         # skip interpolation and use the first value when entry isnt a number
                         if (type(initial_value) is not float) and (type(initial_value) is not int):
                             partial_step.append(initial_value)
                         else:
                             partial_step.append(initial_value + (final_value-initial_value)*(loop)/(loop_count-1)) #interpolate between first and final value
-                    
                 else:
                     for entry in step.get_entries():
-
-                        partial_step.append(entry)
-                        
+                        partial_step.append(entry)  
                 procedure["Procedure"].append(partial_step)
+        
+            return procedure
+        
+    def _export(self):
+        procedure = self._get_procedure()
             
         file_path = filedialog.asksaveasfilename(
             defaultextension=("Yaml files","*.yml*"),

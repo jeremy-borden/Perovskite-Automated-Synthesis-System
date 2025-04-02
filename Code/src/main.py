@@ -116,7 +116,7 @@ if __name__ == "__main__":
     connection_frame = ConnectionFrame(app, control_board,spin_coater,hotplate,camera,spectrometer)
     camera_frame = CameraFrame(app, camera)
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
-    procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict)
+    procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict, procedure_handler)
     spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
     
     # putting the frames on the gui
