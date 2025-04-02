@@ -74,6 +74,7 @@ class SpectrometerFrame(ctk.CTkFrame):
                 self.ax.set_xlabel("Wavelength (nm)")
                 self.ax.set_ylabel("Intensity")
                 self.ax.legend()
+                self.figure.tight_layout()
                 self.canvas.draw()
 
                 self.status_label.configure(text="Measurement Complete")
