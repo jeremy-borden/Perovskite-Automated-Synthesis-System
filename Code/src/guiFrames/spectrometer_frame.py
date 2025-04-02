@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sys
 import os
+import numpy as np
 
 # get current directory so we can import from outside guiFrames folder
 pp = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
@@ -39,7 +40,7 @@ class SpectrometerFrame(ctk.CTkFrame):
         self.status_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
         # Matplotlib figure for plotting
-        self.figure, self.ax = plt.subplots(figsize=(5, 3))
+        self.figure, self.ax = plt.subplots(figsize=(4.8, 2.6))
         self.ax.set_title("Intensity vs Wavelength")
         self.ax.set_xlabel("Wavelength (nm)")
         self.ax.set_ylabel("Intensity")
@@ -57,7 +58,8 @@ class SpectrometerFrame(ctk.CTkFrame):
 
         try:
             self.status_label.configure(text="Measurement in Progress...")
-            if not self.spectrometer.wavelengths:
+            if not isinstance(self.spectrometer.wavelengths, np.ndarray) or self.spectrometer.wavelengths.size == 0:
+
                  wavelengths = self.spectrometer.read_wavelengths()
             else:
                 wavelengths = self.spectrometer.wavelengths
@@ -73,6 +75,7 @@ class SpectrometerFrame(ctk.CTkFrame):
                 self.ax.set_xlabel("Wavelength (nm)")
                 self.ax.set_ylabel("Intensity")
                 self.ax.legend()
+                self.figure.tight_layout()
                 self.canvas.draw()
 
                 self.status_label.configure(text="Measurement Complete")

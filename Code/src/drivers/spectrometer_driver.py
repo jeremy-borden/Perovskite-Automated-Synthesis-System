@@ -82,9 +82,15 @@ class Spectrometer:
         if not self.is_connected():
             self.logger.warning("Spectrometer not connected.")
             return np.array([])
-            
-        self.serial.reset_input_buffer()
+
+        self.send_command("<ext:0>")        # Disable external trigger
+        self.send_command("<roll:0>")       # Disable rolling integration
+        self.send_command("<preflush:2>")   # Default preflush behavior
+
         self.send_command(f"<itime:{self.integration_time}>")
+        
+        self.serial.reset_input_buffer()
+       
         self.serial.write(b"<read:1>\n")
         time.sleep(0.5)
 
@@ -92,10 +98,12 @@ class Spectrometer:
         
         print(f"[DEBUG] Raw data length: {len(raw_data)}")
         print("[DEBUG] Raw data (hex preview):", raw_data[:64].hex(" ", 1))  
+
         
         if len(raw_data) < 3204:
             self.logger.warning("Incomplete spectrum data received.")
             return np.array([])
+            
 
         try:
             intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
