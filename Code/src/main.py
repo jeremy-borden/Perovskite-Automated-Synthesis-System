@@ -11,6 +11,7 @@ from drivers.procedure_file_driver import ProcedureFile
 from drivers.spectrometer_driver import Spectrometer
 # -- OBJECT IMPORT --
 from guiFrames import procedure_builder_frame
+from guiFrames import locations_frame
 from objects.vial_carousel import VialCarousel
 from objects.infeed import Infeed
 from objects.hotplate import Hotplate
@@ -25,6 +26,7 @@ from guiFrames.camera_frame import CameraFrame
 from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
 from guiFrames.spectrometer_frame import SpectrometerFrame
+from guiFrames.locations_frame import LocationFrame
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
@@ -118,15 +120,17 @@ if __name__ == "__main__":
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
     procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict, procedure_handler)
     spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
-    
+    location_frame = LocationFrame(master=app)
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
     connection_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+    spectrometer_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
     console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
+    procedure_builder_frame.grid(row=1, column=1, rowspan=2, sticky="nsew")
     camera_frame.grid(row=1, column=2, padx=5, pady=5,sticky="nsew")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
-    procedure_builder_frame.grid(row=1, column=1, rowspan=2, sticky="nsew")
-    spectrometer_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+    location_frame.grid(row=2, column=2,padx=5, pady=5, sticky="nsew")
+
  
     
     # run the gui

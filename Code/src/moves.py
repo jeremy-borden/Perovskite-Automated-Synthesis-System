@@ -3,6 +3,7 @@ from inspect import signature
 import logging
 import numpy as np
 
+from drivers.procedure_file_driver import ProcedureFile
 from objects.toolhead import Toolhead
 from objects.hotplate import Hotplate
 from objects.gripper import Gripper
@@ -13,7 +14,7 @@ from objects.vial_carousel import VialCarousel
 from drivers.camera_driver import Camera
 from drivers.spincoater_driver import SpinCoater
 from drivers.spectrometer_driver import Spectrometer
-
+from drivers.procedure_file_driver import ProcedureFile
 from image_processing import ImageProcessor
 
 class Dispatcher():
@@ -40,6 +41,7 @@ class Dispatcher():
             "home": self.home,
             
             "move_toolhead": self.move_toolhead,
+            "move_to_location": self.move_to_location,
             
             "set_temperature": self.set_temperature,
             "wait_for_temperature": self.wait_for_temperature,
@@ -64,7 +66,7 @@ class Dispatcher():
         
         
         # procedure coordination info
-        
+        self.locations = []
         self.vial = 0
         
     
@@ -101,11 +103,15 @@ class Dispatcher():
         return valid
 
 # --------- GENERAL MOVES --------
+
     def home(self):
+        """ Reset the machine"""
         self.control_board.send_message("G28 Z")
         self.control_board.send_message("G28 Y")
         self.control_board.send_message("G28 X")
         self.gripper.open()
+        self.locations = ProcedureFile.Open("locations.yml")
+        # TODO create tip matrix thing
         
     def kill(self):
         self.control_board.kill()
@@ -132,22 +138,36 @@ class Dispatcher():
             sleep(1)
 
     # --------- TOOLHEAD MOVES --------
-    def move_toolhead(self, x: float, y: float, z: float, speed: int = 1000):
+    def move_toolhead(self, x: float, y: float, z: float):
         """Move the toolhead to the specified coordiantes """
-        self.toolhead.set_position(x,y,z)
+        self.toolhead.move_axis("X", x)
+        self.toolhead.move_axis("Y", y)
+        self.toolhead.move_axis("Z", z)
+        
+    def move_to_location(self, destination):
+        location_names = [name[0] for name in self.locations]
+        if destination not in location_names:
+            raise f"Location name {destination} not found"
 
+        
+        for location in self.locations:
+            if destination == location[0]:
+                self.toolhead.move_axis("Z", 200)
+                x = location[1]
+                y = location[2]
+                z = location[3]
+                self.move_toolhead(x,y,z)
+        
+        
     # --------- SPIN COATER MOVES --------
-    def spin(self, timelist, speedlist):
-        self.spin_coater.clear_steps()
-        for time, speed in zip(timelist, speedlist):
-            self.spin_coater.add_step(speed, time)
-        self.spin_coater.run() 
         
     def add_spincoater_step(self, rpm: int, spin_time_seconds: int):
         """ Command the spincoater to spin at a specified speed for a specified time"""
         
         self.spin_coater.add_step(rpm, spin_time_seconds)
-        
+    def run_spin_coater(self, wait_to_finish: bool):
+        self.spin_coater.run(wait_to_finish=wait_to_finish)
+    
     # --------- GRIPPER MOVES --------
     def open_gripper(self):
         self.gripper.open()
