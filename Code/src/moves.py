@@ -52,8 +52,6 @@ class Dispatcher():
             
             "set_gripper_angle": self.set_gripper_angle,
             
-            "spin": self.spin,
-            
             "open_infeed": self.open_infeed,
             "close_infeed": self.close_infeed,
             
