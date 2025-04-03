@@ -102,7 +102,9 @@ class Dispatcher():
 
 # --------- GENERAL MOVES --------
     def home(self):
-        self.control_board.send_message("G28")
+        self.control_board.send_message("G28 Z")
+        self.control_board.send_message("G28 Y")
+        self.control_board.send_message("G28 X")
         self.gripper.open()
         
     def kill(self):
@@ -206,9 +208,7 @@ class Dispatcher():
         self.toolhead.move_axis("Z", 150) # move to top
         
         # TODO move over vial carousel opening
-        self.toolhead.move_axis("X", None)
-        self.toolhead.move_axis("Y", None)
-        self.toolhead.move_axis("Z", None)
+        self.move_toolhead(None, None, None)
         
         self.vial_carousel.set_vial(vial_num)
 
@@ -240,7 +240,7 @@ class Dispatcher():
         self.pippete_handler.dispense_all(duration_s)
         
     def get_pippete(self, pippete_num: int):
-        self.toolhead.set_position(900, 100, 50)
+        pass
         
     def eject_tip(self):
         self.pippete_handler.eject_tip()
