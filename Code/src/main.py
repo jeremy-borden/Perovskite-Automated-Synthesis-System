@@ -91,7 +91,7 @@ if __name__ == "__main__":
                             infeed=infeed,
                             spectrometer=spectrometer,
                             vial_carousel=vial_carousel,
-                            pippete_handler=pipette_handler
+                            pippete_handler=pipette_handler,
                             tip_matrix=tip_matrix)
     
     procedure_handler = ProcedureHandler(dispatcher=dispatcher)
