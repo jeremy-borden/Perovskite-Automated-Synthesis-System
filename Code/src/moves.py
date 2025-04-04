@@ -112,7 +112,7 @@ class Dispatcher():
         self.toolhead.home()
         self.gripper.open()
         self.tip_matrix.refill_tips()
-        self.locations = ProcedureFile.Open("locations.yml")
+        self.locations = ProcedureFile.Open("persistant/locations.yml")
         # TODO create tip matrix thing
         
     def kill(self):
