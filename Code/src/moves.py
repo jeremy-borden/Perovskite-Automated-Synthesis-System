@@ -104,9 +104,7 @@ class Dispatcher():
 
     def home(self):
         """ Reset the machine"""
-        self.control_board.send_message("G28 Z")
-        self.control_board.send_message("G28 Y")
-        self.control_board.send_message("G28 X")
+        self.toolhead.home()
         self.gripper.open()
         self.locations = ProcedureFile.Open("locations.yml")
         # TODO create tip matrix thing
