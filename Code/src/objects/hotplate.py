@@ -60,6 +60,7 @@ class Hotplate(threading.Thread):
             time.sleep(0.5)
             response = self.serial.readline().decode().strip()
             #self.logger.debug(f"Raw response: {response}")
+            temperature = None;
 
             if response.startswith("TEMP:"):
                 temperature = float(response.split(":")[1])
