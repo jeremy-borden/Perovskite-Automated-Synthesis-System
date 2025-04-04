@@ -10,8 +10,8 @@ from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 from drivers.spectrometer_driver import Spectrometer
 # -- OBJECT IMPORT --
-from guiFrames import procedure_builder_frame
-from guiFrames import locations_frame
+
+from objects.tip_matrix import TipMatrix
 from objects.vial_carousel import VialCarousel
 from objects.infeed import Infeed
 from objects.hotplate import Hotplate
@@ -74,7 +74,8 @@ if __name__ == "__main__":
     spectrometer = Spectrometer()
     #spectrometer.connect(0) 
     
-
+    # -- TIP MATRIX --
+    tip_matrix = TipMatrix()
   
     infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,)
     infeed = Infeed(infeed_servo)
@@ -90,7 +91,8 @@ if __name__ == "__main__":
                             infeed=infeed,
                             spectrometer=spectrometer,
                             vial_carousel=vial_carousel,
-                            pippete_handler=pipette_handler)
+                            pippete_handler=pipette_handler
+                            tip_matrix=tip_matrix)
     
     procedure_handler = ProcedureHandler(dispatcher=dispatcher)
     
