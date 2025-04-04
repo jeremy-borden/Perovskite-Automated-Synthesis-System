@@ -9,3 +9,6 @@ class Infeed():
         
     def open(self):
         self.servo.angle = 0
+    
+    def set_angle(self, angle):
+        self.servo.angle = angle

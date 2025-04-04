@@ -24,13 +24,15 @@ class ControlBoard():
         self.reader_thread = None
 
         self.received_ok = threading.Event()
+        
+        self.relative_positioning_enabled = False
 
     def connect(self, port_num):
         """Connect to the control board and start the reader thread."""
         if self.is_connected():
             self.logger.error("Control board is already connected")
         port = "/dev/ttyACM" + str(port_num)
-        
+        port = "/dev/control_board"
         try:
             self.serial = serial.Serial(port, 115200, timeout=None)
             self._begin_reader_thread()
@@ -85,11 +87,13 @@ class ControlBoard():
         if axis not in self.positions.keys():
             raise f"Invalid axis {axis}"
   
-        if relative:
-            self.send_message("G90")
-        else:
+        if relative and (not self.relative_positioning_enabled):
             self.send_message("G91")
-        
+            self.relative_positioning_enabled = True
+        elif (not relative) and self.relative_positioning_enabled:
+            self.send_message("G90")
+            self.relative_positioning_enabled = False
+            
         if feedrate_mm_per_minute:
             self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
         else:
@@ -128,13 +132,16 @@ class ControlBoardLineReader(serial.threaded.LineReader):
     def handle_line(self, line):
         """Process each received line."""
         line = line.strip()
-        self.logger.debug(f"Received: {line}")
+        #self.logger.debug(f"Received: {line}")
         
         #check if we recieve position data
+        #logging is inside so we dont send positions in the debug console to avoid clutter
         received_position_data = True
         for prefix in self.POSITION_PREFIXS:
             if prefix not in line:
                 received_position_data = False
+                self.logger.debug(f"Received: {line}")
+                break
                 
         if line == "ok":
             self.control_board.received_ok.set()  # Set the event when "DONE" is received
