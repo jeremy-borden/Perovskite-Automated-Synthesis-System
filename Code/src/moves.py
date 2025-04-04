@@ -148,7 +148,7 @@ class Dispatcher():
     def move_to_location(self, destination: str):
         location_names = [name[0] for name in self.locations]
         if destination not in location_names:
-            raise f"Location name {destination} not found"
+            raise ValueError(f"Location name {destination} not found")
 
         
         for location in self.locations:
@@ -217,9 +217,9 @@ class Dispatcher():
         # get all location names and check if inputs are valid
         location_names = [name[0] for name in self.locations] 
         if destination not in location_names:
-            raise f"Location name <{destination}> not found"
+            raise ValueError(f"Location name {destination} not found")
         if source not in location_names:
-            raise f"Location name <{source}> not found"
+            raise ValueError(f"Location name {source} not found")
         
         # raise machine to avoid collisions
         self.toolhead.move_axis("Z", 200)
@@ -238,7 +238,7 @@ class Dispatcher():
         lower_distance = 20 #distance gripper should lower in order to pick up slide
         location_names = [name[0] for name in self.locations] 
         if source not in location_names:
-            raise f"Location name <{source}> not found"
+            raise ValueError(f"Location name {source} not found")
         
         # raise machine to avoid collisions
         self.toolhead.move_axis("Z", 200)
@@ -254,7 +254,7 @@ class Dispatcher():
         lower_distance = 20 #distance gripper should lower in order to pick up slide
         location_names = [name[0] for name in self.locations]
         if destination not in location_names:
-            raise f"Location name <{destination}> not found"
+            raise ValueError(f"Location name {destination} not found")
         
         # raise machine to avoid collisions
         self.toolhead.move_axis("Z", 200)
