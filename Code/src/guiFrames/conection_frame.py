@@ -94,7 +94,7 @@ class ConnectionFrame(ctk.CTkFrame):
             width=50,height=50,
             command=self._send_entry)
         self.send_entry_button.grid(
-            row=4, column=3, rowspan=2, 
+            row=4, column=3, rowspan=3, 
             padx=5, pady=5, sticky="nw")
         
         self._update()
