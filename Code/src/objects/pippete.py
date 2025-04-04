@@ -15,7 +15,7 @@ class Pipette:
     PLUNGER_TOP_MM: float # location where the actuator is just above the plunger
     PLUNGER_BOTTOM_MM: float # location where the actuator presses the plunger to its limit
     PLUNGER_FLUSH_MM: float
-    last_fluid: str = None
+    NEEDS_BIG_TIP: bool 
     
 
 class PipetteHandler():
@@ -51,16 +51,6 @@ class PipetteHandler():
             return
         
         self.control_board.move_axis("B", position_mm, speed, False)
-        
-    # def set_actuator_position_ul(self, position_ul , feedrate):
-    #     if position_ul > self.current_pipette.MAX_VOLUME_UL or position_ul < 0:
-    #         return
-        
-        
-    #     ul_per_mm = self.current_pipette.MAX_VOLUME_UL/(self.current_pipette.PLUNGER_TOP_MM - self.current_pipette.PLUNGER_BOTTOM_MM)
-    #     self.current_fluid_volume_ul += volume_ul
-        
-    #     self.control_board.move_axis("B",  volume_ul*ul_per_mm, feedrate)
         
     def flush_pippete(self):
         """Presses the pippete beyond its normal limit to ensure all fluid is purged.

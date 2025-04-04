@@ -381,7 +381,7 @@ class LabelEntry(ctk.CTkFrame):
         else:
             self.entry = ctk.CTkEntry(
                 master=self,
-                width=50)
+                width=100)
             
         self.entry.grid(
             row=0, column=1,

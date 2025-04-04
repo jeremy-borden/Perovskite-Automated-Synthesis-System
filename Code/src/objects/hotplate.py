@@ -57,18 +57,18 @@ class Hotplate(threading.Thread):
         
         try:
             self.serial.write(b"GET_TEMP\n") # utf-8
-            time.sleep(0.2)
+            time.sleep(0.5)
             response = self.serial.readline().decode().strip()
             #self.logger.debug(f"Raw response: {response}")
 
             if response.startswith("TEMP:"):
-                self.current_temperature_c = float(response.split(":")[1])
+                temperature = float(response.split(":")[1])
             else:
                 self.logger.warning(f"Invalid response from Arduino: {response}")
         except Exception as e:
             self.logger.error(f"Error reading temperature: {e}")
 
-        return self.current_temperature_c
+        return temperature
         
     def set_temperature(self, temperature):
         """Send set temperature to Arduino and verify response."""
@@ -104,7 +104,7 @@ class Hotplate(threading.Thread):
         self.logger.info("Hotplate thread started.")
         while True:
             if self.is_connected():
-                self.get_temperature()
+                self.current_temperature_c = self.get_temperature()
             time.sleep(1)
 
 

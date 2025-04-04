@@ -62,8 +62,8 @@ if __name__ == "__main__":
     # -- PIPETTE HANDLER --
     tip_eject_servo = AngularServo(pin=27, min_angle=0, max_angle=270, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
     grabber_servo = AngularServo(pin=22, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
-    pipettes = [Pipette(200, 35, 20, 15, None),
-                Pipette(1000, 35, 20, 15, None)]
+    pipettes = [Pipette(200, 22, 4.5, 2.5, False),
+                Pipette(1000, 22, 4.5, 2.5, True)]
     pipette_handler = PipetteHandler(control_board=control_board,
                                      tip_eject_servo=tip_eject_servo, grabber_servo=grabber_servo,
                                      pipettes=pipettes)

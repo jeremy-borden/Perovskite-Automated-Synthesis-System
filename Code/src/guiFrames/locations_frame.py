@@ -13,7 +13,6 @@ class LocationFrame(ctk.CTkScrollableFrame):
         super().__init__(master=master, width=300)
         self.location_entries = []
         self._load_locations()
-        print(len(self.location_entries))
         
         # save button
         self.save_button = ctk.CTkButton(master=self, text="Save",

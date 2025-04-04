@@ -10,6 +10,7 @@ from objects.gripper import Gripper
 from objects.infeed import Infeed
 from objects.pippete import PipetteHandler
 from objects.vial_carousel import VialCarousel
+from objects.tip_matrix import TipMatrix
 
 from drivers.camera_driver import Camera
 from drivers.spincoater_driver import SpinCoater
@@ -20,7 +21,7 @@ from image_processing import ImageProcessor
 class Dispatcher():
     def __init__(self, spin_coater: SpinCoater, hotplate: Hotplate, 
                  camera: Camera, gripper: Gripper, infeed: Infeed, pippete_handler: PipetteHandler,
-                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer):
+                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer, tip_matrix: TipMatrix):
         self.logger = logging.getLogger("Main Logger")
         
         self.toolhead = toolhead
@@ -32,6 +33,7 @@ class Dispatcher():
         self.hotplate = hotplate
         self.vial_carousel = vial_carousel
         self.spectrometer = spectrometer
+        self.tip_matrix = tip_matrix
         
         ImageProcessor.set_detector()
 
@@ -50,13 +52,12 @@ class Dispatcher():
             "open_gripper": self.open_gripper,
             "close_gripper": self.close_gripper,
             
-            "set_gripper_angle": self.set_gripper_angle,
             
             "open_infeed": self.open_infeed,
             "close_infeed": self.close_infeed,
             
             "extract": self.extract,
-            "eject_tip": self.eject_tip,
+            "replace_tip": self.replace_tip,
 
             "measure_spectrum": self.measure_spectrum,
             "automated_measurement": self.automated_measurement,
@@ -67,7 +68,6 @@ class Dispatcher():
         self.locations = []
         self.vial = 0
         
-    
     def validate_moves(self, moves: list) -> bool:
         """Validates a list of moves by checking if the move exists in the dispatcher.
         Also checks if the number of args is correct
@@ -106,6 +106,7 @@ class Dispatcher():
         """ Reset the machine"""
         self.toolhead.home()
         self.gripper.open()
+        self.tip_matrix.refill_tips()
         self.locations = ProcedureFile.Open("locations.yml")
         # TODO create tip matrix thing
         
@@ -126,7 +127,6 @@ class Dispatcher():
     
     #  --------- HOTPLATE MOVES --------
     def set_temperature(self, temperature_c: int):
-        self.logger.debug("hi")
         self.hotplate.set_temperature(temperature_c)
     
     def wait_for_temperature(self, target_temperature: int, threshold: int):
@@ -153,10 +153,8 @@ class Dispatcher():
                 y = location[2]
                 z = location[3]
                 self.move_toolhead(x,y,z)
-        
-        
+         
     # --------- SPIN COATER MOVES --------
-        
     def add_spincoater_step(self, rpm: int, spin_time_seconds: int):
         """ Command the spincoater to spin at a specified speed for a specified time"""
         
@@ -204,11 +202,20 @@ class Dispatcher():
         angle0 = (90-angle0) + 25
         self.gripper.set_arm_angle(int(angle0))
         
-    def working_slide_to(self, location):
+    def move_slide_to(self, location):
         """ pick up the slide currently being worked on and move it to the specified location"""
         
         
     # -------- PIPPETE MOVES --------
+    def replace_tip(self):
+        self.move_to_location("tip dropoff")
+        self.pippete_handler.eject_tip()
+        
+            
+        x,y,z = self.tip_matrix.get_next_tip_coords(self.pippete_handler.current_pipette.NEEDS_BIG_TIP)
+        self.move_toolhead(x,y,z)
+        self.toolhead.move_axis
+    
     def extract(self, volume_ul: int):
             """ Assuming we are at the vial carousel, the system will extract fluid.
             The gantry will "dip" into the vial by the amount specified"""
@@ -249,6 +256,39 @@ class Dispatcher():
         self.pippete_handler.dispense_all(2)
         self.toolhead.move_axis("Y", 10, relative=True)
         
+    def mix_fluid(self, source_vial_1: int, amount_1: int, source_vial_2: int, amount_2: int, destination_vial: int):
+        lower_amount = 10 #distance required for pipette to dip into vial
+        if self.pippete_handler.current_pipette.NEEDS_BIG_TIP == False:
+            lower_amount +=25
+
+            
+        self.move_to_location("vial carousel")
+        # draw from first vial
+        self.vial_carousel.set_vial(source_vial_1)
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.pippete_handler.draw_ul(amount_1)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        # dispense fluid 1 into destination
+        self.vial_carousel.set_vial(destination_vial)
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.pippete_handler.dispense_all(1)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        # draw from second vial
+        self.vial_carousel.set_vial(source_vial_2)
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.pippete_handler.draw_ul(amount_2)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        # dispense fluid 2 into destination
+        self.vial_carousel.set_vial(destination_vial)
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.pippete_handler.dispense_all(1)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        #mix fluids together
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        for i in range(5):
+            self.pippete_handler.draw_ul(50)
+            self.pippete_handler.dispense_all(1)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
         
     def dispense(self, duration_s):
         """ Dispense all fluid in pippete, assuming there is any"""

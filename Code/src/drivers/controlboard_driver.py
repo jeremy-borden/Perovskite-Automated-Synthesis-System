@@ -80,7 +80,7 @@ class ControlBoard():
         self.reader_thread.write(message.encode("utf-8"))
         self.logger.debug(f"Sending message: {message}")
         
-    def move_axis(self, axis: str, distance_mm: float, feedrate_mm_per_minute: int = None, relative: bool = False):
+    def move_axis(self, axis: str, distance_mm: float, feedrate_mm_per_minute: int = None, relative: bool = False, finish_move: bool = True):
         """ Takes in a list of axes, distances and speeds to move the gantry"""
         if axis not in self.positions.keys():
             raise f"Invalid axis {axis}"
@@ -94,6 +94,9 @@ class ControlBoard():
             self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
         else:
             self.send_message(f"G0 {axis}{distance_mm}")
+            
+        if finish_move:
+            self.finish_moves()
 
     def finish_moves(self):
         """Wait for the move to finish"""
