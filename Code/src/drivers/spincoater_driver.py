@@ -19,11 +19,11 @@ class SpinCoater():
         
         self.done = threading.Event()
         
-    def connect(self, port_num):
+    def connect(self):
         if self.is_connected():
             self.logger.error("Spin Coater is already connected")
             return
-        port = "/dev/ttyACM"+str(port_num)
+        port = "/dev/spin_coater"
         try:
             self.serial = serial.Serial(port, 9600, timeout=None)
             self._begin_reader_thread()

@@ -31,11 +31,11 @@ class Spectrometer:
         self.wavelengths = []
         self.measurements = {}  # to store intensities for Background, Reference, and Sample
 
-    def connect(self, port_num):
+    def connect(self):
         """Establish connection to the spectrometer"""
         
         
-        port = "/dev/ttyACM" + str(port_num)
+        port = "/dev/spectrometer"
         try:
             self.serial = serial.Serial(port, baudrate=115200, timeout=5)
             self.logger.info(f"Connected to spectrometer on {port}")

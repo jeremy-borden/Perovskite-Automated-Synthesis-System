@@ -109,23 +109,19 @@ class ConnectionFrame(ctk.CTkFrame):
         self.after(1000, self._update)
 
     def _connect_control_board(self):
-        port_num = self.control_board_connection.get_port()
-        self.control_board.connect(port_num)
+        self.control_board.connect()
         self.control_board_connection.set_connection_status(True)
     
     def _connect_spin_coater(self):
-        port_num = self.control_board_connection.get_port()
-        self.spin_coater.connect(port_num)
+        self.spin_coater.connect()
         self.spin_coater_connection.set_connection_status(True)
         
     def _connect_hotplate(self):
-        port_num = self.hotplate_connection.get_port()
-        self.hotplate.connect(port_num)
+        self.hotplate.connect()
         self.hotplate_connection.set_connection_status(True)
         
     def _connect_spectrometer(self):
-        port_num = self.spectrometer_connection.get_port()
-        self.spectrometer.connect(port_num)
+        self.spectrometer.connect()
         self.spectrometer_connection.set_connection_status(True)
         
     def _connect_camera(self):
@@ -177,20 +173,10 @@ class NameLater(ctk.CTkFrame):
         # Connect button
         self.connect_button = ctk.CTkButton(
             master=self, text="Connect",
-            width=60, height=20,
+            width=100, height=20,
             command=command)
         self.connect_button.grid(
             row=2, column=0, 
-            padx=5, pady=5, 
-            sticky="nw")
-        # Port Selection
-        self.port_num = ctk.CTkOptionMenu(
-            master=self,
-            width=30, height=20,
-            values=["0","1","2","3","4","5","6"])
-        self.port_num.set(str(default_port))
-        self.port_num.grid(
-            row=2, column=1, 
             padx=5, pady=5, 
             sticky="nw")
       
@@ -204,9 +190,6 @@ class NameLater(ctk.CTkFrame):
             # check prevents it from glitching out and updating constantly
             if self.connect_button.cget("state") != "normal":
                 self.connect_button.configure(state="normal")
-            
-    def get_port(self):
-        return self.port_num.get()
     
 if __name__ == "__main__":
     app = ctk.CTk()

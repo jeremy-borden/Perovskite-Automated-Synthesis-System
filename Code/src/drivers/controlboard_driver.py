@@ -27,11 +27,10 @@ class ControlBoard():
         
         self.relative_positioning_enabled = False
 
-    def connect(self, port_num):
+    def connect(self):
         """Connect to the control board and start the reader thread."""
         if self.is_connected():
             self.logger.error("Control board is already connected")
-        port = "/dev/ttyACM" + str(port_num)
         port = "/dev/control_board"
         try:
             self.serial = serial.Serial(port, 115200, timeout=None)
