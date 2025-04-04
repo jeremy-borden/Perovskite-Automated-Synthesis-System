@@ -26,7 +26,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             master=self,
             width=600,height=600)
         self.step_frame.grid(
-            row=0, column=0, rowspan=7,
+            row=0, column=0, rowspan=8,
             padx=5,pady=5)
         
         self.step_frame.bind("<Button-1>", self._deselect_step)
@@ -100,7 +100,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             width=120, height=50,
             command=self._quick_run)
         self.quick_run_button.grid(
-            row=6, column=1,
+            row=7, column=1,
             padx=5, pady=5,
             sticky="nwe")
 

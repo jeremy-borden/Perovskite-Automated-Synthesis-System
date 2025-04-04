@@ -142,7 +142,7 @@ class Dispatcher():
         self.toolhead.move_axis("Y", y)
         self.toolhead.move_axis("Z", z)
         
-    def move_to_location(self, destination):
+    def move_to_location(self, destination: str):
         location_names = [name[0] for name in self.locations]
         if destination not in location_names:
             raise f"Location name {destination} not found"
