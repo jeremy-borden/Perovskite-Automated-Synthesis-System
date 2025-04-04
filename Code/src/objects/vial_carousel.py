@@ -57,6 +57,9 @@ class VialCarousel():
         return True
         
     def set_vial(self, vial_num):
-        self.control_board.move_axis("A", 30*(self.current_vial - vial_num), 100)
+        if vial_num >12:
+            vial_num = 11
+        next_vial_offset = 2.862
+        self.control_board.move_axis("A", vial_num * next_vial_offset, finish_move=True)
         self.current_vial = vial_num
 

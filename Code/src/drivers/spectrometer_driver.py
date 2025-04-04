@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import logging
+import time
 from data_processor import plot_spectra, save_all_to_csv  
 
 
@@ -23,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 class Spectrometer:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, integration_time=1000):
+    def __init__(self, integration_time=5000):
         self.logger = logging.getLogger("Main Logger")
         self.integration_time = integration_time
         self.serial = None
@@ -36,7 +37,7 @@ class Spectrometer:
         
         port = "/dev/ttyACM" + str(port_num)
         try:
-            self.serial = serial.Serial(port, baudrate=115200, timeout=3)
+            self.serial = serial.Serial(port, baudrate=115200, timeout=5)
             self.logger.info(f"Connected to spectrometer on {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to spectrometer: {e}")
@@ -55,6 +56,7 @@ class Spectrometer:
         """Send a command to the spectrometer and return the response"""
         if self.is_connected():
             self.serial.write((command + "\n").encode())
+            time.sleep(0.1)
             response = self.serial.readline().decode().strip()
             self.logger.info(f"Sent: {command}, Received: {response}")
             return response
@@ -70,16 +72,48 @@ class Spectrometer:
         self.wavelengths = np.fromstring(response, sep=',')
         self.logger.info(f"Read {len(self.wavelengths)} wavelength values.")
 
+        return self.wavelengths
+
+
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
-        self.send_command("<read:1>")
+        print("[TEST] Triggering <read:1>...")
+
+        if not self.is_connected():
+            self.logger.warning("Spectrometer not connected.")
+            return np.array([])
+
+        self.send_command("<ext:0>")        # Disable external trigger
+        self.send_command("<roll:0>")       # Disable rolling integration
+        self.send_command("<preflush:2>")   # Default preflush behavior
+
+        self.send_command(f"<itime:{self.integration_time}>")
+        
+        self.serial.reset_input_buffer()
+       
+        self.serial.write(b"<read:1>\n")
+        time.sleep(0.5)
+
         raw_data = self.serial.read(3204)
-        intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
+        
+        print(f"[DEBUG] Raw data length: {len(raw_data)}")
+        print("[DEBUG] Raw data (hex preview):", raw_data[:64].hex(" ", 1))  
+
+        
+        if len(raw_data) < 3204:
+            self.logger.warning("Incomplete spectrum data received.")
+            return np.array([])
+            
+
+        try:
+            intensities = np.frombuffer(raw_data[2:3202], dtype=np.uint16)
+        except Exception as e:
+            self.logger.error(f"Failed to parse intensity data: {e}")
+            return np.array([])
 
         # Store the collected data
         self.measurements[measurement_type] = intensities
         self.logger.info(f"Read {len(intensities)} intensity values for {measurement_type}.")
-
         return intensities
 
 

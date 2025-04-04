@@ -1,24 +1,27 @@
 from time import sleep
 from inspect import signature
 import logging
+import numpy as np
 
+from drivers.procedure_file_driver import ProcedureFile
 from objects.toolhead import Toolhead
 from objects.hotplate import Hotplate
 from objects.gripper import Gripper
 from objects.infeed import Infeed
 from objects.pippete import PipetteHandler
 from objects.vial_carousel import VialCarousel
+from objects.tip_matrix import TipMatrix
 
 from drivers.camera_driver import Camera
 from drivers.spincoater_driver import SpinCoater
 from drivers.spectrometer_driver import Spectrometer
-
+from drivers.procedure_file_driver import ProcedureFile
 from image_processing import ImageProcessor
 
 class Dispatcher():
     def __init__(self, spin_coater: SpinCoater, hotplate: Hotplate, 
                  camera: Camera, gripper: Gripper, infeed: Infeed, pippete_handler: PipetteHandler,
-                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer):
+                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer, tip_matrix: TipMatrix):
         self.logger = logging.getLogger("Main Logger")
         
         self.toolhead = toolhead
@@ -30,6 +33,7 @@ class Dispatcher():
         self.hotplate = hotplate
         self.vial_carousel = vial_carousel
         self.spectrometer = spectrometer
+        self.tip_matrix = tip_matrix
         
         ImageProcessor.set_detector()
 
@@ -39,6 +43,7 @@ class Dispatcher():
             "home": self.home,
             
             "move_toolhead": self.move_toolhead,
+            "move_to_location": self.move_to_location,
             
             "set_temperature": self.set_temperature,
             "wait_for_temperature": self.wait_for_temperature,
@@ -47,15 +52,12 @@ class Dispatcher():
             "open_gripper": self.open_gripper,
             "close_gripper": self.close_gripper,
             
-            "set_gripper_angle": self.set_gripper_angle,
-            
-            "spin": self.spin,
             
             "open_infeed": self.open_infeed,
             "close_infeed": self.close_infeed,
             
             "extract": self.extract,
-            "eject_tip": self.eject_tip,
+            "replace_tip": self.replace_tip,
 
             "measure_spectrum": self.measure_spectrum,
             "automated_measurement": self.automated_measurement,
@@ -63,10 +65,9 @@ class Dispatcher():
         
         
         # procedure coordination info
-        
+        self.locations = []
         self.vial = 0
         
-    
     def validate_moves(self, moves: list) -> bool:
         """Validates a list of moves by checking if the move exists in the dispatcher.
         Also checks if the number of args is correct
@@ -100,9 +101,14 @@ class Dispatcher():
         return valid
 
 # --------- GENERAL MOVES --------
+
     def home(self):
-        self.control_board.send_message("G28")
+        """ Reset the machine"""
+        self.toolhead.home()
         self.gripper.open()
+        self.tip_matrix.refill_tips()
+        self.locations = ProcedureFile.Open("locations.yml")
+        # TODO create tip matrix thing
         
     def kill(self):
         self.control_board.kill()
@@ -121,7 +127,6 @@ class Dispatcher():
     
     #  --------- HOTPLATE MOVES --------
     def set_temperature(self, temperature_c: int):
-        self.logger.debug("hi")
         self.hotplate.set_temperature(temperature_c)
     
     def wait_for_temperature(self, target_temperature: int, threshold: int):
@@ -129,22 +134,34 @@ class Dispatcher():
             sleep(1)
 
     # --------- TOOLHEAD MOVES --------
-    def move_toolhead(self, x: float, y: float, z: float, speed: int = 1000):
+    def move_toolhead(self, x: float, y: float, z: float):
         """Move the toolhead to the specified coordiantes """
-        self.toolhead.set_position(x,y,z)
-
-    # --------- SPIN COATER MOVES --------
-    def spin(self, timelist, speedlist):
-        self.spin_coater.clear_steps()
-        for time, speed in zip(timelist, speedlist):
-            self.spin_coater.add_step(speed, time)
-        self.spin_coater.run() 
+        self.toolhead.move_axis("X", x)
+        self.toolhead.move_axis("Y", y)
+        self.toolhead.move_axis("Z", z)
         
+    def move_to_location(self, destination: str):
+        location_names = [name[0] for name in self.locations]
+        if destination not in location_names:
+            raise f"Location name {destination} not found"
+
+        
+        for location in self.locations:
+            if destination == location[0]:
+                self.toolhead.move_axis("Z", 200)
+                x = location[1]
+                y = location[2]
+                z = location[3]
+                self.move_toolhead(x,y,z)
+         
+    # --------- SPIN COATER MOVES --------
     def add_spincoater_step(self, rpm: int, spin_time_seconds: int):
         """ Command the spincoater to spin at a specified speed for a specified time"""
         
         self.spin_coater.add_step(rpm, spin_time_seconds)
-        
+    def run_spin_coater(self, wait_to_finish: bool):
+        self.spin_coater.run(wait_to_finish=wait_to_finish)
+    
     # --------- GRIPPER MOVES --------
     def open_gripper(self):
         self.gripper.open()
@@ -185,11 +202,20 @@ class Dispatcher():
         angle0 = (90-angle0) + 25
         self.gripper.set_arm_angle(int(angle0))
         
-    def working_slide_to(self, location):
+    def move_slide_to(self, location):
         """ pick up the slide currently being worked on and move it to the specified location"""
         
         
     # -------- PIPPETE MOVES --------
+    def replace_tip(self):
+        self.move_to_location("tip dropoff")
+        self.pippete_handler.eject_tip()
+        
+            
+        x,y,z = self.tip_matrix.get_next_tip_coords(self.pippete_handler.current_pipette.NEEDS_BIG_TIP)
+        self.move_toolhead(x,y,z)
+        self.toolhead.move_axis
+    
     def extract(self, volume_ul: int):
             """ Assuming we are at the vial carousel, the system will extract fluid.
             The gantry will "dip" into the vial by the amount specified"""
@@ -205,9 +231,7 @@ class Dispatcher():
         self.toolhead.move_axis("Z", 150) # move to top
         
         # TODO move over vial carousel opening
-        self.toolhead.move_axis("X", None)
-        self.toolhead.move_axis("Y", None)
-        self.toolhead.move_axis("Z", None)
+        self.move_toolhead(None, None, None)
         
         self.vial_carousel.set_vial(vial_num)
 
@@ -232,6 +256,39 @@ class Dispatcher():
         self.pippete_handler.dispense_all(2)
         self.toolhead.move_axis("Y", 10, relative=True)
         
+    def mix_fluid(self, source_vial_1: int, amount_1: int, source_vial_2: int, amount_2: int, destination_vial: int):
+        lower_amount = 10 #distance required for pipette to dip into vial
+        if self.pippete_handler.current_pipette.NEEDS_BIG_TIP == False:
+            lower_amount +=25
+
+            
+        self.move_to_location("vial carousel")
+        # draw from first vial
+        self.vial_carousel.set_vial(source_vial_1)
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.pippete_handler.draw_ul(amount_1)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        # dispense fluid 1 into destination
+        self.vial_carousel.set_vial(destination_vial)
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.pippete_handler.dispense_all(1)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        # draw from second vial
+        self.vial_carousel.set_vial(source_vial_2)
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.pippete_handler.draw_ul(amount_2)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        # dispense fluid 2 into destination
+        self.vial_carousel.set_vial(destination_vial)
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.pippete_handler.dispense_all(1)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        #mix fluids together
+        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        for i in range(5):
+            self.pippete_handler.draw_ul(50)
+            self.pippete_handler.dispense_all(1)
+        self.toolhead.move_axis("Y", lower_amount, relative=True)
         
     def dispense(self, duration_s):
         """ Dispense all fluid in pippete, assuming there is any"""
@@ -239,7 +296,7 @@ class Dispatcher():
         self.pippete_handler.dispense_all(duration_s)
         
     def get_pippete(self, pippete_num: int):
-        self.toolhead.set_position(900, 100, 50)
+        pass
         
     def eject_tip(self):
         self.pippete_handler.eject_tip()
@@ -260,34 +317,43 @@ class Dispatcher():
         self.logger.info(f"Starting spectrometer measurement: {measurement_type}")
 
         # Request wavelengths if not already retrieved
-        if not hasattr(self, "wavelengths") or not self.wavelengths:
+        if not hasattr(self, "wavelengths") or not isinstance(self.wavelengths, np.ndarray) or self.wavelengths.size == 0:
             self.logger.info("Retrieving wavelength data...")
-            self.spectrometer.send_command("<wavs?>")
             self.wavelengths = self.spectrometer.read_wavelengths()
 
         # Capture intensity data
         self.logger.info("Capturing spectrum intensity data...")
-        self.spectrometer.send_command("<read:1>")
         intensities = self.spectrometer.read_spectrum(measurement_type)
 
         # Store the measurement
-        if not hasattr(self, "measurements"):
-            self.measurements = {}
+        if isinstance(intensities, np.ndarray) and intensities.size > 0 and \
+           isinstance(self.wavelengths, np.ndarray) and self.wavelengths.size > 0 and \
+           intensities.shape == self.wavelengths.shape:
 
-        self.measurements[measurement_type] = {
-            "wavelengths": self.wavelengths,
-            "intensities": intensities
-        }
+                
+            if not hasattr(self, "measurements"):
+                self.measurements = {}
 
-        self.logger.info(f"Measurement '{measurement_type}' captured successfully.")
+            self.measurements[measurement_type] = {
+                "wavelengths": self.wavelengths,
+                "intensities": intensities
+            }
 
+            self.logger.info(f"Measurement '{measurement_type}' captured successfully.")
+        else:
+            self.logger.warning(f"Incomplete data for measurement '{measurement_type}'. Skipping.")
+        
     def automated_measurement(self):
         """Runs the full spectrometer measurement process."""
         measurement_types = ["Background", "Reference", "Sample"]
         
         for measurement in measurement_types:
             self.measure_spectrum(measurement)
-
+            sleep(1.0) 
+            
+        save_all_to_csv(self.measurements, self.wavelengths)
+        plot_spectra(self.measurements, self.wavelengths)
+        
         self.logger.info("All spectrometer measurements completed successfully.")
     
     # -------- VIAL CAROUSEL MOVES --------

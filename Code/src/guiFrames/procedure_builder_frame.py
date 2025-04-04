@@ -11,7 +11,7 @@ sys.path.append(path)
 from drivers.procedure_file_driver import ProcedureFile
 
 class ProcedureBuilderFrame(ctk.CTkFrame):
-    def __init__(self, master, moves):
+    def __init__(self, master, moves, procedure_handler):
         super().__init__(master=master,border_color="#1f6aa5",border_width=2,
                          width=600)
         self.logger=logging.getLogger("Main Logger")
@@ -19,13 +19,14 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.variation_step_list = []
         self.selected_step = None
         self.moves = moves
+        self.procedure_handler = procedure_handler
         
         # step holding frame
         self.step_frame = ctk.CTkScrollableFrame(
             master=self,
             width=600,height=600)
         self.step_frame.grid(
-            row=0, column=0, rowspan=7,
+            row=0, column=0, rowspan=8,
             padx=5,pady=5)
         
         self.step_frame.bind("<Button-1>", self._deselect_step)
@@ -36,6 +37,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.step_dropdown.grid(row=0, column=1,
             padx=5, pady=5,
             sticky="nwe")
+   
         
         # add step button
         self.add_step_button = ctk.CTkButton(
@@ -88,6 +90,17 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             command=self._export)
         self.export_button.grid(
             row=5, column=1,
+            padx=5, pady=5, 
+            sticky="nwe")
+        
+        # quick run button
+        self.quick_run_button = ctk.CTkButton(
+            master=self,
+            text="Quick Run",
+            width=120, height=50,
+            command=self._quick_run)
+        self.quick_run_button.grid(
+            row=7, column=1,
             padx=5, pady=5,
             sticky="nwe")
 
@@ -101,9 +114,14 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         
     def _bind_step_widgets(self, step_frame):
         """Recursively bind click events to all widgets in step frame"""
+        
         step_frame.bind('<Button-1>', lambda e: self._select_step(e,))
         
         for child in step_frame.winfo_children():
+            # Skip binding for checkboxes since it disables them
+            if isinstance(child, ctk.CTkCheckBox):
+                continue
+            
             child.bind('<Button-1>', lambda e: self._select_step(e,))
             if len(child.winfo_children()) > 0:
                 self._bind_step_widgets(child)
@@ -215,7 +233,20 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.selected_step = None
         self._update()
         
-    def _export(self):
+    def _quick_run(self):
+        """Quickly run the procedure without exporting."""
+        
+        procedure = self._get_procedure()
+        self.procedure_handler.set_procedure(procedure["Procedure"])
+        self.procedure_handler.begin()
+        self.logger.info("Quick Run started!")
+        
+    def _get_procedure(self):
+        """Returns a runnable procedure list of moves
+
+        Returns:
+            _type_: _description_
+        """
         procedure = {"Procedure": []}
         try:
             loop_count = self.loop_count.get_entry()
@@ -227,23 +258,21 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             for step, variation_step in zip(self.step_list, self.variation_step_list):
                 partial_step = [step.function.__name__] # get step name
                 if variation_step is not None: # if step should vary throughout procedures
-                    
-                    
- 
                     for initial_value, final_value in zip(step.get_entries(), variation_step.get_entries()):
-                
                         # skip interpolation and use the first value when entry isnt a number
-                        if type(initial_value) is not float and type(initial_value) is not int:
+                        if (type(initial_value) is not float) and (type(initial_value) is not int):
                             partial_step.append(initial_value)
                         else:
                             partial_step.append(initial_value + (final_value-initial_value)*(loop)/(loop_count-1)) #interpolate between first and final value
-                    
                 else:
                     for entry in step.get_entries():
-
-                        partial_step.append(entry)
-                        
+                        partial_step.append(entry)  
                 procedure["Procedure"].append(partial_step)
+        
+            return procedure
+        
+    def _export(self):
+        procedure = self._get_procedure()
             
         file_path = filedialog.asksaveasfilename(
             defaultextension=("Yaml files","*.yml*"),
@@ -297,7 +326,7 @@ class StepFrame(ctk.CTkFrame):
         # main step frame
         self.step_frame = ctk.CTkFrame(
             master=self,
-            width=350)
+            width=200, height=20)
         self.step_frame.grid(
             row=1, column=0, columnspan=2,
             padx=5, pady=5,
@@ -344,15 +373,15 @@ class LabelEntry(ctk.CTkFrame):
             row=0, column=0,
             padx=5, pady=5,sticky="nwe")
         
-        # create a proper input (checkbox or entry) based on entry type
+        # create input (checkbox or entry) based on entry type
         if entry_type is bool:
             self.entry = ctk.CTkCheckBox(
-                master=self, text="",
+                master=self, text="", 
                 width=50,)
         else:
             self.entry = ctk.CTkEntry(
                 master=self,
-                width=50)
+                width=100)
             
         self.entry.grid(
             row=0, column=1,
@@ -394,7 +423,8 @@ class peepee():
         
         self.moves = {
             "fardddd_yo": self.fardddd_yo,
-            "shit": self.shit
+            "shit": self.shit,
+            "nothing": self.nothing
         }
         
     def shit(self, a: int, b: str, bool_ean: bool):
@@ -402,6 +432,9 @@ class peepee():
     
     def fardddd_yo(self, inbt: int, flot: float, str: str):
         pass # gas
+    
+    def nothing(self):
+        pass
     
     def get_dick(self):
         return self.moves

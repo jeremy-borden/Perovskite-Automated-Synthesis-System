@@ -18,4 +18,8 @@ class Toolhead():
     def get_position(self, axis):
         return self.control_board.positions[axis]
     
-    
+    def home(self):
+        self.control_board.send_message("G28 Z")
+        self.control_board.send_message("G28 Y")
+        self.control_board.send_message("G28 X")
+

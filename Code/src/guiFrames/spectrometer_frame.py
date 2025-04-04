@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sys
 import os
+import numpy as np
 
 # get current directory so we can import from outside guiFrames folder
 pp = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
@@ -39,7 +40,7 @@ class SpectrometerFrame(ctk.CTkFrame):
         self.status_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
         # Matplotlib figure for plotting
-        self.figure, self.ax = plt.subplots(figsize=(5, 3))
+        self.figure, self.ax = plt.subplots(figsize=(4.8, 2.6))
         self.ax.set_title("Intensity vs Wavelength")
         self.ax.set_xlabel("Wavelength (nm)")
         self.ax.set_ylabel("Intensity")
@@ -57,18 +58,24 @@ class SpectrometerFrame(ctk.CTkFrame):
 
         try:
             self.status_label.configure(text="Measurement in Progress...")
+            if not isinstance(self.spectrometer.wavelengths, np.ndarray) or self.spectrometer.wavelengths.size == 0:
 
-            self.spectrometer.send_command("<read:1>")
+                 wavelengths = self.spectrometer.read_wavelengths()
+            else:
+                wavelengths = self.spectrometer.wavelengths
+            
+            
             intensities = self.spectrometer.read_spectrum("live")
-            wavelengths = self.spectrometer.read_wavelengths()
 
-            if intensities is not None and wavelengths is not None:
+
+            if (isinstance(intensities, np.ndarray) and isinstance(wavelengths, np.ndarray) and  intensities.size > 0 and wavelengths.size > 0 and intensities.shape == wavelengths.shape ):
                 self.ax.clear()
                 self.ax.plot(wavelengths, intensities, color='blue', label="PL Spectrum")
                 self.ax.set_title("Intensity vs Wavelength")
                 self.ax.set_xlabel("Wavelength (nm)")
                 self.ax.set_ylabel("Intensity")
                 self.ax.legend()
+                self.figure.tight_layout()
                 self.canvas.draw()
 
                 self.status_label.configure(text="Measurement Complete")
@@ -76,3 +83,6 @@ class SpectrometerFrame(ctk.CTkFrame):
                 self.status_label.configure(text="No data received.")
         except Exception as e:
             self.status_label.configure(text=f"Error: {str(e)}")
+            
+        if self.winfo_exists():
+            self.after(1000, self.update_plot)
