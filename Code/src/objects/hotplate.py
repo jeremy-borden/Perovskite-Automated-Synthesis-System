@@ -18,12 +18,12 @@ class Hotplate(threading.Thread):
         time.sleep(2)  # Allow time for Arduino to reset
         
         
-    def connect(self, port_num):
+    def connect(self):
         """Connect to the control board and start the reader thread."""
         if self.is_connected():
             self.logger.error("Hotplate is already connected")
         
-        port = "/dev/ttyACM"+str(port_num)
+        port = "/dev/hotplate"
         try:
             self.serial = serial.Serial(port, 115200, timeout=None)
             self.logger.info(f"Connected to hotplate on port {port}")
@@ -60,6 +60,7 @@ class Hotplate(threading.Thread):
             time.sleep(0.5)
             response = self.serial.readline().decode().strip()
             #self.logger.debug(f"Raw response: {response}")
+            temperature = None;
 
             if response.startswith("TEMP:"):
                 temperature = float(response.split(":")[1])

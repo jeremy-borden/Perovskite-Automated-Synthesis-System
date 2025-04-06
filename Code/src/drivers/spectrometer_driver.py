@@ -31,11 +31,11 @@ class Spectrometer:
         self.wavelengths = []
         self.measurements = {}  # to store intensities for Background, Reference, and Sample
 
-    def connect(self, port_num):
+    def connect(self):
         """Establish connection to the spectrometer"""
         
         
-        port = "/dev/ttyACM" + str(port_num)
+        port = "/dev/spectrometer"
         try:
             self.serial = serial.Serial(port, baudrate=115200, timeout=5)
             self.logger.info(f"Connected to spectrometer on {port}")
@@ -60,11 +60,7 @@ class Spectrometer:
             response = self.serial.readline().decode().strip()
             self.logger.info(f"Sent: {command}, Received: {response}")
             return response
-
-    def set_integration_time(self):
-        """Set the integration time for measurements"""
-        command = f"<itime:{self.integration_time}>"
-        self.send_command(command)
+        return None
 
     def read_wavelengths(self):
         """Retrieve wavelength data from the spectrometer"""
@@ -77,21 +73,18 @@ class Spectrometer:
 
     def read_spectrum(self, measurement_type):
         """Read spectral intensity for a given measurement type"""
-        print("[TEST] Triggering <read:1>...")
+        self.logger.info("Reading spectrum...")
 
         if not self.is_connected():
             self.logger.warning("Spectrometer not connected.")
             return np.array([])
 
-        self.send_command("<ext:0>")        # Disable external trigger
-        self.send_command("<roll:0>")       # Disable rolling integration
         self.send_command("<preflush:2>")   # Default preflush behavior
-
         self.send_command(f"<itime:{self.integration_time}>")
         
         self.serial.reset_input_buffer()
        
-        self.serial.write(b"<read:1>\n")
+        self.serial.write(b"<read:1>")
         time.sleep(0.5)
 
         raw_data = self.serial.read(3204)
@@ -100,7 +93,7 @@ class Spectrometer:
         print("[DEBUG] Raw data (hex preview):", raw_data[:64].hex(" ", 1))  
 
         
-        if len(raw_data) < 3204:
+        if len(raw_data) != 3204:
             self.logger.warning("Incomplete spectrum data received.")
             return np.array([])
             

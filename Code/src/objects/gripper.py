@@ -11,9 +11,11 @@ class Gripper():
     def close(self):
         self.finger_servo.angle = 2
     
-    def set_arm_angle(self, angle_degrees:int):
+    def set_arm_angle(self, angle_degrees: int):
         self.arm_servo.angle = angle_degrees
         
+    def set_finger_angle(self, angle_degrees: int):
+        self.finger_servo.angle=angle_degrees
         
     def detatch_servos(self):
         self.arm_servo.detach()

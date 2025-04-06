@@ -32,15 +32,20 @@ class PipetteHandler():
         self.current_pipette: Pipette = None
         self.current_fluid_volume_ul = 0
         
-    def set_pipette(self, index: int):
+    def set_pipette(self, index: int = None):
+        """Set the currently held pipette. Use without an index to remove currently held pipette"""
+        if index is None:
+            self.current_pipette = None
+        
         if index > len(self.pipettes):
             return
         
         self.current_pipette = self.pipettes[index]
         
-    def get_pippete(self):
-        """Return the currently held pippete"""
-        return self.current_pipette
+    def get_pippete_index(self):
+        """Return the currently held pippete index"""
+        if self.current_pipette is not None:
+            return self.pipettes.index(self.current_pipette)
         
     def set_actuator_position(self, position_mm, speed):
         # dont allow actuator to go too far away

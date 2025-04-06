@@ -49,15 +49,20 @@ class Dispatcher():
             "wait_for_temperature": self.wait_for_temperature,
             
             "align_gripper": self.align_gripper,
-            "open_gripper": self.open_gripper,
-            "close_gripper": self.close_gripper,
+            "set_finger_angle": self.set_finger_angle,
+            #"open_gripper": self.open_gripper,
+            #"close_gripper": self.close_gripper,
             
+            "add_spin_coater_step": self.add_spin_coater_step,
+            "run_spin_coater": self.run_spin_coater,
             
-            "open_infeed": self.open_infeed,
-            "close_infeed": self.close_infeed,
+            "set_infeed_angle": self.set_infeed_angle,
+            #"open_infeed": self.open_infeed,
+            #"close_infeed": self.close_infeed,
             
-            "extract": self.extract,
+            "extract_from_vial": self.extract_from_vial,
             "replace_tip": self.replace_tip,
+            "mix_fluid": self.mix_fluid,
 
             "measure_spectrum": self.measure_spectrum,
             "automated_measurement": self.automated_measurement,
@@ -107,7 +112,7 @@ class Dispatcher():
         self.toolhead.home()
         self.gripper.open()
         self.tip_matrix.refill_tips()
-        self.locations = ProcedureFile.Open("locations.yml")
+        self.locations = ProcedureFile().Open("persistant/locations.yml")
         # TODO create tip matrix thing
         
     def kill(self):
@@ -143,7 +148,7 @@ class Dispatcher():
     def move_to_location(self, destination: str):
         location_names = [name[0] for name in self.locations]
         if destination not in location_names:
-            raise f"Location name {destination} not found"
+            raise ValueError(f"Location name {destination} not found")
 
         
         for location in self.locations:
@@ -155,10 +160,11 @@ class Dispatcher():
                 self.move_toolhead(x,y,z)
          
     # --------- SPIN COATER MOVES --------
-    def add_spincoater_step(self, rpm: int, spin_time_seconds: int):
+    def add_spin_coater_step(self, rpm: int, spin_time_seconds: int):
         """ Command the spincoater to spin at a specified speed for a specified time"""
         
         self.spin_coater.add_step(rpm, spin_time_seconds)
+        
     def run_spin_coater(self, wait_to_finish: bool):
         self.spin_coater.run(wait_to_finish=wait_to_finish)
     
@@ -169,8 +175,11 @@ class Dispatcher():
     def close_gripper(self):
         self.gripper.close()
     
-    def set_gripper_angle(self, angle):
+    def set_gripper_angle(self, angle: int):
         self.gripper.set_arm_angle(angle)
+        
+    def set_finger_angle(self, angle:int):
+        self.gripper.set_finger_angle(angle)
     
     def align_gripper(self):
         frame = self.camera.get_frame()
@@ -182,7 +191,6 @@ class Dispatcher():
             self.logger.debug("Getting first angle")
             frame = self.camera.get_frame()
             
-        
             angle0 = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
             if angle0 is not None:
                 angle0 = angle0 % 90
@@ -194,7 +202,7 @@ class Dispatcher():
             angle1 = ImageProcessor.get_marker_angles(image=frame, marker_id=7)
             if angle1 is not None:
                 angle1 = angle1 % 90 
-            self.logger.info(f"Got Angle1: {angle1}")
+            self.logger.debug(f"Got Angle1: {angle1}")
             sleep(1)
             
         self.logger.info(int(angle0))
@@ -202,101 +210,164 @@ class Dispatcher():
         angle0 = (90-angle0) + 25
         self.gripper.set_arm_angle(int(angle0))
         
-    def move_slide_to(self, location):
-        """ pick up the slide currently being worked on and move it to the specified location"""
+    def move_slide_from_to(self, source: str, destination: str):
+        """ move the slide to a different position from another. locations should be 20mm above 
+        gripper minimum position."""
+        lower_distance = 20 #distance gripper should lower in order to pick up slide
+        # get all location names and check if inputs are valid
+        location_names = [name[0] for name in self.locations] 
+        if destination not in location_names:
+            raise ValueError(f"Location name {destination} not found")
+        if source not in location_names:
+            raise ValueError(f"Location name {source} not found")
+        
+        # raise machine to avoid collisions
+        self.toolhead.move_axis("Z", 200)
+        
+        #pick up slide from source
+        self.move_to_location(source)
+        self.gripper.open()
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
+        self.gripper.close()
+        
+        # raise machine to avoid collisions
+        self.toolhead.move_axis("Z", 200)
+        self.move_to_location(source)
+
+    def grab_slide_from(self, source: str):
+        lower_distance = 20 #distance gripper should lower in order to pick up slide
+        location_names = [name[0] for name in self.locations] 
+        if source not in location_names:
+            raise ValueError(f"Location name {source} not found")
+        
+        # raise machine to avoid collisions
+        self.toolhead.move_axis("Z", 200)
+        
+        #pick up slide from source
+        self.move_to_location(source)
+        self.gripper.open()
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
+        self.gripper.close()
+        self.toolhead.move_axis("Z", lower_distance, relative=True)
+        
+    def move_slide_to(self, destination: str):
+        lower_distance = 20 #distance gripper should lower in order to pick up slide
+        location_names = [name[0] for name in self.locations]
+        if destination not in location_names:
+            raise ValueError(f"Location name {destination} not found")
+        
+        # raise machine to avoid collisions
+        self.toolhead.move_axis("Z", 200)
+        
+        #place slide at destination
+        self.move_to_location(destination)
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
+        self.gripper.open()
+        self.toolhead.move_axis("Z", lower_distance, relative=True)
         
         
     # -------- PIPPETE MOVES --------
     def replace_tip(self):
+        lower_distance = 10 # this means the pipette end should be 10mm above the tip
+        # raise machine to avoid collisions
+        self.toolhead.move_axis("Z", 200)
+        
         self.move_to_location("tip dropoff")
         self.pippete_handler.eject_tip()
         
-            
+    
         x,y,z = self.tip_matrix.get_next_tip_coords(self.pippete_handler.current_pipette.NEEDS_BIG_TIP)
         self.move_toolhead(x,y,z)
-        self.toolhead.move_axis
-    
-    def extract(self, volume_ul: int):
-            """ Assuming we are at the vial carousel, the system will extract fluid.
-            The gantry will "dip" into the vial by the amount specified"""
-            #TODO add a current location and check if thats possible
-            
-            self.vial_carousel.remove_fluid(self.vial, volume_ul)
-            
-            self.toolhead.move_axis("Y", -10, relative=True)
-            self.pippete_handler.draw_ul(volume_ul)
-            self.toolhead.move_axis("Y", 10, relative=True)
-            
-    def extract_from_vial(self, volume_ul, vial_num: int):
-        self.toolhead.move_axis("Z", 150) # move to top
         
-        # TODO move over vial carousel opening
-        self.move_toolhead(None, None, None)
-        
-        self.vial_carousel.set_vial(vial_num)
-
-        self.vial_carousel.remove_fluid(self.vial, volume_ul)
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
+        self.toolhead.move_axis("Z", 200)
             
-        self.toolhead.move_axis("Y", -10, relative=True)
-        self.pippete_handler.draw_ul(volume_ul)
-        self.toolhead.move_axis("Y", 10, relative=True)
-        pass
-            
-    def dispense_to_vial(self, vial_num: int):
-        self.toolhead.move_axis("Z", 150) # move to top
-        
-        # TODO move over vial carousel opening
-        self.toolhead.move_axis("X", None)
-        self.toolhead.move_axis("Y", None)
-        self.toolhead.move_axis("Z", None)
-        
-        self.vial_carousel.add_fluid()
-        self.vial_carousel.set_vial(vial_num)
-        self.toolhead.move_axis("Y", -10, relative=True)
-        self.pippete_handler.dispense_all(2)
-        self.toolhead.move_axis("Y", 10, relative=True)
-        
-    def mix_fluid(self, source_vial_1: int, amount_1: int, source_vial_2: int, amount_2: int, destination_vial: int):
-        lower_amount = 10 #distance required for pipette to dip into vial
+    def extract_from_vial(self, volume_ul: int, vial_num: int):
+        lower_distance = 10 #distance required for pipette to dip into vial
         if self.pippete_handler.current_pipette.NEEDS_BIG_TIP == False:
-            lower_amount +=25
-
+            lower_distance +=25
             
+        self.move_to_location("vial carousel")
+        self.vial_carousel.set_vial(vial_num)
+
+        
+            
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
+        self.pippete_handler.draw_ul(volume_ul)
+        self.toolhead.move_axis("Z", lower_distance, relative=True)
+                
+    def mix_fluid(self, source_vial_1: int, amount_1: int, source_vial_2: int, amount_2: int, destination_vial: int):
+        lower_distance = 10 #distance required for pipette to dip into vial
+        if self.pippete_handler.current_pipette.NEEDS_BIG_TIP == False:
+            lower_distance +=25
+
+        # raise machine to avoid collisions
+        self.toolhead.move_axis("Z", 200)
+        
         self.move_to_location("vial carousel")
         # draw from first vial
         self.vial_carousel.set_vial(source_vial_1)
-        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
         self.pippete_handler.draw_ul(amount_1)
-        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        self.toolhead.move_axis("Z", lower_distance, relative=True)
         # dispense fluid 1 into destination
         self.vial_carousel.set_vial(destination_vial)
-        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
         self.pippete_handler.dispense_all(1)
-        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        self.toolhead.move_axis("Z", lower_distance, relative=True)
         # draw from second vial
         self.vial_carousel.set_vial(source_vial_2)
-        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
         self.pippete_handler.draw_ul(amount_2)
-        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        self.toolhead.move_axis("Z", lower_distance, relative=True)
         # dispense fluid 2 into destination
         self.vial_carousel.set_vial(destination_vial)
-        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
         self.pippete_handler.dispense_all(1)
-        self.toolhead.move_axis("Y", lower_amount, relative=True)
-        #mix fluids together
-        self.toolhead.move_axis("Y", -lower_amount, relative=True)
+        self.toolhead.move_axis("Z", lower_distance, relative=True)
+        # mix fluids together
+        self.toolhead.move_axis("Z", -lower_distance, relative=True)
         for i in range(5):
             self.pippete_handler.draw_ul(50)
             self.pippete_handler.dispense_all(1)
-        self.toolhead.move_axis("Y", lower_amount, relative=True)
+        self.toolhead.move_axis("Z", lower_distance, relative=True)
         
-    def dispense(self, duration_s):
+    def dispense(self, duration_s: int):
         """ Dispense all fluid in pippete, assuming there is any"""
         # calculate feedrate
         self.pippete_handler.dispense_all(duration_s)
         
-    def get_pippete(self, pippete_num: int):
-        pass
+    def set_pipette(self, pippete_num: int):
+        # rasie toolhead to avoid collisions
+        pipette_stand_y_offset = 50
+        
+        self.toolhead.move_axis("Z", 200)
+        
+        self.move_to_location("pipette pickup")
+        
+        # if we have a pipette and its not the one we want, put it away
+        if self.current_pippete and (pippete_num != self.pippete_handler.get_pippete_index()):
+            i = self.pippete_handler.get_pippete_index()
+            self.toolhead.move_axis("Y", i*50, relative=True)
+            
+            #raise, approach and lower into stand
+            self.toolhead.move_axis("Z", 50, relative=True)
+            self.toolhead.move_axis("X", 50, relative=True)
+            self.toolhead.move_axis("Z", -50, relative=True)
+            
+            self.pippete_handler.open_grabber()
+            
+            self.toolhead.move_axis("X", -50, relative=True)
+            self.move_to_location("pipette pickup")
+            
+        self.pippete_handler.open_grabber()
+        self.toolhead.move_axis("Y", pippete_num*50, relative=True)
+        #approach and grab pipette
+        self.toolhead.move_axis("X", 50, relative=True)
+        self.pippete_handler.close_grabber()
+        #raise and back out
+        self.toolhead.move_axis("Z", 50, relative=True)
+        self.toolhead.move_axis("X", -50, relative=True)
         
     def eject_tip(self):
         self.pippete_handler.eject_tip()
@@ -361,9 +432,6 @@ class Dispatcher():
         self.vial_carousel.set_vial(vial_num)
         
     # -------- INFEED MOVES --------
-    def open_infeed(self):
-        pass
-     
-    def close_infeed(self):
-        pass
+    def set_infeed_angle(self, angle: int):
+        self.infeed.set_angle(angle)
     

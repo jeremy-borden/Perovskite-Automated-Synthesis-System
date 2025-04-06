@@ -40,10 +40,10 @@ class LocationFrame(ctk.CTkScrollableFrame):
             if (location[0] != ""):
                 location_data.append(location)
         
-        ProcedureFile().Save("locations", location_data)
+        ProcedureFile().Save("persistant/locations", location_data)
         
     def _load_locations(self):
-        location_data = ProcedureFile().Open("locations.yml")
+        location_data = ProcedureFile().Open("persistant/locations.yml")
         for location in location_data:
             new_location = self._new_entry()
             new_location.load_entry(location[0], location[1],location[2],location[3])
