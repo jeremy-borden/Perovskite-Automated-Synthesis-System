@@ -48,7 +48,7 @@ class ProcedureHandler(threading.Thread):
             # wait until user has started procedure
             self.started.wait()
             # home gantry and initialize values
-            self.dispatcher.home
+            
             self.current_step = 0
             
             for move in self.procedure:
