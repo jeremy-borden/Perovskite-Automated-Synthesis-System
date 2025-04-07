@@ -62,7 +62,7 @@ class PipetteHandler():
             The actuator then returns to the bottom of the plunger"""
         self.control_board.move_axis("B", self.current_pipette.PLUNGER_FLUSH_MM, 300, False)
         self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, 300, False)
-        self.control_board.finish_moves()
+        
         self.current_fluid_volume_ul = 0
     
     def dispense_all(self, duration_s: float):

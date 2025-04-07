@@ -12,9 +12,6 @@ class Toolhead():
     def move_axis(self, axis: str, distance_mm: float, relative: bool = False, finish_move: bool = True):
         self.control_board.move_axis(axis, distance_mm, 600, relative, finish_move)
         
-        if finish_move:
-            self.control_board.finish_moves()
-        
     def get_position(self, axis):
         return self.control_board.positions[axis]
     

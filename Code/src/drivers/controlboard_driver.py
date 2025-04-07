@@ -111,7 +111,7 @@ class ControlBoard():
         sleep(0.5)
         self.send_message("M400")
         self.logger.debug("Waiting for move to finish")
-        self.received_ok.wait(timeout=20)  # Wait until the move_finished event is set
+        self.received_ok.wait(timeout=30)  # Wait until the move_finished event is set
         
 
 
