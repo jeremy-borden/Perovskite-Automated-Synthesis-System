@@ -90,6 +90,8 @@ class PipetteHandler():
         sleep(1)
         self.tip_eject_servo.angle = 0
          
+    def set_grabber_angle(self, angle: int):
+        self.grabber_servo.angle = angle
     def open_grabber(self):
         self.grabber_servo.angle = 0
         

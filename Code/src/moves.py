@@ -53,6 +53,9 @@ class Dispatcher():
             #"open_gripper": self.open_gripper,
             #"close_gripper": self.close_gripper,
             
+            "grab_slide_from": self.grab_slide_from,
+            "move_slide_to": self.move_slide_to,
+            
             "add_spin_coater_step": self.add_spin_coater_step,
             "run_spin_coater": self.run_spin_coater,
             
@@ -63,7 +66,8 @@ class Dispatcher():
             "extract_from_vial": self.extract_from_vial,
             "replace_tip": self.replace_tip,
             "mix_fluid": self.mix_fluid,
-
+            "eject_tip": self.eject_tip,
+            "set_grab_angle": self.set_grab_angle,
             "measure_spectrum": self.measure_spectrum,
             "automated_measurement": self.automated_measurement,
         }
@@ -336,6 +340,9 @@ class Dispatcher():
         """ Dispense all fluid in pippete, assuming there is any"""
         # calculate feedrate
         self.pippete_handler.dispense_all(duration_s)
+        
+    def set_grab_angle(self, angle: int):
+        self.pippete_handler.set_grabber_angle(angle)
         
     def set_pipette(self, pippete_num: int):
         # rasie toolhead to avoid collisions
