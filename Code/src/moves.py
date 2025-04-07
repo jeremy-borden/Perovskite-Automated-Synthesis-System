@@ -154,14 +154,17 @@ class Dispatcher():
         if destination not in location_names:
             raise ValueError(f"Location name {destination} not found")
 
-        
+        self.toolhead.move_axis("Z", 200)
         for location in self.locations:
             if destination == location[0]:
-                self.toolhead.move_axis("Z", 200)
+                
                 x = location[1]
                 y = location[2]
                 z = location[3]
-                self.move_toolhead(x,y,z)
+                self.toolhead.move_axis("X", x)
+                self.toolhead.move_axis("Y", y)
+                self.toolhead.move_axis("Z", z)
+                break
          
     # --------- SPIN COATER MOVES --------
     def add_spin_coater_step(self, rpm: int, spin_time_seconds: int):
