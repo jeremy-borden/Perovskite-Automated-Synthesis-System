@@ -90,9 +90,8 @@ class Spectrometer:
         raw_data = self.serial.read(3204)
         
         print(f"[DEBUG] Raw data length: {len(raw_data)}")
-        print("[DEBUG] Raw data (hex preview):", raw_data[:64].hex(" ", 1))  
+        print(f"[DEBUG] Raw data preview: {raw_data[:16].hex()}")  
 
-        
         if len(raw_data) != 3204:
             self.logger.warning("Incomplete spectrum data received.")
             return np.array([])
