@@ -1,6 +1,7 @@
 from queue import Queue
 import logging
 import threading
+from time import sleep
 import serial
 import serial.threaded
 
@@ -106,11 +107,11 @@ class ControlBoard():
         if not self.is_connected():
             self.logger.error("Serial is not connected")
             return
-        
-        self.send_message("M400")
         self.received_ok.clear()
+        sleep(0.5)
+        self.send_message("M400")
         self.logger.debug("Waiting for move to finish")
-        self.received_ok.wait()  # Wait until the move_finished event is set
+        self.received_ok.wait(timeout=20)  # Wait until the move_finished event is set
         
 
 
