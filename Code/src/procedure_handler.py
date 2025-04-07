@@ -52,6 +52,11 @@ class ProcedureHandler(threading.Thread):
             self.current_step = 0
             
             for move in self.procedure:
+                # if procedure is stopped, break from the loop
+                if not self.started.is_set():
+                    self.logger.debug("Stopping")
+                    break
+                
                 # if procedure is paused after finishing previous move
                 if self.paused.is_set():
                     self.logger.debug("Paused")
@@ -60,10 +65,7 @@ class ProcedureHandler(threading.Thread):
                         if not self.started.is_set():
                             break
                     
-                # if procedure is stopped, break from the loop
-                if not self.started.is_set():
-                    self.logger.debug("Stopping")
-                    break
+                
                 
                 self.logger.debug(f"Executing move {self.current_step}")
                 func_name = move[0]
@@ -77,6 +79,7 @@ class ProcedureHandler(threading.Thread):
                     break
                 self.logger.debug(f"Move Done")
                 self.current_step+=1
+                time.sleep(0.2)
             
             self.logger.debug("Procedure Ended")
             self.stop()
