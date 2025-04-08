@@ -114,11 +114,10 @@ class Dispatcher():
     def validate_location(self, location: str):
         self.locations = ProcedureFile().Open("persistant/locations.yml")
         location_names = []
-        for location in self.locations:
-            location_names.append(location[0])
+        for loc in self.locations:
+            location_names.append(loc[0])
+            self.logger.debug(loc[0])
             
-      
-    
         if location not in location_names:
             raise ValueError(f"Location name {location} not found")
         
