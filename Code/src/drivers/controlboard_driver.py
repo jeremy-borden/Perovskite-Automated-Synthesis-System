@@ -87,17 +87,23 @@ class ControlBoard():
         if axis not in self.positions.keys():
             raise f"Invalid axis {axis}"
   
-        if relative and (not self.relative_positioning_enabled):
+        # if relative and (not self.relative_positioning_enabled):
+        #      # turn on relative positioning
+        #     self.relative_positioning_enabled = True
+        # elif (not relative) and self.relative_positioning_enabled:
+        #     self.send_message("G90") # turn off relative positioning
+        #     self.relative_positioning_enabled = False
+        if relative:
             self.send_message("G91")
-            self.relative_positioning_enabled = True
-        elif (not relative) and self.relative_positioning_enabled:
-            self.send_message("G90")
-            self.relative_positioning_enabled = False
-        
-        
+        # dont go crazy with these axes
+        if (axis == "Z" or axis == "A" or axis == "B") and feedrate_mm_per_minute == 2000:
+            feedrate_mm_per_minute = 600
+            
         self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
         
             
+        if relative:
+            self.send_message("G90")
         if finish_move:
             self.finish_moves()
 

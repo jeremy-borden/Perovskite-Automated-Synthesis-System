@@ -158,11 +158,11 @@ class Dispatcher():
             sleep(1)
 
     # --------- TOOLHEAD MOVES --------
-    def move_toolhead(self, x: float, y: float, z: float):
+    def move_toolhead(self, x: float, y: float, z: float, relaitve: bool):
         """Move the toolhead to the specified coordiantes """
-        self.toolhead.move_axis("X", x)
-        self.toolhead.move_axis("Y", y)
-        self.toolhead.move_axis("Z", z)
+        self.toolhead.move_axis("X", x, relative=relaitve)
+        self.toolhead.move_axis("Y", y, relative=relaitve)
+        self.toolhead.move_axis("Z", z, relative=relaitve)
         
     def move_to_location(self, destination: str):
         
