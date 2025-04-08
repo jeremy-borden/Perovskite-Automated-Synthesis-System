@@ -47,7 +47,6 @@ class ProcedureHandler(threading.Thread):
         while True:
             # wait until user has started procedure
             self.started.wait()
-            self.dispatcher.home()
             
             self.current_step = 0
             
