@@ -176,13 +176,13 @@ class Dispatcher():
                 x = location[1]
                 y = location[2]
                 z = location[3]
-                self.toolhead.move_axis("Z", z)
-                sleep(1)
+                
                 self.toolhead.move_axis("Y", y)
                 sleep(1)
                 self.toolhead.move_axis("X", x)
                 sleep(1)
-                
+                self.toolhead.move_axis("Z", z)
+                sleep(1)
                 
                 break
          
@@ -297,6 +297,9 @@ class Dispatcher():
         
         
     # -------- PIPPETE MOVES --------
+    def set_actuator(self, position: float):
+        self.pippete_handler.set_actuator_position(position)
+    
     def replace_tip(self):
         lower_distance = 10 # this means the pipette end should be 10mm above the tip
         # raise machine to avoid collisions

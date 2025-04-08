@@ -50,15 +50,9 @@ class PipetteHandler():
     def home(self):
         self.control_board.send_message("G28 B")
         
-    def set_actuator_position(self, position_mm, speed):
-        # dont allow actuator to go too far away
-        if position_mm > self.ACTUATOR_MAX_HEIGHT_MM:
-            return
-        # dont allow actuator to go past the flush height if there is a pippete
-        if self.current_pipette is not None and position_mm < self.current_pipette.PLUNGER_FLUSH_MM:
-            return
+    def set_actuator_position(self, position_mm):
         
-        self.control_board.move_axis("B", position_mm, speed, False)
+        self.control_board.move_axis("B", position_mm)
         
     def flush_pippete(self):
         """Presses the pippete beyond its normal limit to ensure all fluid is purged.
