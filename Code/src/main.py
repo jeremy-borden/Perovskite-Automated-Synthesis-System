@@ -84,6 +84,7 @@ if __name__ == "__main__":
     
     # -- VIAL CAROUSEL --
     vial_carousel = VialCarousel(control_board)
+    spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
     
     dispatcher = Dispatcher(toolhead=toolhead,
                             spin_coater=spin_coater,
@@ -124,7 +125,6 @@ if __name__ == "__main__":
     camera_frame = CameraFrame(app, camera)
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
     procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict, procedure_handler)
-    spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
     location_frame = LocationFrame(master=app)
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
