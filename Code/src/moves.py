@@ -241,7 +241,7 @@ class Dispatcher():
             
         self.logger.info(int(angle0))
         
-        angle0 = (90-angle0) + 25
+        angle0 = (90-angle0) + 27
         self.gripper.set_arm_angle(int(angle0))
         
     def move_slide_from_to(self, source: str, destination: str):
