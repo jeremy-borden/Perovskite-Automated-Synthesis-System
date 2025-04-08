@@ -68,6 +68,7 @@ class Dispatcher():
             "mix_fluid": self.mix_fluid,
             "eject_tip": self.eject_tip,
             "set_grab_angle": self.set_grab_angle,
+            
             "measure_spectrum": self.measure_spectrum,
             "automated_measurement": self.automated_measurement,
         }
@@ -114,6 +115,8 @@ class Dispatcher():
     def home(self):
         """ Reset the machine"""
         self.toolhead.home()
+        self.pippete_handler.home()
+        self.vial_carousel.home()
         self.gripper.open()
         self.tip_matrix.refill_tips()
         self.locations = ProcedureFile().Open("persistant/locations.yml")
@@ -196,7 +199,7 @@ class Dispatcher():
         
         angle0 = None
         angle1 = None
-        
+        try_count = 5
         while(angle0 is None or angle1 is None) or abs(angle1-angle0) > 5:
             self.logger.debug("Getting first angle")
             frame = self.camera.get_frame()
@@ -214,6 +217,13 @@ class Dispatcher():
                 angle1 = angle1 % 90 
             self.logger.debug(f"Got Angle1: {angle1}")
             sleep(1)
+            
+            try_count -= 1
+            
+            if try_count == 0:
+                raise ValueError("Angle could not be found")
+            
+        
             
         self.logger.info(int(angle0))
         

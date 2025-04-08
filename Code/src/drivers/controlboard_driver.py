@@ -94,7 +94,7 @@ class ControlBoard():
             self.send_message("G90")
             self.relative_positioning_enabled = False
             
-        if feedrate_mm_per_minute:
+        if feedrate_mm_per_minute != 1000:
             self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
         else:
             self.send_message(f"G0 {axis}{distance_mm}")

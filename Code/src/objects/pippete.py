@@ -47,6 +47,9 @@ class PipetteHandler():
         if self.current_pipette is not None:
             return self.pipettes.index(self.current_pipette)
         
+    def home(self):
+        self.control_board.send_message("G28 B")
+        
     def set_actuator_position(self, position_mm, speed):
         # dont allow actuator to go too far away
         if position_mm > self.ACTUATOR_MAX_HEIGHT_MM:
@@ -74,7 +77,7 @@ class PipetteHandler():
         self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate, False)
         self.current_fluid_volume_ul = 0
         
-    def draw_ul(self, volume_ul, feedrate):
+    def draw_ul(self, volume_ul):
         """ Raises the actuator so that the specified volume is drawn. Cannot draw past max volume. 
         Draws are persistant, so when draw_ul is called twice without dispensing, the total fluid is compounded...?"""
         if self.current_fluid_volume_ul + volume_ul > self.current_pipette.MAX_VOLUME_UL:
@@ -83,10 +86,10 @@ class PipetteHandler():
             
         ul_per_mm = self.current_pipette.MAX_VOLUME_UL/(self.current_pipette.PLUNGER_TOP_MM - self.current_pipette.PLUNGER_BOTTOM_MM)
         self.current_fluid_volume_ul += volume_ul
-        self.control_board.move_axis("B",  volume_ul*ul_per_mm, feedrate, True)
+        self.control_board.move_axis("B",  volume_ul*ul_per_mm, relative=True)
         
     def eject_tip(self):
-        self.tip_eject_servo.angle = 200
+        self.tip_eject_servo.angle = 100
         sleep(1)
         self.tip_eject_servo.angle = 0
          

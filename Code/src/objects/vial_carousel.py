@@ -9,7 +9,9 @@ class VialCarousel():
         
         self.current_vial = 0
         self.vial_volumes_ul = [0]*self.VIALS
-        
+    
+    def home(self):
+        self.control_board.send_message("G28 A")
     
     def remove_fluid(self, vial_num: int, volume_ul: int):
         """ Removes fluid from the specified vial. Returns True if the 
