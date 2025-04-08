@@ -84,6 +84,13 @@ if __name__ == "__main__":
     
     # -- VIAL CAROUSEL --
     vial_carousel = VialCarousel(control_board)
+
+    # -- GUI --
+    app = ctk.CTk()
+    ctk.set_appearance_mode("dark")
+    app.geometry("1200x1000")
+    app.title("ECD 515 - Perovskite Automated Synthesis System")
+    
     spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
     
     dispatcher = Dispatcher(toolhead=toolhead,
@@ -108,11 +115,7 @@ if __name__ == "__main__":
     else:
         logger.warning("Default procedure not found")
 
-    # -- GUI --
-    app = ctk.CTk()
-    ctk.set_appearance_mode("dark")
-    app.geometry("1200x1000")
-    app.title("ECD 515 - Perovskite Automated Synthesis System")
+
     
     # trying to make an icon 
     icon = PhotoImage(file="guiImages/logo.png")
