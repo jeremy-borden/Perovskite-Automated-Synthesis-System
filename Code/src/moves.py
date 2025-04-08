@@ -21,7 +21,7 @@ from image_processing import ImageProcessor
 class Dispatcher():
     def __init__(self, spin_coater: SpinCoater, hotplate: Hotplate, 
                  camera: Camera, gripper: Gripper, infeed: Infeed, pippete_handler: PipetteHandler,
-                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer, tip_matrix: TipMatrix):
+                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer,spectrometer_frame=spectrometer_frame, tip_matrix: TipMatrix):
         self.logger = logging.getLogger("Main Logger")
         
         self.toolhead = toolhead
@@ -33,6 +33,7 @@ class Dispatcher():
         self.hotplate = hotplate
         self.vial_carousel = vial_carousel
         self.spectrometer = spectrometer
+        self.spectrometer_frame = spectrometer_frame
         self.tip_matrix = tip_matrix
         
         ImageProcessor.set_detector()
@@ -427,7 +428,8 @@ class Dispatcher():
         # Capture intensity data
         self.logger.info("Capturing spectrum intensity data...")
         intensities = self.spectrometer.read_spectrum(measurement_type)
-
+        if self.spectrometer_frame:
+            self.spectrometer_frame.update_plot()
         # Store the measurement
         if isinstance(intensities, np.ndarray) and intensities.size > 0 and \
            isinstance(self.wavelengths, np.ndarray) and self.wavelengths.size > 0 and \
