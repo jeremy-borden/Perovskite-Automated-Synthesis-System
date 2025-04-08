@@ -93,11 +93,10 @@ class ControlBoard():
         elif (not relative) and self.relative_positioning_enabled:
             self.send_message("G90")
             self.relative_positioning_enabled = False
-            
-        if feedrate_mm_per_minute != 2000:
-            self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
-        else:
-            self.send_message(f"G0 {axis}{distance_mm}")
+        
+        
+        self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
+        
             
         if finish_move:
             self.finish_moves()
