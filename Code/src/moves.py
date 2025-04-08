@@ -429,7 +429,8 @@ class Dispatcher():
         # Capture intensity data
         self.logger.info("Capturing spectrum intensity data...")
         intensities = self.spectrometer.read_spectrum(measurement_type)
-
+        if self.spectrometer_frame:
+            self.spectrometer_frame.update_plot()
         # Store the measurement
         if isinstance(intensities, np.ndarray) and intensities.size > 0 and \
            isinstance(self.wavelengths, np.ndarray) and self.wavelengths.size > 0 and \
