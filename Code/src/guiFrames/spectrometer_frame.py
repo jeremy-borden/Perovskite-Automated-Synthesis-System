@@ -84,5 +84,5 @@ class SpectrometerFrame(ctk.CTkFrame):
         except Exception as e:
             self.status_label.configure(text=f"Error: {str(e)}")
             
-        if self.winfo_exists():
+        #if self.winfo_exists():
             #self.after(1000, self.update_plot)
