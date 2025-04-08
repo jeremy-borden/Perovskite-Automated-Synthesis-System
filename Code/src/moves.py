@@ -21,7 +21,7 @@ from image_processing import ImageProcessor
 class Dispatcher():
     def __init__(self, spin_coater: SpinCoater, hotplate: Hotplate, 
                  camera: Camera, gripper: Gripper, infeed: Infeed, pippete_handler: PipetteHandler,
-                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer,spectrometer_frame=spectrometer_frame, tip_matrix: TipMatrix):
+                 toolhead: Toolhead, vial_carousel: VialCarousel, spectrometer: Spectrometer, tip_matrix: TipMatrix, spectrometer_frame=None):
         self.logger = logging.getLogger("Main Logger")
         
         self.toolhead = toolhead
