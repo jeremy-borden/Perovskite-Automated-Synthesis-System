@@ -33,6 +33,7 @@ class Dispatcher():
         self.hotplate = hotplate
         self.vial_carousel = vial_carousel
         self.spectrometer = spectrometer
+        self.spectrometer_frame = spectrometer_frame
         self.tip_matrix = tip_matrix
         
         ImageProcessor.set_detector()
