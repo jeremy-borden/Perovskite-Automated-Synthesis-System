@@ -110,16 +110,28 @@ class Dispatcher():
 
         return valid
 
+    
+    def validate_location(self, location: str):
+        self.locations = ProcedureFile().Open("persistant/locations.yml")
+        location_names = []
+        for location in self.locations:
+            location_names.append(location[0])
+            
+      
+    
+        if location not in location_names:
+            raise ValueError(f"Location name {location} not found")
+        
 # --------- GENERAL MOVES --------
 
     def home(self):
         """ Reset the machine"""
-        self.toolhead.home()
-        self.pippete_handler.home()
-        self.vial_carousel.home()
+        #self.toolhead.home()
+        #self.pippete_handler.home()
+        #self.vial_carousel.home()
         self.gripper.open()
         self.tip_matrix.refill_tips()
-        self.locations = ProcedureFile().Open("persistant/locations.yml")
+        
         # TODO create tip matrix thing
         
     def kill(self):
@@ -153,9 +165,9 @@ class Dispatcher():
         self.toolhead.move_axis("Z", z)
         
     def move_to_location(self, destination: str):
-        location_names = [name[0] for name in self.locations]
-        if destination not in location_names:
-            raise ValueError(f"Location name {destination} not found")
+        
+        
+        self.validate_location(destination)
 
         self.toolhead.move_axis("Z", 200)
         for location in self.locations:
