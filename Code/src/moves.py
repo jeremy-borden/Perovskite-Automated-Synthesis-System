@@ -175,12 +175,14 @@ class Dispatcher():
                 x = location[1]
                 y = location[2]
                 z = location[3]
-                self.toolhead.move_axis("X", x)
+                self.toolhead.move_axis("Z", z)
                 sleep(1)
                 self.toolhead.move_axis("Y", y)
                 sleep(1)
-                self.toolhead.move_axis("Z", z)
+                self.toolhead.move_axis("X", x)
                 sleep(1)
+                
+                
                 break
          
     # --------- SPIN COATER MOVES --------
@@ -246,11 +248,7 @@ class Dispatcher():
         gripper minimum position."""
         lower_distance = 20 #distance gripper should lower in order to pick up slide
         # get all location names and check if inputs are valid
-        location_names = [name[0] for name in self.locations] 
-        if destination not in location_names:
-            raise ValueError(f"Location name {destination} not found")
-        if source not in location_names:
-            raise ValueError(f"Location name {source} not found")
+        
         
         # raise machine to avoid collisions
         self.toolhead.move_axis("Z", 200)
