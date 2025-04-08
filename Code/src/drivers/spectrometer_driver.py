@@ -106,6 +106,7 @@ class Spectrometer:
         # Store the collected data
         self.measurements[measurement_type] = intensities
         self.logger.info(f"Read {len(intensities)} intensity values for {measurement_type}.")
+        print(f"[DEBUG] Sample Intensities: {intensities[:10]} ...")  # Shows first 10 values
         return intensities
 
 
