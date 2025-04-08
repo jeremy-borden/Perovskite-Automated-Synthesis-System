@@ -106,6 +106,7 @@ class ControlBoard():
             self.send_message("G90")
         if finish_move:
             self.finish_moves()
+            sleep(2)
 
     def finish_moves(self):
         """Wait for the move to finish"""
