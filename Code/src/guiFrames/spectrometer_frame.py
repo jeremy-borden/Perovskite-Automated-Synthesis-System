@@ -48,7 +48,7 @@ class SpectrometerFrame(ctk.CTkFrame):
         self.canvas = FigureCanvasTkAgg(self.figure, master=self)
         self.canvas.get_tk_widget().grid(row=2, column=0, padx=5, pady=5)
 
-        self.update_plot()
+        #self.update_plot()
 
     def update_plot(self):
         """Fetch new spectrometer data and update the plot in real-time."""
