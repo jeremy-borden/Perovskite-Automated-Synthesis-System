@@ -69,7 +69,7 @@ class SpinCoater():
         self.send_message("spc run")
         self.done.clear()
         if wait_to_finish:
-            self.done.wait()
+            self.done.wait(timeout=60)
         
     def add_step(self, rpm: int, time_seconds:float):
         self.send_message(f"spc add step {rpm} {time_seconds}")
