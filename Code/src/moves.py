@@ -198,8 +198,8 @@ class Dispatcher():
         
         self.spin_coater.add_step(rpm, spin_time_seconds)
         
-    def run_spin_coater(self, wait_to_finish: bool):
-        self.spin_coater.run(wait_to_finish=wait_to_finish)
+    def run_spin_coater(self):
+        self.spin_coater.run(wait_to_finish=True)
     
     # --------- GRIPPER MOVES --------
     def open_gripper(self):
