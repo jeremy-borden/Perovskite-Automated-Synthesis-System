@@ -149,3 +149,4 @@ if __name__ == "__main__":
     spectrometer.disconnect()
     spin_coater.disconnect()
     camera.disconnect()
+    hotplate.disconnect()
