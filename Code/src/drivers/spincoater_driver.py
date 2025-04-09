@@ -28,6 +28,7 @@ class SpinCoater():
             self.serial = serial.Serial(port, 9600, timeout=None)
             self._begin_reader_thread()
             self.set_pc_mode()
+            self.clear_steps()
             self.logger.info(
                 f"Connected to spincoater on port {port}")
         except serial.SerialException as e:
@@ -95,7 +96,7 @@ class SpinCoaterLineReader(serial.threaded.LineReader):
         line = line.strip()
         self.logger.debug(f"Received: {line}")
         
-        if line == "done":
+        if line == "Done":
             self.spin_coater.done.set()
             
     
