@@ -130,7 +130,7 @@ class Dispatcher():
         #self.toolhead.home()
         #self.pippete_handler.home()
         #self.vial_carousel.home()
-        self.gripper.open()
+        
         self.tip_matrix.refill_tips()
         
         # TODO create tip matrix thing
@@ -159,11 +159,15 @@ class Dispatcher():
             sleep(1)
 
     # --------- TOOLHEAD MOVES --------
-    def move_toolhead(self, x: float, y: float, z: float, relaitve: bool):
+    def move_toolhead(self, x: float, y: float, z: float, relaitve: int):
         """Move the toolhead to the specified coordiantes """
-        self.toolhead.move_axis("X", x, relative=relaitve)
-        self.toolhead.move_axis("Y", y, relative=relaitve)
-        self.toolhead.move_axis("Z", z, relative=relaitve)
+        if relaitve >= 1:
+            rrelaitve = True
+        else:
+            rrelative = False
+        self.toolhead.move_axis("X", x, relative=rrelaitve)
+        self.toolhead.move_axis("Y", y, relative=rrelaitve)
+        self.toolhead.move_axis("Z", z, relative=rrelaitve)
         
     def move_to_location(self, destination: str):
         

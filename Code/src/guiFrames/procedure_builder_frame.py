@@ -24,9 +24,9 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         # step holding frame
         self.step_frame = ctk.CTkScrollableFrame(
             master=self,
-            width=600,height=600)
+            width=600,height=500)
         self.step_frame.grid(
-            row=0, column=0, rowspan=8,
+            row=0, column=0, rowspan=9,
             padx=5,pady=5)
         
         self.step_frame.bind("<Button-1>", self._deselect_step)
@@ -93,6 +93,17 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             padx=5, pady=5, 
             sticky="nwe")
         
+        # import steps button
+        self.import_button = ctk.CTkButton(
+            master=self,
+            text="Import\nProcedure",
+            width=120, height=50,
+            command=self._import)
+        self.import_button.grid(
+            row=6, column=1,
+            padx=5, pady=5, 
+            sticky="nwe")
+        
         # quick run button
         self.quick_run_button = ctk.CTkButton(
             master=self,
@@ -108,7 +119,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.loop_count = LabelEntry(self, "Loop Count: ", int)
         self.loop_count.entry.insert(0,"1")
         self.loop_count.grid(
-            row=6, column=1,
+            row=8, column=1,
             padx=5, pady=5,
             sticky="nwe")
         
@@ -282,6 +293,39 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             ProcedureFile().Save(path=file_path, procedure=procedure)
             self.logger.info("Procedure Succesfully Exported!")
             
+    def _import(self):
+        file_path = filedialog.askopenfilename(
+        initialdir="src/procedures/",
+        title="Open Procedure File",
+        filetypes=(("Yaml files", "*.yml*"), ("All files", "*.*")))
+        if not file_path:
+            return
+        
+        try:
+            procedure = ProcedureFile().Open(file_path)
+            self.step_list.clear()
+            self.variation_step_list.clear()
+
+            for step in procedure["Procedure"]:
+                func_name = step[0]
+                if func_name not in self.moves:
+                    self.logger.error(f"Function '{func_name}' not found in moves.")
+                    return
+                
+            function = self.moves[func_name]
+            new_step = StepFrame(self.step_frame, function)
+
+            # Populate step entries with the arguments from the procedure
+            for entry, value in zip(new_step.entry_list, step[1:]):
+                entry.entry.insert(0, str(value))
+
+            # Bind click events and update lists
+            self._bind_step_widgets(new_step)
+            self.step_list.append(new_step)
+        except Exception as e:
+            self.logger.error(f"Ran into error {e} while importing")
+        self._update()
+        
     def _update(self):
         """ Update the step frame"""
         for i, step in enumerate(self.step_list):
