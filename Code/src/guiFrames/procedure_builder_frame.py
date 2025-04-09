@@ -306,9 +306,10 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         try:
             procedure = ProcedureFile().Open(file_path)
             for step, vstep in zip(self.step_list, self.variation_step_list):
-                index = self.step_list.index(step)
-                self.step_list.pop(index).destroy()
-                self.variation_step_list.pop(index).destroy()
+                if step is not None:
+                    step.destroy()
+                if vstep is not None:
+                    vstep.destroy()
                 
             self.step_list.clear()
             self.variation_step_list.clear()
