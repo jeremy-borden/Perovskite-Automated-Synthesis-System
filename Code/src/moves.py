@@ -161,10 +161,10 @@ class Dispatcher():
     # --------- TOOLHEAD MOVES --------
     def move_toolhead(self, x: float, y: float, z: float, relaitve: int):
         """Move the toolhead to the specified coordiantes """
+        rrelaitve = False
         if relaitve >= 1:
             rrelaitve = True
-        else:
-            rrelative = False
+        
         self.toolhead.move_axis("X", x, relative=rrelaitve)
         self.toolhead.move_axis("Y", y, relative=rrelaitve)
         self.toolhead.move_axis("Z", z, relative=rrelaitve)
