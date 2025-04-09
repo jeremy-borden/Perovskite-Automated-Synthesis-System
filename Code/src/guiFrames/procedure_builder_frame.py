@@ -305,6 +305,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             procedure = ProcedureFile().Open(file_path)
             self.step_list.clear()
             self.variation_step_list.clear()
+            self.selected_step = None
 
             for step in procedure["Procedure"]:
                 func_name = step[0]
@@ -322,6 +323,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             # Bind click events and update lists
             self._bind_step_widgets(new_step)
             self.step_list.append(new_step)
+            self.variation_step_list.append(None)
         except Exception as e:
             self.logger.error(f"Ran into error {e} while importing")
         self._update()
