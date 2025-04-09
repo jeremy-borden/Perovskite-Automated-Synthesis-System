@@ -321,17 +321,17 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
                     self.logger.error(f"Function '{func_name}' not found in moves.")
                     return
                 
-            function = self.moves[func_name]
-            new_step = StepFrame(self.step_frame, function)
+                function = self.moves[func_name]
+                new_step = StepFrame(self.step_frame, function)
 
-            # Populate step entries with the arguments from the procedure
-            for entry, value in zip(new_step.entry_list, step[1:]):
-                entry.entry.insert(0, str(value))
+                # Populate step entries with the arguments from the procedure
+                for entry, value in zip(new_step.entry_list, step[1:]):
+                    entry.entry.insert(0, str(value))
 
-            # Bind click events and update lists
-            self._bind_step_widgets(new_step)
-            self.step_list.append(new_step)
-            self.variation_step_list.append(None)
+                # Bind click events and update lists
+                self._bind_step_widgets(new_step)
+                self.step_list.append(new_step)
+                self.variation_step_list.append(None)
         except Exception as e:
             self.logger.error(f"Ran into error {e} while importing")
         self._update()
@@ -459,7 +459,7 @@ class LabelEntry(ctk.CTkFrame):
     
     def _validate_float(self, P):
         """ Validate that only floats are entered. """
-        if P.isdigit() or P == "" or (P.count('.') == 1 and P.replace('.', '').isdigit()) or (P.count('-') == 1 and P.replace('-', '').isdigit()):
+        if P.isdigit() or P == "" or (P.count('.') == 1 and P.replace('.', '').isdigit()) or (P.count('-') == 1 and (P.replace('-', '').isdigit() or P.replace('-', '') == '')):
             return True
         else:
             return False
