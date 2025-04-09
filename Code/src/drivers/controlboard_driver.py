@@ -104,6 +104,7 @@ class ControlBoard():
             sleep(1)
         if relative:
             self.send_message("G90")
+            sleep(1)
 
     def finish_moves(self):
         """Wait for the move to finish"""
