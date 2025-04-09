@@ -64,7 +64,7 @@ class Dispatcher():
             "set_infeed_angle": self.set_infeed_angle,
             #"open_infeed": self.open_infeed,
             #"close_infeed": self.close_infeed,
-            
+            "set_actuator": self.set_actuator,
             "extract_from_vial": self.extract_from_vial,
             "replace_tip": self.replace_tip,
             "mix_fluid": self.mix_fluid,
