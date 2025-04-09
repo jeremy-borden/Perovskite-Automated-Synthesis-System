@@ -53,7 +53,7 @@ class ProcedureHandler(threading.Thread):
             while self.started.is_set() and (self.current_step < len(self.procedure)):
                 
                 if self.started.is_set() == False:
-                    self.logger.debug("Stopping")
+                    self.logger.info("Stopping")
                     break
                 
                 move = self.procedure[self.current_step]
@@ -74,12 +74,12 @@ class ProcedureHandler(threading.Thread):
             
                 # if procedure is paused after finishing previous move
                 if self.paused.is_set():
-                    self.logger.debug("Paused")
+                    self.logger.info("Paused")
                     self.procedure_timer.pause()
                     while self.paused.is_set():
                         time.sleep(0.1)
                     self.procedure_timer.unpause()
-                    self.logger.debug("Unpaused")
+                    self.logger.info("Unpaused")
             
             self.stop()
             self.logger.debug("Procedure Ended")
