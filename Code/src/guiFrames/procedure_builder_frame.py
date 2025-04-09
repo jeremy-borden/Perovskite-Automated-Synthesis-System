@@ -466,7 +466,7 @@ class LabelEntry(ctk.CTkFrame):
         
     def _validate_int(self, P):
         """ Validate that only ints are entered. """
-        if P.isdigit() or P == "":
+        if P.isdigit() or P == "" or P.count('-') == 1:
             return True
         else:
             return False
