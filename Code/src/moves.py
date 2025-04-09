@@ -178,10 +178,11 @@ class Dispatcher():
                 y = location[2]
                 z = location[3]
                 
-                self.toolhead.move_axis("Y", y)
-                sleep(1)
                 self.toolhead.move_axis("X", x)
                 sleep(1)
+                self.toolhead.move_axis("Y", y)
+                sleep(1)
+                
                 self.toolhead.move_axis("Z", z)
                 sleep(15)
                 

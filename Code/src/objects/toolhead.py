@@ -10,7 +10,7 @@ class Toolhead():
         self.control_board = control_board
         
     def move_axis(self, axis: str, distance_mm: float, relative: bool = False, finish_move: bool = True):
-        self.control_board.move_axis(axis, distance_mm, 600, relative, finish_move)
+        self.control_board.move_axis(axis, distance_mm, 1000, relative=relative, finish_move=finish_move)
         
     def get_position(self, axis):
         return self.control_board.positions[axis]
