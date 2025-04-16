@@ -280,7 +280,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
                         partial_step.append(entry)  
                 procedure["Procedure"].append(partial_step)
         
-            return procedure
+        return procedure
         
     def _export(self):
         procedure = self._get_procedure()

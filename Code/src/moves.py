@@ -65,6 +65,7 @@ class Dispatcher():
             #"open_infeed": self.open_infeed,
             #"close_infeed": self.close_infeed,
             "set_actuator": self.set_actuator,
+            "set_eject_angle": self.set_eject_angle,
             "extract_from_vial": self.extract_from_vial,
             "replace_tip": self.replace_tip,
             "mix_fluid": self.mix_fluid,
@@ -413,6 +414,9 @@ class Dispatcher():
         
     def eject_tip(self):
         self.pippete_handler.eject_tip()
+        
+    def set_eject_angle(self, angle: int):
+        self.pippete_handler.set_eject_angle(angle)
 
     # -------- SPECTROMETER MOVES --------
 
