@@ -58,7 +58,7 @@ class VialCarousel():
         self.vial_volumes_ul[vial_num] = 0
         return True
         
-    def set_vial(self, vial_num):
+    def set_vial(self, vial_num: int):
         if vial_num >12:
             vial_num = 11
         next_vial_offset = 2.862
