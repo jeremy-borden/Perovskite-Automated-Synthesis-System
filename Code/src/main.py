@@ -30,7 +30,7 @@ from guiFrames.locations_frame import LocationFrame
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
-from predictor import predict_bandgap_and_efficiency
+#from predictor import predict_bandgap_and_efficiency
 
 if __name__ == "__main__":
     #enable software pwm
@@ -141,16 +141,16 @@ if __name__ == "__main__":
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="new")
     location_frame.grid(row=2, column=2,padx=5, pady=5, sticky="new")
 
-    bg, eff = predict_bandgap_and_efficiency(
-    intensity=1500000,
-    ink="FASnI3",
-    additive="Zn",
-    concentration=1.1,
-    composition_value=5,
-    composition_type="5% Zn"
-    )
+    #bg, eff = predict_bandgap_and_efficiency(
+    #intensity=1500000,
+    #ink="FASnI3",
+    #additive="Zn",
+    #concentration=1.1,
+    #composition_value=5,
+    #composition_type="5% Zn"
+    #)
 
-    logger.info(f"[ML Test] Predicted Bandgap: {bg:.3f} eV | Efficiency: {eff:.2f}%")
+    #logger.info(f"[ML Test] Predicted Bandgap: {bg:.3f} eV | Efficiency: {eff:.2f}%")
     
     # run the gui
     app.mainloop()
