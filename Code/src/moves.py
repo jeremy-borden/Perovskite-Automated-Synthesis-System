@@ -308,9 +308,6 @@ class Dispatcher():
     def set_actuator(self, position: float):
         self.pippete_handler.set_actuator_position(position)
     
-    def set_vial(self, vial_num: int):
-        self.vial_carousel.set_vial(vial_num)
-    
     def replace_tip(self):
         lower_distance = 10 # this means the pipette end should be 10mm above the tip
         # raise machine to avoid collisions
@@ -479,7 +476,7 @@ class Dispatcher():
         self.logger.info("All spectrometer measurements completed successfully.")
     
     # -------- VIAL CAROUSEL MOVES --------
-    def set_vial(self, vial_num):
+    def set_vial(self, vial_num: int):
         self.vial_carousel.set_vial(vial_num)
         
     # -------- INFEED MOVES --------
