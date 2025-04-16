@@ -66,9 +66,10 @@ class Dispatcher():
             #"close_infeed": self.close_infeed,
             "set_actuator": self.set_actuator,
             "set_eject_angle": self.set_eject_angle,
-            "extract_from_vial": self.extract_from_vial,
-            "replace_tip": self.replace_tip,
-            "mix_fluid": self.mix_fluid,
+            "set_vial": self.set_vial,
+            #"extract_from_vial": self.extract_from_vial,
+            #"replace_tip": self.replace_tip,
+            #"mix_fluid": self.mix_fluid,
             "eject_tip": self.eject_tip,
             "set_grab_angle": self.set_grab_angle,
             
@@ -306,6 +307,9 @@ class Dispatcher():
     # -------- PIPPETE MOVES --------
     def set_actuator(self, position: float):
         self.pippete_handler.set_actuator_position(position)
+    
+    def set_vial(self, vial_num: int):
+        self.vial_carousel.set_vial(vial_num)
     
     def replace_tip(self):
         lower_distance = 10 # this means the pipette end should be 10mm above the tip
