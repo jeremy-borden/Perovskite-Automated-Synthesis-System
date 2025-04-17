@@ -124,7 +124,7 @@ class SpectrometerFrame(ctk.CTkFrame):
             self.status_label.configure(text=f"Error: {str(e)}")
 
 
-  def predict_efficiency(self):
+   def predict_efficiency(self):
           try:
               ink = self.ink_var.get()
               additive = self.additive_var.get()
@@ -151,16 +151,16 @@ class SpectrometerFrame(ctk.CTkFrame):
           except Exception as e:
               self.prediction_label.configure(text=f"Error: {e}")
 
-  def run_optimization(self):
+   def run_optimization(self):
       result = genetic_algorithm()
       self.prediction_label.configure( text=f"Top: {result['Ink']}, {result['Additive']} | Eff: {result['Efficiency']:.2f}%" )
       plot_sq_limit_overlay(result['Bandgap'], result['Efficiency'])
 
-  def plot_feature_importance(self):
+   def plot_feature_importance(self):
       plot_feature_importance()
       self.prediction_label.configure(text="Saved: feature_importance.png")
 
-  def suggest_recipes(self):
+   def suggest_recipes(self):
       top5 = get_top_5_recipes()
       msg = f"Top 1: {top5[0]['Ink']} + {top5[0]['Additive']} → {top5[0]['Efficiency']:.2f}%"
       self.prediction_label.configure(text=msg)
