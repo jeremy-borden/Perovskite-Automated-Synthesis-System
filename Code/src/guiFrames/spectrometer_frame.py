@@ -124,46 +124,46 @@ class SpectrometerFrame(ctk.CTkFrame):
             self.status_label.configure(text=f"Error: {str(e)}")
 
 
-      def predict_efficiency(self):
-              try:
-                  ink = self.ink_var.get()
-                  additive = self.additive_var.get()
-                  comp_type = self.comp_type_var.get()
-                  concentration = float(self.concentration_entry.get())
-                  comp_value = float(self.comp_value_entry.get())
-        
-                  # Placeholder average intensity (can replace with live reading)
-                  intensity = 1500000
-        
-                  bg, eff = predict_bandgap_and_efficiency(
-                    intensity=intensity,
-                    ink=ink,
-                    additive=additive,
-                    concentration=concentration,
-                    composition_value=comp_value,
-                    composition_type=comp_type
-                  )
-                  if bg is not None:
-                      plot_sq_limit_overlay(bg, eff)
-                      self.prediction_label.configure(text=f"Bandgap: {bg:.3f} eV | Eff: {eff:.2f}%")
-                  else:
-                      self.prediction_label.configure(text="Prediction Failed")
-              except Exception as e:
-                  self.prediction_label.configure(text=f"Error: {e}")
+  def predict_efficiency(self):
+          try:
+              ink = self.ink_var.get()
+              additive = self.additive_var.get()
+              comp_type = self.comp_type_var.get()
+              concentration = float(self.concentration_entry.get())
+              comp_value = float(self.comp_value_entry.get())
+    
+              # Placeholder average intensity (can replace with live reading)
+              intensity = 1500000
+    
+              bg, eff = predict_bandgap_and_efficiency(
+                intensity=intensity,
+                ink=ink,
+                additive=additive,
+                concentration=concentration,
+                composition_value=comp_value,
+                composition_type=comp_type
+              )
+              if bg is not None:
+                  plot_sq_limit_overlay(bg, eff)
+                  self.prediction_label.configure(text=f"Bandgap: {bg:.3f} eV | Eff: {eff:.2f}%")
+              else:
+                  self.prediction_label.configure(text="Prediction Failed")
+          except Exception as e:
+              self.prediction_label.configure(text=f"Error: {e}")
 
-      def run_optimization(self):
-          result = genetic_algorithm()
-          self.prediction_label.configure( text=f"Top: {result['Ink']}, {result['Additive']} | Eff: {result['Efficiency']:.2f}%" )
-          plot_sq_limit_overlay(result['Bandgap'], result['Efficiency'])
+  def run_optimization(self):
+      result = genetic_algorithm()
+      self.prediction_label.configure( text=f"Top: {result['Ink']}, {result['Additive']} | Eff: {result['Efficiency']:.2f}%" )
+      plot_sq_limit_overlay(result['Bandgap'], result['Efficiency'])
 
-      def plot_feature_importance(self):
-          plot_feature_importance()
-          self.prediction_label.configure(text="Saved: feature_importance.png")
+  def plot_feature_importance(self):
+      plot_feature_importance()
+      self.prediction_label.configure(text="Saved: feature_importance.png")
 
-      def suggest_recipes(self):
-          top5 = get_top_5_recipes()
-          msg = f"Top 1: {top5[0]['Ink']} + {top5[0]['Additive']} → {top5[0]['Efficiency']:.2f}%"
-          self.prediction_label.configure(text=msg)
+  def suggest_recipes(self):
+      top5 = get_top_5_recipes()
+      msg = f"Top 1: {top5[0]['Ink']} + {top5[0]['Additive']} → {top5[0]['Efficiency']:.2f}%"
+      self.prediction_label.configure(text=msg)
 
         #if self.winfo_exists():
             #self.after(1000, self.update_plot)
