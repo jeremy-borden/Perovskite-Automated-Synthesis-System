@@ -5,7 +5,7 @@ import pandas as pd
 
 # Get the folder where this .py file is saved
 BASE_DIR = os.path.dirname(__file__)
-MODEL_PATH = os.path.join(BASE_DIR, "Steve-ML")
+MODEL_PATH = BASE_DIR 
 
 # --- Load model and encoders ---
 with open(os.path.join(MODEL_PATH, "random_forest_model.pkl"), "rb") as f:
