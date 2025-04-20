@@ -65,9 +65,11 @@ class Dispatcher():
             #"open_infeed": self.open_infeed,
             #"close_infeed": self.close_infeed,
             "set_actuator": self.set_actuator,
-            "extract_from_vial": self.extract_from_vial,
-            "replace_tip": self.replace_tip,
-            "mix_fluid": self.mix_fluid,
+            "set_eject_angle": self.set_eject_angle,
+            "set_vial": self.set_vial,
+            #"extract_from_vial": self.extract_from_vial,
+            #"replace_tip": self.replace_tip,
+            #"mix_fluid": self.mix_fluid,
             "eject_tip": self.eject_tip,
             "set_grab_angle": self.set_grab_angle,
             
@@ -413,6 +415,9 @@ class Dispatcher():
         
     def eject_tip(self):
         self.pippete_handler.eject_tip()
+        
+    def set_eject_angle(self, angle: int):
+        self.pippete_handler.set_eject_angle(angle)
 
     # -------- SPECTROMETER MOVES --------
 
@@ -471,7 +476,7 @@ class Dispatcher():
         self.logger.info("All spectrometer measurements completed successfully.")
     
     # -------- VIAL CAROUSEL MOVES --------
-    def set_vial(self, vial_num):
+    def set_vial(self, vial_num: int):
         self.vial_carousel.set_vial(vial_num)
         
     # -------- INFEED MOVES --------

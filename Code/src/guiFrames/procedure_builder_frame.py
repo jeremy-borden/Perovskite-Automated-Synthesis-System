@@ -264,7 +264,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         except ValueError:
             self.logger.error("Loop count must be > 0")
             return
-    
+        
         for loop in range(loop_count):
             for step, variation_step in zip(self.step_list, self.variation_step_list):
                 partial_step = [step.function.__name__] # get step name
@@ -280,7 +280,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
                         partial_step.append(entry)  
                 procedure["Procedure"].append(partial_step)
         
-            return procedure
+        return procedure
         
     def _export(self):
         procedure = self._get_procedure()
