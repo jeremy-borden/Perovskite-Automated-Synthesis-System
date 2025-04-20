@@ -459,14 +459,14 @@ class LabelEntry(ctk.CTkFrame):
     
     def _validate_float(self, P):
         """ Validate that only floats are entered. """
-        if P.isdigit() or P == "" or (P.count('.') == 1 and P.replace('.', '').isdigit()) or (P.count('-') == 1 and (P.replace('-', '').isdigit() or P.replace('-', '') == '')):
+        if P.isdigit() or P == "" or (P.count('.') == 1 and P.replace('.', '').isdigit()) or ((P.count('-') == 1 and (P.replace('-', '').isdigit() or P.replace('-', '') == ''))):
             return True
         else:
             return False
         
     def _validate_int(self, P):
         """ Validate that only ints are entered. """
-        if P.isdigit() or P == "" or P.count('-') == 1:
+        if P.isdigit() or P == "" or ((P.count('-') == 1 and (P.replace('-', '').isdigit() or P.replace('-', '') == ''))):
             return True
         else:
             return False
