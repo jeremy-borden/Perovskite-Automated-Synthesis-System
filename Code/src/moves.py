@@ -190,7 +190,7 @@ class Dispatcher():
                 sleep(1)
                 
                 self.toolhead.move_axis("Z", z)
-                sleep(15)
+                sleep(1)
                 
                 break
          
