@@ -4,14 +4,18 @@ import pandas as pd
 import random
 import matplotlib.pyplot as plt
 
-# Load model + encoders
-with open("ml_models/random_forest_model.pkl", "rb") as f:
+# --- Correct model path (same folder as ml_optimizers.py) ---
+BASE_DIR = os.path.dirname(__file__)  # path to /src/
+MODEL_PATH = BASE_DIR  # because your .pkl files are directly inside /src/
+
+# --- Load model and encoders ---
+with open(os.path.join(MODEL_PATH, "random_forest_model.pkl"), "rb") as f:
     model = pickle.load(f)
-with open("ml_models/ink_encoder.pkl", "rb") as f:
+with open(os.path.join(MODEL_PATH, "ink_encoder.pkl"), "rb") as f:
     ink_encoder = pickle.load(f)
-with open("ml_models/additive_encoder.pkl", "rb") as f:
+with open(os.path.join(MODEL_PATH, "additive_encoder.pkl"), "rb") as f:
     additive_encoder = pickle.load(f)
-with open("ml_models/composition_encoder.pkl", "rb") as f:
+with open(os.path.join(MODEL_PATH, "composition_encoder.pkl"), "rb") as f:
     composition_encoder = pickle.load(f)
 
 # Efficiency function

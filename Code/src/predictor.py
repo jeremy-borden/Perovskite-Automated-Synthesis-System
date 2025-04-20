@@ -1,18 +1,23 @@
 import pickle
+import os
 import numpy as np
 import pandas as pd
 
+# Get the folder where this .py file is saved
+BASE_DIR = os.path.dirname(__file__)
+MODEL_PATH = BASE_DIR 
+
 # --- Load model and encoders ---
-with open("ml_models/random_forest_model.pkl", "rb") as f:
+with open(os.path.join(MODEL_PATH, "random_forest_model.pkl"), "rb") as f:
     rf_model = pickle.load(f)
 
-with open("ml_models/ink_encoder.pkl", "rb") as f:
+with open(os.path.join(MODEL_PATH, "ink_encoder.pkl"), "rb") as f:
     ink_encoder = pickle.load(f)
 
-with open("ml_models/additive_encoder.pkl", "rb") as f:
+with open(os.path.join(MODEL_PATH, "additive_encoder.pkl"), "rb") as f:
     additive_encoder = pickle.load(f)
 
-with open("ml_models/composition_encoder.pkl", "rb") as f:
+with open(os.path.join(MODEL_PATH, "composition_encoder.pkl"), "rb") as f:
     composition_encoder = pickle.load(f)
 
 # --- Adjusted SQ Efficiency Formula ---

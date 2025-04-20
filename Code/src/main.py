@@ -30,7 +30,7 @@ from guiFrames.locations_frame import LocationFrame
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
-#from predictor import predict_bandgap_and_efficiency
+# from predictor import predict_bandgap_and_efficiency
 
 if __name__ == "__main__":
     #enable software pwm
