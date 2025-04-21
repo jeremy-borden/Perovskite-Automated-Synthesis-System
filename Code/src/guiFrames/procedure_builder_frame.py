@@ -293,6 +293,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             ProcedureFile().Save(path=file_path, procedure=procedure)
             self.logger.info("Procedure Succesfully Exported!")
             
+        
     def _import(self):
         file_path = filedialog.askopenfilename(
         initialdir="src/procedures/",
@@ -352,7 +353,13 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
                 row=i, column=1,
                 padx=5,pady=5,
                 sticky="nw")
+    
+    def update_super_moves(self):
+        # search through persistant folder
+        # for each file ending in _supermove, add it to the moves list
+        # when this move is run, it should run the moves specified in the file
         
+        pass
 # -------- STEPS --------
 class StepFrame(ctk.CTkFrame):
     def __init__(self, master, function):
