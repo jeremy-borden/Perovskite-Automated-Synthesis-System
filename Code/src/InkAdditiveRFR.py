@@ -16,26 +16,27 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, r2_score
-from skopt import gp_minimize
-from skopt.space import Integer, Real
-from skopt.utils import use_named_args
+# from sklearn.metrics import mean_absolute_error, r2_score
+# from skopt import gp_minimize
+# from skopt.space import Integer, Real
+# from skopt.utils import use_named_args
 import warnings
-import pickle
+# import pickle
 from sklearn.model_selection import GridSearchCV
-from skopt.space import Real, Categorical
-import scipy.stats as stats
-from sklearn.ensemble import GradientBoostingRegressor
+# from skopt.space import Real, Categorical
+# import scipy.stats as stats
+# from sklearn.ensemble import GradientBoostingRegressor
 from category_encoders import TargetEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from concurrent.futures import ProcessPoolExecutor
 from tqdm import tqdm
 import random
-import plotly.express as px
+# import plotly.express as px
 from bayes_opt import BayesianOptimization
+from scipy.interpolate import make_interp_spline
 
-import plotly.io as pio
-pio.renderers.default = "browser"
+# import plotly.io as pio
+# pio.renderers.default = "browser"
 
 
 """# **13. Optimization Loop beyond the dataset using Genetic Algorithm**
@@ -43,152 +44,152 @@ pio.renderers.default = "browser"
     **The Optimization Loop using a Genetic Algorithm iteratively generates new ink compositions beyond the dataset by mimicking natural selection. It evaluates compositions based on desired properties (e.g., bandgap) and evolves them through selection, crossover, and mutation. This approach helps discover novel formulations with improved performance.**
     """
 
-# Define the fitness function outside of the genetic_algorithm function
-def fitness(individual, best_rf, ink_encoder, additive_encoder, composition_encoder, adjusted_sq_efficiency):
-        """ Calculate the fitness of an individual (adjusted SQ efficiency) """
-        try:
-            # Create a synthetic row for efficiency calculation
-            synthetic_row = pd.DataFrame([{
-                'Intensity': individual['Intensity'],
-                'Ink Concentration [M]': individual['Ink_Concentration'],
-                'Composition_Value': individual['Composition_Value'],
-                'Ink': individual['Ink'],
-                'Additive': individual['Additive'],
-                'Composition_Type_original': individual['Composition_Type'],
-                'Bandgap': None,
-                'Composition_Type_Zn': int('Zn' in individual['Composition_Type']),
-                'Composition_Type_Br': int('Br' in individual['Composition_Type']),
-                'Composition_Type_FA': int('FA' in individual['Composition_Type']),
-                'Composition_Type_EA': int('EA' in individual['Composition_Type'])
-            }])
+# # Define the fitness function outside of the genetic_algorithm function
+# def fitness(individual, best_rf, ink_encoder, additive_encoder, composition_encoder, adjusted_sq_efficiency):
+#         """ Calculate the fitness of an individual (adjusted SQ efficiency) """
+#         try:
+#             # Create a synthetic row for efficiency calculation
+#             synthetic_row = pd.DataFrame([{
+#                 'Intensity': individual['Intensity'],
+#                 'Ink Concentration [M]': individual['Ink_Concentration'],
+#                 'Composition_Value': individual['Composition_Value'],
+#                 'Ink': individual['Ink'],
+#                 'Additive': individual['Additive'],
+#                 'Composition_Type_original': individual['Composition_Type'],
+#                 'Bandgap': None,
+#                 'Composition_Type_Zn': int('Zn' in individual['Composition_Type']),
+#                 'Composition_Type_Br': int('Br' in individual['Composition_Type']),
+#                 'Composition_Type_FA': int('FA' in individual['Composition_Type']),
+#                 'Composition_Type_EA': int('EA' in individual['Composition_Type'])
+#             }])
 
-            # Encode categorical features
-            synthetic_row['Ink_encoded'] = ink_encoder.transform(synthetic_row[['Ink']])
-            synthetic_row['Additive_encoded'] = additive_encoder.transform(synthetic_row[['Additive']])
-            synthetic_row['Composition_Type_encoded'] = composition_encoder.transform(synthetic_row[['Composition_Type_original']])
+#             # Encode categorical features
+#             synthetic_row['Ink_encoded'] = ink_encoder.transform(synthetic_row[['Ink']])
+#             synthetic_row['Additive_encoded'] = additive_encoder.transform(synthetic_row[['Additive']])
+#             synthetic_row['Composition_Type_encoded'] = composition_encoder.transform(synthetic_row[['Composition_Type_original']])
 
-            # Prepare features for prediction
-            X_synthetic = synthetic_row[['Intensity', 'Ink Concentration [M]', 'Composition_Value',
-                                        'Ink_encoded', 'Additive_encoded', 'Composition_Type_encoded']]
+#             # Prepare features for prediction
+#             X_synthetic = synthetic_row[['Intensity', 'Ink Concentration [M]', 'Composition_Value',
+#                                         'Ink_encoded', 'Additive_encoded', 'Composition_Type_encoded']]
 
-            # Predict bandgap
-            synthetic_row['Bandgap'] = best_rf.predict(X_synthetic)[0]
+#             # Predict bandgap
+#             synthetic_row['Bandgap'] = best_rf.predict(X_synthetic)[0]
 
-            # Calculate efficiency
-            efficiency = adjusted_sq_efficiency(synthetic_row.iloc[0])
-            return efficiency
-        except Exception as e:
-            return -1  # Return very low fitness if there was an error
+#             # Calculate efficiency
+#             efficiency = adjusted_sq_efficiency(synthetic_row.iloc[0])
+#             return efficiency
+#         except Exception as e:
+#             return -1  # Return very low fitness if there was an error
 
-def genetic_algorithm(n_generations=100, population_size=50, mutation_rate=0.1, tournament_size=5, max_no_improvement=10, best_rf=None, ink_encoder=None, additive_encoder=None, composition_encoder=None, adjusted_sq_efficiency=None):
-        # Define parameter ranges
-        param_ranges = {
-            'Intensity': (1000, 2000000),
-            'Ink_Concentration': (1.0, 1.3),
-            'Composition_Value': (0, 30),
-            'Ink': ['FASnI3', 'mix', 'MASnI3'],
-            'Additive': ['Zn', 'Br', 'MA', 'EASCN', '4-MePEABr', '0'],
-            'Composition_Type': ['Baseline', '5% Zn', '10% Zn', '15% Zn',
-                                '5%Br', '10% Br', '20% Br', '20% FA',
-                                '10% MA', '20% MA', '10% EA', '4-MePEABr',
-                                '5% EA', '15% EA', 'EA 5%', 'EA 15%']
-        }
+# def genetic_algorithm(n_generations=100, population_size=50, mutation_rate=0.1, tournament_size=5, max_no_improvement=10, best_rf=None, ink_encoder=None, additive_encoder=None, composition_encoder=None, adjusted_sq_efficiency=None):
+#         # Define parameter ranges
+#         param_ranges = {
+#             'Intensity': (1000, 2000000),
+#             'Ink_Concentration': (1.0, 1.3),
+#             'Composition_Value': (0, 30),
+#             'Ink': ['FASnI3', 'mix', 'MASnI3'],
+#             'Additive': ['Zn', 'Br', 'MA', 'EASCN', '4-MePEABr', '0'],
+#             'Composition_Type': ['Baseline', '5% Zn', '10% Zn', '15% Zn',
+#                                 '5%Br', '10% Br', '20% Br', '20% FA',
+#                                 '10% MA', '20% MA', '10% EA', '4-MePEABr',
+#                                 '5% EA', '15% EA', 'EA 5%', 'EA 15%']
+#         }
 
-        def create_individual():
-            """ Generate a random individual solution """
-            return {
-                'Intensity': random.uniform(*param_ranges['Intensity']),
-                'Ink_Concentration': random.uniform(*param_ranges['Ink_Concentration']),
-                'Composition_Value': random.uniform(*param_ranges['Composition_Value']),
-                'Ink': random.choice(param_ranges['Ink']),
-                'Additive': random.choice(param_ranges['Additive']),
-                'Composition_Type': random.choice(param_ranges['Composition_Type'])
-            }
+#         def create_individual():
+#             """ Generate a random individual solution """
+#             return {
+#                 'Intensity': random.uniform(*param_ranges['Intensity']),
+#                 'Ink_Concentration': random.uniform(*param_ranges['Ink_Concentration']),
+#                 'Composition_Value': random.uniform(*param_ranges['Composition_Value']),
+#                 'Ink': random.choice(param_ranges['Ink']),
+#                 'Additive': random.choice(param_ranges['Additive']),
+#                 'Composition_Type': random.choice(param_ranges['Composition_Type'])
+#             }
 
-        def crossover(parent1, parent2):
-            """ Perform one-point crossover to produce offspring """
-            crossover_point = random.randint(0, len(parent1)-1)
-            offspring = parent1.copy()
+#         def crossover(parent1, parent2):
+#             """ Perform one-point crossover to produce offspring """
+#             crossover_point = random.randint(0, len(parent1)-1)
+#             offspring = parent1.copy()
 
-            # Swap from crossover point onwards with the second parent
-            for key in list(parent2.keys())[crossover_point:]:
-                offspring[key] = parent2[key]
-            return offspring
+#             # Swap from crossover point onwards with the second parent
+#             for key in list(parent2.keys())[crossover_point:]:
+#                 offspring[key] = parent2[key]
+#             return offspring
 
-        def mutate(individual):
-            """ Apply mutation by randomly changing one of the parameters """
-            mutation_type = random.choice(list(individual.keys()))
+#         def mutate(individual):
+#             """ Apply mutation by randomly changing one of the parameters """
+#             mutation_type = random.choice(list(individual.keys()))
 
-            if mutation_type == 'Intensity':
-                individual[mutation_type] = random.uniform(*param_ranges['Intensity'])
-            elif mutation_type == 'Ink_Concentration':
-                individual[mutation_type] = random.uniform(*param_ranges['Ink_Concentration'])
-            elif mutation_type == 'Composition_Value':
-                individual[mutation_type] = random.uniform(*param_ranges['Composition_Value'])
-            elif mutation_type == 'Ink':
-                individual[mutation_type] = random.choice(param_ranges['Ink'])
-            elif mutation_type == 'Additive':
-                individual[mutation_type] = random.choice(param_ranges['Additive'])
-            elif mutation_type == 'Composition_Type':
-                individual[mutation_type] = random.choice(param_ranges['Composition_Type'])
+#             if mutation_type == 'Intensity':
+#                 individual[mutation_type] = random.uniform(*param_ranges['Intensity'])
+#             elif mutation_type == 'Ink_Concentration':
+#                 individual[mutation_type] = random.uniform(*param_ranges['Ink_Concentration'])
+#             elif mutation_type == 'Composition_Value':
+#                 individual[mutation_type] = random.uniform(*param_ranges['Composition_Value'])
+#             elif mutation_type == 'Ink':
+#                 individual[mutation_type] = random.choice(param_ranges['Ink'])
+#             elif mutation_type == 'Additive':
+#                 individual[mutation_type] = random.choice(param_ranges['Additive'])
+#             elif mutation_type == 'Composition_Type':
+#                 individual[mutation_type] = random.choice(param_ranges['Composition_Type'])
 
-            return individual
+#             return individual
 
-        def tournament_selection(population, best_rf, ink_encoder, additive_encoder, composition_encoder, adjusted_sq_efficiency):
-            """ Tournament selection to choose parents based on fitness """
-            tournament = random.sample(population, tournament_size)
+#         def tournament_selection(population, best_rf, ink_encoder, additive_encoder, composition_encoder, adjusted_sq_efficiency):
+#             """ Tournament selection to choose parents based on fitness """
+#             tournament = random.sample(population, tournament_size)
 
-            # Pass necessary arguments to fitness function
-            tournament.sort(key=lambda x: fitness(x, best_rf, ink_encoder, additive_encoder, composition_encoder, adjusted_sq_efficiency), reverse=True)
-            return tournament[0], tournament[1]  # Return two best individuals
+#             # Pass necessary arguments to fitness function
+#             tournament.sort(key=lambda x: fitness(x, best_rf, ink_encoder, additive_encoder, composition_encoder, adjusted_sq_efficiency), reverse=True)
+#             return tournament[0], tournament[1]  # Return two best individuals
 
-        # Initialize population
-        population = [create_individual() for _ in range(population_size)]
+#         # Initialize population
+#         population = [create_individual() for _ in range(population_size)]
 
-        best_individual = None
-        best_fitness = -1
-        no_improvement_count = 0
+#         best_individual = None
+#         best_fitness = -1
+#         no_improvement_count = 0
 
-        # Evolve the population over generations
-        with ProcessPoolExecutor() as executor:
-            for generation in range(n_generations):
-                new_population = []
+#         # Evolve the population over generations
+#         with ProcessPoolExecutor() as executor:
+#             for generation in range(n_generations):
+#                 new_population = []
 
-                for _ in range(population_size):
-                    parent1, parent2 = tournament_selection(population, best_rf, ink_encoder, additive_encoder, composition_encoder, adjusted_sq_efficiency)
-                    offspring = crossover(parent1, parent2)
+#                 for _ in range(population_size):
+#                     parent1, parent2 = tournament_selection(population, best_rf, ink_encoder, additive_encoder, composition_encoder, adjusted_sq_efficiency)
+#                     offspring = crossover(parent1, parent2)
 
-                    if random.random() < mutation_rate:
-                        offspring = mutate(offspring)
+#                     if random.random() < mutation_rate:
+#                         offspring = mutate(offspring)
 
-                    new_population.append(offspring)
+#                     new_population.append(offspring)
 
-                # Evaluate the new population using parallelization
-                fitness_values = list(executor.map(fitness, new_population, [best_rf]*population_size,
-                                                    [ink_encoder]*population_size, [additive_encoder]*population_size,
-                                                    [composition_encoder]*population_size, [adjusted_sq_efficiency]*population_size))
+#                 # Evaluate the new population using parallelization
+#                 fitness_values = list(executor.map(fitness, new_population, [best_rf]*population_size,
+#                                                     [ink_encoder]*population_size, [additive_encoder]*population_size,
+#                                                     [composition_encoder]*population_size, [adjusted_sq_efficiency]*population_size))
 
-                # Track the best individual
-                for idx, individual in enumerate(new_population):
-                    individual_fitness = fitness_values[idx]
-                    if individual_fitness > best_fitness:
-                        best_fitness = individual_fitness
-                        best_individual = individual
-                        no_improvement_count = 0
-                    else:
-                        no_improvement_count += 1
+#                 # Track the best individual
+#                 for idx, individual in enumerate(new_population):
+#                     individual_fitness = fitness_values[idx]
+#                     if individual_fitness > best_fitness:
+#                         best_fitness = individual_fitness
+#                         best_individual = individual
+#                         no_improvement_count = 0
+#                     else:
+#                         no_improvement_count += 1
 
-                print(f"Generation {generation+1}/{n_generations}: Best Fitness = {best_fitness:.4f}")
+#                 print(f"Generation {generation+1}/{n_generations}: Best Fitness = {best_fitness:.4f}")
 
-                # Early stopping if no improvement
-                if no_improvement_count >= max_no_improvement:
-                    print("Early stopping due to no improvement in fitness.")
-                    break
+#                 # Early stopping if no improvement
+#                 if no_improvement_count >= max_no_improvement:
+#                     print("Early stopping due to no improvement in fitness.")
+#                     break
 
-                population = new_population
+#                 population = new_population
 
-        # Return best individual found
-        return best_individual, best_fitness
+#         # Return best individual found
+#         return best_individual, best_fitness
 # Function to calculate efficiency with composition-specific scaling
 def adjusted_sq_efficiency(row):
         """
@@ -212,10 +213,11 @@ def adjusted_sq_efficiency(row):
             base_efficiency *= 1.07  # FA improves efficiency (+7%)
 
         if 'Composition_Type_EA' in row and row['Composition_Type_EA']:
-            base_efficiency *= 1.04  # EA enhances stability and crystallinity (+4%)
+            base_efficiency *= 0.92  # EA decreases stability and crystallinity (-8%)
 
         # Convert to percentage and clip between 0-100%
-        return np.clip(base_efficiency * 100, 0, 100)
+        η_total = 0.90 * 0.95 * 0.97
+        return np.clip(base_efficiency * η_total * 100, 0, 100)
         
 # **2. Uploading and Loading Data**"""
 def main():
@@ -232,35 +234,35 @@ def main():
 
     """
 
-    np.random.seed(42)
-    data_size = 500
+    # np.random.seed(42)
+    # data_size = 500
 
-    # Creating a sample dataset
-    df = pd.DataFrame({
-        "Intensity": np.random.uniform(0.1, 1.0, data_size),
-        "Ink Concentration [M]": np.random.uniform(0.01, 1.0, data_size),
-        "Composition_Value": np.random.uniform(0.1, 1.0, data_size),
-        "Ink_encoded": np.random.choice([0, 1], data_size),
-        "Additive_encoded": np.random.choice([0, 1], data_size),
-        "Composition_Type_encoded": np.random.choice([0, 1], data_size),
-        "Efficiency": np.random.uniform(10, 30, data_size)  # Target variable
-    })
+    # # Creating a sample dataset
+    # df = pd.DataFrame({
+    #     "Intensity": np.random.uniform(0.1, 1.0, data_size),
+    #     "Ink Concentration [M]": np.random.uniform(0.01, 1.0, data_size),
+    #     "Composition_Value": np.random.uniform(0.1, 1.0, data_size),
+    #     "Ink_encoded": np.random.choice([0, 1], data_size),
+    #     "Additive_encoded": np.random.choice([0, 1], data_size),
+    #     "Composition_Type_encoded": np.random.choice([0, 1], data_size),
+    #     "Efficiency": np.random.uniform(10, 30, data_size)  # Target variable
+    # })
 
-    # Define features and target
-    X = df.drop(columns=["Efficiency"])  # Feature set
-    y = df["Efficiency"]  # Target variable
+    # # Define features and target
+    # X = df.drop(columns=["Efficiency"])  # Feature set
+    # y = df["Efficiency"]  # Target variable
 
-    # Split dataset into training (80%) and testing (20%) sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # # Split dataset into training (80%) and testing (20%) sets
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Initialize the Gradient Boosting Regressor
-    gb_model = GradientBoostingRegressor(random_state=42)
+    # # Initialize the Gradient Boosting Regressor
+    # gb_model = GradientBoostingRegressor(random_state=42)
 
-    # Train the model
-    gb_model.fit(X_train, y_train)
+    # # Train the model
+    # gb_model.fit(X_train, y_train)
 
-    # Make predictions
-    y_pred = gb_model.predict(X_test)
+    # # Make predictions
+    # y_pred = gb_model.predict(X_test)
 
     # Step 1: Calculate Bandgap (same as before)
     data['Bandgap'] = 1240 / data['Wavelength'].replace(0, np.nan)
@@ -308,36 +310,39 @@ def main():
     composition_mapping = data[['Composition_Type_original', 'Composition_Type_encoded']].drop_duplicates()
 
     # Display mappings
-    print("\nInk Mapping:")
-    print(ink_mapping.to_markdown(index=False, tablefmt="grid"))
+    print(ink_mapping.head())
+    print(additive_mapping.head())
+    print(composition_mapping.head())
+    # print("\nInk Mapping:")
+    # print(ink_mapping.to_markdown(index=False, tablefmt="grid"))
 
-    print("\nAdditive Mapping:")
-    print(additive_mapping.to_markdown(index=False, tablefmt="grid"))
+    # print("\nAdditive Mapping:")
+    # print(additive_mapping.to_markdown(index=False, tablefmt="grid"))
 
-    print("\nComposition Type Mapping:")
-    print(composition_mapping.to_markdown(index=False, tablefmt="grid"))
+    # print("\nComposition Type Mapping:")
+    # print(composition_mapping.to_markdown(index=False, tablefmt="grid"))
 
     # Display full training data
-    train_data = X_train.copy()
-    train_data['Bandgap'] = y_train
-    train_data['Sample_No'] = data.loc[X_train.index, 'Sample_No']
-    train_data = train_data.merge(data[['Sample_No', 'Ink_original', 'Additive_original',
-                                    'Composition_Type_original']], on='Sample_No')
+    # train_data = X_train.copy()
+    # train_data['Bandgap'] = y_train
+    # train_data['Sample_No'] = data.loc[X_train.index, 'Sample_No']
+    # train_data = train_data.merge(data[['Sample_No', 'Ink_original', 'Additive_original',
+    #                                 'Composition_Type_original']], on='Sample_No')
 
-    print("\nFull Training Data:")
-    print(train_data[['Sample_No', 'Intensity', 'Ink Concentration [M]', 'Composition_Value',
-                    'Ink_original', 'Additive_original', 'Composition_Type_original', 'Bandgap']].to_markdown(index=False, tablefmt="grid"))
+    # print("\nFull Training Data:")
+    # print(train_data[['Sample_No', 'Intensity', 'Ink Concentration [M]', 'Composition_Value',
+    #                 'Ink_original', 'Additive_original', 'Composition_Type_original', 'Bandgap']].to_markdown(index=False, tablefmt="grid"))
 
-    # Display full testing data
-    test_data = X_test.copy()
-    test_data['Bandgap'] = y_test
-    test_data['Sample_No'] = data.loc[X_test.index, 'Sample_No']
-    test_data = test_data.merge(data[['Sample_No', 'Ink_original', 'Additive_original',
-                                    'Composition_Type_original']], on='Sample_No')
+    # # Display full testing data
+    # test_data = X_test.copy()
+    # test_data['Bandgap'] = y_test
+    # test_data['Sample_No'] = data.loc[X_test.index, 'Sample_No']
+    # test_data = test_data.merge(data[['Sample_No', 'Ink_original', 'Additive_original',
+    #                                 'Composition_Type_original']], on='Sample_No')
 
-    print("\nFull Testing Data:")
-    print(test_data[['Sample_No', 'Intensity', 'Ink Concentration [M]', 'Composition_Value',
-                    'Ink_original', 'Additive_original', 'Composition_Type_original', 'Bandgap']].to_markdown(index=False, tablefmt="grid"))
+    # print("\nFull Testing Data:")
+    # print(test_data[['Sample_No', 'Intensity', 'Ink Concentration [M]', 'Composition_Value',
+    #                 'Ink_original', 'Additive_original', 'Composition_Type_original', 'Bandgap']].to_markdown(index=False, tablefmt="grid"))
 
     """# **6. Model Training and Making Predictions**"""
 
@@ -374,107 +379,107 @@ def main():
 
     """
 
-    # Define the hyperparameter grid
-    param_grid = {
-        'n_estimators': [50, 100, 200],  # Number of trees in the forest
-        'max_depth': [None, 10, 20, 30],  # Maximum depth of trees
-        'min_samples_split': [2, 5, 10],  # Minimum samples required to split a node
-        'min_samples_leaf': [1, 2, 4]  # Minimum samples required at a leaf node
-    }
+    # # Define the hyperparameter grid
+    # param_grid = {
+    #     'n_estimators': [50, 100, 200],  # Number of trees in the forest
+    #     'max_depth': [None, 10, 20, 30],  # Maximum depth of trees
+    #     'min_samples_split': [2, 5, 10],  # Minimum samples required to split a node
+    #     'min_samples_leaf': [1, 2, 4]  # Minimum samples required at a leaf node
+    # }
 
-    # Initialize RandomForestRegressor
-    rf = RandomForestRegressor(random_state=42)
+    # # Initialize RandomForestRegressor
+    # rf = RandomForestRegressor(random_state=42)
 
-    # Set up GridSearchCV
-    grid_search = GridSearchCV(estimator=rf, param_grid=param_grid,
-                            cv=5, n_jobs=-1, verbose=2, scoring='r2')
+    # # Set up GridSearchCV
+    # grid_search = GridSearchCV(estimator=rf, param_grid=param_grid,
+    #                         cv=5, n_jobs=-1, verbose=2, scoring='r2')
 
-    # Train using GridSearchCV
-    grid_search.fit(X_train, y_train)
+    # # Train using GridSearchCV
+    # grid_search.fit(X_train, y_train)
 
-    # Best parameters from GridSearch
-    best_params = grid_search.best_params_
-    print(f"Best Hyperparameters: {best_params}")
+    # # Best parameters from GridSearch
+    # best_params = grid_search.best_params_
+    # print(f"Best Hyperparameters: {best_params}")
 
-    # Train Random Forest with best parameters
-    best_rf = RandomForestRegressor(**best_params, random_state=42)
-    best_rf.fit(X_train, y_train)
+    # # Train Random Forest with best parameters
+    # best_rf = RandomForestRegressor(**best_params, random_state=42)
+    # best_rf.fit(X_train, y_train)
 
-    # Predictions
-    y_pred = best_rf.predict(X_test)
+    # # Predictions
+    # y_pred = best_rf.predict(X_test)
 
-    # Evaluate the optimized model
-    mae = mean_absolute_error(y_test, y_pred)
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    r2 = r2_score(y_test, y_pred)
+    # # Evaluate the optimized model
+    # mae = mean_absolute_error(y_test, y_pred)
+    # mse = mean_squared_error(y_test, y_pred)
+    # rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    # r2 = r2_score(y_test, y_pred)
 
-    # Print evaluation metrics
-    print(f"Optimized Random Forest Performance:")
-    print(f"Mean Absolute Error (MAE): {mae:.6f}")
-    print(f"Mean Squared Error (MSE): {mse:.6f}")
-    print(f"Root Mean Squared Error (RMSE): {rmse:.6f}")
-    print(f"R-squared (R²): {r2:.6f}")
+    # # Print evaluation metrics
+    # print(f"Optimized Random Forest Performance:")
+    # print(f"Mean Absolute Error (MAE): {mae:.6f}")
+    # print(f"Mean Squared Error (MSE): {mse:.6f}")
+    # print(f"Root Mean Squared Error (RMSE): {rmse:.6f}")
+    # print(f"R-squared (R²): {r2:.6f}")
 
-    """### **7.3. Hyperparameter Optimization Useing Bayesian Optimization**
+    # """### **7.3. Hyperparameter Optimization Useing Bayesian Optimization**
 
-    **Hyperparameter Optimization for Random Forest Uses Bayesian Optimization to find the best hyperparameters for a Random Forest model by minimizing the negative R² score. Optimized parameters are used to train the final Random Forest model.**
-    """
+    # **Hyperparameter Optimization for Random Forest Uses Bayesian Optimization to find the best hyperparameters for a Random Forest model by minimizing the negative R² score. Optimized parameters are used to train the final Random Forest model.**
+    # """
 
-    # Define function for Bayesian Optimization
-    def rf_evaluate(n_estimators, max_depth, min_samples_split, min_samples_leaf, max_features):
-        max_features = min(max_features, 1.0)  # Ensure max_features is within range
-        model = RandomForestRegressor(
-            n_estimators=int(n_estimators),
-            max_depth=int(max_depth),
-            min_samples_split=int(min_samples_split),
-            min_samples_leaf=int(min_samples_leaf),
-            max_features=max_features,  # Ensuring valid range
-            random_state=42,
-            n_jobs=-1
-        )
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        return -mean_squared_error(y_test, y_pred)
+    # # Define function for Bayesian Optimization
+    # def rf_evaluate(n_estimators, max_depth, min_samples_split, min_samples_leaf, max_features):
+    #     max_features = min(max_features, 1.0)  # Ensure max_features is within range
+    #     model = RandomForestRegressor(
+    #         n_estimators=int(n_estimators),
+    #         max_depth=int(max_depth),
+    #         min_samples_split=int(min_samples_split),
+    #         min_samples_leaf=int(min_samples_leaf),
+    #         max_features=max_features,  # Ensuring valid range
+    #         random_state=42,
+    #         n_jobs=-1
+    #     )
+    #     model.fit(X_train, y_train)
+    #     y_pred = model.predict(X_test)
+    #     return -mean_squared_error(y_test, y_pred)
 
-    # Define search space
-    param_bounds = {
-        "n_estimators": (50, 400),
-        "max_depth": (5, 25),
-        "min_samples_split": (2, 10),
-        "min_samples_leaf": (1, 5),
-        "max_features": (0.3, 1.0)
-    }
+    # # Define search space
+    # param_bounds = {
+    #     "n_estimators": (50, 400),
+    #     "max_depth": (5, 25),
+    #     "min_samples_split": (2, 10),
+    #     "min_samples_leaf": (1, 5),
+    #     "max_features": (0.3, 1.0)
+    # }
 
-    # Perform Bayesian Optimization
-    optimizer = BayesianOptimization(f=rf_evaluate, pbounds=param_bounds, random_state=42)
-    optimizer.maximize(init_points=10, n_iter=50)
+    # # Perform Bayesian Optimization
+    # optimizer = BayesianOptimization(f=rf_evaluate, pbounds=param_bounds, random_state=42)
+    # optimizer.maximize(init_points=10, n_iter=50)
 
-    # Get best parameters
-    best_params = optimizer.max['params']
-    best_params['n_estimators'] = int(best_params['n_estimators'])
-    best_params['max_depth'] = int(best_params['max_depth'])
-    best_params['min_samples_split'] = int(best_params['min_samples_split'])
-    best_params['min_samples_leaf'] = int(best_params['min_samples_leaf'])
+    # # Get best parameters
+    # best_params = optimizer.max['params']
+    # best_params['n_estimators'] = int(best_params['n_estimators'])
+    # best_params['max_depth'] = int(best_params['max_depth'])
+    # best_params['min_samples_split'] = int(best_params['min_samples_split'])
+    # best_params['min_samples_leaf'] = int(best_params['min_samples_leaf'])
 
-    print("\nBest Hyperparameters:", best_params)
+    # print("\nBest Hyperparameters:", best_params)
 
-    # Train final model with optimized parameters
-    best_rf = RandomForestRegressor(**best_params, random_state=42, n_jobs=-1)
-    best_rf.fit(X_train, y_train)
-    y_pred_best = best_rf.predict(X_test)
+    # # Train final model with optimized parameters
+    # best_rf = RandomForestRegressor(**best_params, random_state=42, n_jobs=-1)
+    # best_rf.fit(X_train, y_train)
+    # y_pred_best = best_rf.predict(X_test)
 
-    # Evaluate the optimized model
-    mae = mean_absolute_error(y_test, y_pred_best)
-    mse = mean_squared_error(y_test, y_pred_best)
-    rmse = np.sqrt(mse)
-    r2 = r2_score(y_test, y_pred_best)
+    # # Evaluate the optimized model
+    # mae = mean_absolute_error(y_test, y_pred_best)
+    # mse = mean_squared_error(y_test, y_pred_best)
+    # rmse = np.sqrt(mse)
+    # r2 = r2_score(y_test, y_pred_best)
 
-    print("\nOptimized Random Forest Performance:")
-    print(f"Mean Absolute Error (MAE): {mae:.6f}")
-    print(f"Mean Squared Error (MSE): {mse:.6f}")
-    print(f"Root Mean Squared Error (RMSE): {rmse:.6f}")
-    print(f"R-squared (R²): {r2:.6f}")
+    # print("\nOptimized Random Forest Performance:")
+    # print(f"Mean Absolute Error (MAE): {mae:.6f}")
+    # print(f"Mean Squared Error (MSE): {mse:.6f}")
+    # print(f"Root Mean Squared Error (RMSE): {rmse:.6f}")
+    # print(f"R-squared (R²): {r2:.6f}")
 
     """# **8. Visualization Functions**
 
@@ -485,34 +490,34 @@ def main():
     mae_initial = mean_absolute_error(y_test, y_pred_rf)
     r2_initial = r2_score(y_test, y_pred_rf)
 
-    # For Tuned Model (after fitting best_rf)
-    mae_tuned = mean_absolute_error(y_test, y_pred)
-    r2_tuned = r2_score(y_test, y_pred)
+    # # For Tuned Model (after fitting best_rf)
+    # mae_tuned = mean_absolute_error(y_test, y_pred)
+    # r2_tuned = r2_score(y_test, y_pred)
 
-    # For Optimized Model (after fitting best_rf from Bayesian Optimization)
-    mae_optimized = mean_absolute_error(y_test, y_pred_best)
-    r2_optimized = r2_score(y_test, y_pred_best)
+    # # For Optimized Model (after fitting best_rf from Bayesian Optimization)
+    # mae_optimized = mean_absolute_error(y_test, y_pred_best)
+    # r2_optimized = r2_score(y_test, y_pred_best)
 
-    # Define models and their respective performance metrics
-    models = ['Initial Model', 'Tuned Model', 'Optimized Model']
-    mae_values = [mae_initial, mae_tuned, mae_optimized]  # MAE values for the 3 models
-    r2_values = [r2_initial, r2_tuned, r2_optimized]  # R² values for the 3 models
+    # # Define models and their respective performance metrics
+    # models = ['Initial Model', 'Tuned Model', 'Optimized Model']
+    # mae_values = [mae_initial, mae_tuned, mae_optimized]  # MAE values for the 3 models
+    # r2_values = [r2_initial, r2_tuned, r2_optimized]  # R² values for the 3 models
 
-    # Plot MAE comparison
-    plt.figure(figsize=(8, 4))
-    plt.bar(models, mae_values, color=['red', 'blue', 'green'])
-    plt.ylabel('Mean Absolute Error (MAE)')
-    plt.title('MAE Comparison: Initial vs. Tuned vs. Optimized Model')
-    plt.savefig("mae_comparison.png")
-    plt.close()
+    # # Plot MAE comparison
+    # plt.figure(figsize=(8, 4))
+    # plt.bar(models, mae_values, color=['red', 'blue', 'green'])
+    # plt.ylabel('Mean Absolute Error (MAE)')
+    # plt.title('MAE Comparison: Initial vs. Tuned vs. Optimized Model')
+    # plt.savefig("mae_comparison.png")
+    # plt.close()
 
-    # Plot R² Score comparison
-    plt.figure(figsize=(8, 4))
-    plt.bar(models, r2_values, color=['red', 'blue', 'green'])
-    plt.ylabel('R² Score')
-    plt.title('R² Score Comparison: Initial vs. Tuned vs. Optimized Model')
-    plt.savefig("R²_comparison.png")
-    plt.close()
+    # # Plot R² Score comparison
+    # plt.figure(figsize=(8, 4))
+    # plt.bar(models, r2_values, color=['red', 'blue', 'green'])
+    # plt.ylabel('R² Score')
+    # plt.title('R² Score Comparison: Initial vs. Tuned vs. Optimized Model')
+    # plt.savefig("R²_comparison.png")
+    # plt.close()
 
     """### **8.2.  Model coefficients and Plot for feature importances**
 
@@ -522,7 +527,7 @@ def main():
     """
 
     # Feature Importance (Random Forest)
-    feature_importances = best_rf.feature_importances_
+    feature_importances = rf_model.feature_importances_
 
     # Print the feature importances
     print("\nFeature Importances:")
@@ -536,6 +541,7 @@ def main():
     plt.title("Random Forest Feature Importances")
     plt.savefig("Feature Importance.png")
     plt.close()
+    
     
 
 
@@ -588,28 +594,85 @@ def main():
 
     # **9. Efficiency Calculation and Visualization using Shockley-Queisser limit**
     """
+    # --- 9. Efficiency Calculation and Visualization using Shockley–Queisser Limit ---
 
-    # Predefined Shockley-Queisser (SQ) limit curve (bandgap vs efficiency)
-    bandgap_values = np.linspace(0.5, 3.0, 100)  # Bandgap range (eV)
-    sq_efficiency_curve = 0.337 * (bandgap_values / 1.34) * np.exp(-(bandgap_values - 1.34)**2 / 0.1)  # Standard SQ limit
-
-    # Plot SQ limit curve for reference
-    plt.figure(figsize=(8, 6))
-    plt.plot(bandgap_values, sq_efficiency_curve * 100, label="Shockley-Queisser Limit")
-    plt.axvline(x=1.34, color='red', linestyle='--', label="Optimal Bandgap (1.34 eV)")
-    plt.xlabel("Bandgap (eV)")
-    plt.ylabel("Efficiency (%)")
-    plt.title("Shockley-Queisser Limit for Different Compositions")
-    plt.grid(True)
-    plt.legend()
-    plt.savefig("sq_limit_curve.png")
-    plt.close()
-
-
-    # Apply efficiency calculation to dataset
+    # Step 1: Apply efficiency calculation to dataset
     data['Adjusted_SQ_Efficiency'] = data.apply(adjusted_sq_efficiency, axis=1)
 
-    # Print efficiency results
+    bandgap_values = np.linspace(0.9, 2.1, 500)
+    sq_efficiency_curve = 0.337 * (bandgap_values / 1.34) * np.exp(-(bandgap_values - 1.34)**2 / 0.15)
+    sq_efficiency_percent = sq_efficiency_curve * 100
+
+    # 2. Clean real dataset points
+    filtered = data.dropna(subset=['Bandgap', 'Adjusted_SQ_Efficiency'])
+    raw_x = filtered['Bandgap'].values
+    raw_y = filtered['Adjusted_SQ_Efficiency'].values
+
+    # 3. Smooth interpolated curve
+    grouped = filtered.groupby('Bandgap', as_index=False)['Adjusted_SQ_Efficiency'].mean()
+    grouped = grouped.sort_values('Bandgap')
+
+    x = grouped['Bandgap'].values
+    y = grouped['Adjusted_SQ_Efficiency'].values
+
+    if len(x) >= 4:
+        x_smooth = np.linspace(x.min(), x.max(), 300)
+        spline = make_interp_spline(x, y, k=3)
+        y_smooth = spline(x_smooth)
+    else:
+        x_smooth, y_smooth = x, y
+
+    # Final Plot
+    # 4. Final Plot
+    plt.figure(figsize=(12, 8))
+
+    # Ideal curve
+    plt.plot(bandgap_values, sq_efficiency_percent, color='black', linewidth=2, label="Shockley–Queisser Limit (Ideal)")
+
+    # Interpolated model curve
+    plt.plot(x_smooth, y_smooth, color='blue', linewidth=2.5, label="ML Predicted Efficiency Curve")
+
+    # Real data points
+    plt.scatter(raw_x, raw_y, color='green', edgecolor='black', s=45, alpha=0.8, label="Measured Sample Efficiencies")
+
+    # Red vertical line at 1.34 eV
+    plt.axvline(x=1.34, color='red', linestyle='--', linewidth=1.5, label="Optimal Bandgap (1.34 eV)")
+
+    # Labels & aesthetics
+    plt.xlabel("Bandgap (eV)", fontsize=13)
+    plt.ylabel("Efficiency (%)", fontsize=13)
+    plt.title("Dataset Efficiency vs Theoretical Limit", fontsize=15)
+    plt.xlim(0.9, 2.1)
+    plt.ylim(0, 40)
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.legend(fontsize=11)
+    plt.tight_layout()
+
+    # Save and show
+    plt.savefig("sq_limit_with_all_samples.png")
+    plt.close()
+
+    # # Predefined Shockley-Queisser (SQ) limit curve (bandgap vs efficiency)
+    # bandgap_values = np.linspace(0.5, 3.0, 100)  # Bandgap range (eV)
+    # sq_efficiency_curve = 0.337 * (bandgap_values / 1.34) * np.exp(-(bandgap_values - 1.34)**2 / 0.1)  # Standard SQ limit
+
+    # # Plot SQ limit curve for reference
+    # plt.figure(figsize=(8, 6))
+    # plt.plot(bandgap_values, sq_efficiency_curve * 100, label="Shockley-Queisser Limit")
+    # plt.axvline(x=1.34, color='red', linestyle='--', label="Optimal Bandgap (1.34 eV)")
+    # plt.xlabel("Bandgap (eV)")
+    # plt.ylabel("Efficiency (%)")
+    # plt.title("Shockley-Queisser Limit for Different Compositions")
+    # plt.grid(True)
+    # plt.legend()
+    # plt.savefig("sq_limit_curve.png")
+    # plt.close()
+
+
+    # # Apply efficiency calculation to dataset
+    # data['Adjusted_SQ_Efficiency'] = data.apply(adjusted_sq_efficiency, axis=1)
+
+    #  Print efficiency results
     print(data[['Bandgap', 'Adjusted_SQ_Efficiency']])
 
     # Efficiency Distribution Plot
@@ -626,17 +689,17 @@ def main():
     # Save updated dataset
     data.to_csv("dataset_with_adjusted_efficiency.csv", index=False)
 
-    """**If the peak is around 30, most samples have 30% efficiency.**"""
+    # """**If the peak is around 30, most samples have 30% efficiency.**"""
 
-    fig = px.scatter_3d(
-        data,
-        x='Composition_Type_original',
-        y='Ink Concentration [M]',
-        z='Bandgap',
-        color='Adjusted_SQ_Efficiency'
-    )
-    fig.write_html("3d_efficiency_plot.html")
-    #fig.write_image("3d_efficiency_plot.png")
+    # fig = px.scatter_3d(
+    #     data,
+    #     x='Composition_Type_original',
+    #     y='Ink Concentration [M]',
+    #     z='Bandgap',
+    #     color='Adjusted_SQ_Efficiency'
+    # )
+    # fig.write_html("3d_efficiency_plot.html")
+    # #fig.write_image("3d_efficiency_plot.png")
     
     
 
@@ -662,7 +725,7 @@ def main():
     **Model performs a random search by generating new, unseen combinations of Intensity, Ink, and Additive beyond the original dataset. It uses the trained Random Forest model to predict Bandgap for these combinations and identifies the optimal parameters that maximize Bandgap. This allows for the exploration of a wider parameter space to find better configurations.**
     """
 
-    def random_search_optimization(n_iterations=1000):
+    def random_search_optimization(n_iterations=1000, model=None):
         """
         Performs random search optimization to find parameter combinations
         that maximize the adjusted SQ efficiency.
@@ -722,7 +785,7 @@ def main():
                                         'Ink_encoded', 'Additive_encoded', 'Composition_Type_encoded']]
 
                 # Predict bandgap
-                synthetic_row['Bandgap'] = best_rf.predict(X_synthetic)[0]
+                synthetic_row['Bandgap'] = model.predict(X_synthetic)[0]
 
                 # Calculate efficiency
                 efficiency = adjusted_sq_efficiency(synthetic_row.iloc[0])
@@ -746,7 +809,7 @@ def main():
         return best_params, pd.DataFrame(results)
 
     # Run random search optimization
-    best_random_params, random_results = random_search_optimization(n_iterations=500)
+    best_random_params, random_results = random_search_optimization(n_iterations=500, model=rf_model)
 
     # Display best parameters found
     if best_random_params is not None:
@@ -820,7 +883,7 @@ def main():
                 X_synthetic = synthetic_row[['Intensity', 'Ink Concentration [M]', 'Composition_Value',
                                             'Ink_encoded', 'Additive_encoded', 'Composition_Type_encoded']]
 
-                synthetic_row['Bandgap'] = best_rf.predict(X_synthetic)[0]
+                synthetic_row['Bandgap'] = rf_model.predict(X_synthetic)[0]
                 efficiency = adjusted_sq_efficiency(synthetic_row.iloc[0])
                 return efficiency
             except:
@@ -891,32 +954,32 @@ def main():
     # Print the result
     print(f"Optimal Efficiency: {optimal_efficiency:.2f}%")
 
-    # Run the Genetic Algorithm with optimizations
-    best_genetic_params, best_genetic_efficiency = genetic_algorithm(
-        n_generations=50,
-        population_size=50,
-        mutation_rate=0.1,
-        tournament_size=5,
-        max_no_improvement=10,
-        best_rf=best_rf,
-        ink_encoder=ink_encoder,
-        additive_encoder=additive_encoder,
-        composition_encoder=composition_encoder,
-        adjusted_sq_efficiency=adjusted_sq_efficiency
-)
+#     # Run the Genetic Algorithm with optimizations
+#     best_genetic_params, best_genetic_efficiency = genetic_algorithm(
+#         n_generations=50,
+#         population_size=50,
+#         mutation_rate=0.1,
+#         tournament_size=5,
+#         max_no_improvement=10,
+#         best_rf=best_rf,
+#         ink_encoder=ink_encoder,
+#         additive_encoder=additive_encoder,
+#         composition_encoder=composition_encoder,
+#         adjusted_sq_efficiency=adjusted_sq_efficiency
+# )
 
-    # Display the results
-    print("\nOptimal Parameters Found (Genetic Algorithm - Adjusted SQ Efficiency):")
-    print(f"Intensity: {best_genetic_params['Intensity']:.2f}")
-    print(f"Ink: {best_genetic_params['Ink']}")
-    print(f"Additive: {best_genetic_params['Additive']}")
-    print(f"Ink Concentration [M]: {best_genetic_params['Ink_Concentration']:.4f}")
-    print(f"Composition Type: {best_genetic_params['Composition_Type']}")
-    print(f"Predicted Efficiency: {best_genetic_efficiency:.4f}%")
+#     # Display the results
+#     print("\nOptimal Parameters Found (Genetic Algorithm - Adjusted SQ Efficiency):")
+#     print(f"Intensity: {best_genetic_params['Intensity']:.2f}")
+#     print(f"Ink: {best_genetic_params['Ink']}")
+#     print(f"Additive: {best_genetic_params['Additive']}")
+#     print(f"Ink Concentration [M]: {best_genetic_params['Ink_Concentration']:.4f}")
+#     print(f"Composition Type: {best_genetic_params['Composition_Type']}")
+#     print(f"Predicted Efficiency: {best_genetic_efficiency:.4f}%")
     
-     # Save the trained model using pickle
-    with open('random_forest_model.pkl', 'wb') as file:
-        pickle.dump(best_rf, file)
+#      # Save the trained model using pickle
+#     with open('random_forest_model.pkl', 'wb') as file:
+#         pickle.dump(best_rf, file)
         
 if __name__ == '__main__':
     from multiprocessing import freeze_support
