@@ -6,6 +6,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sys
 import os
 import numpy as np
+import subprocess
+
 
 # get current directory so we can import from outside guiFrames folder
 pp = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
@@ -84,6 +86,16 @@ class SpectrometerFrame(ctk.CTkFrame):
 
         self.canvas = FigureCanvasTkAgg(self.figure, master=self)
         self.canvas.get_tk_widget().grid(row=2, column=0, padx=5, pady=5)
+        self.ml_button = ctk.CTkButton(self, text="Run ML Model", command=self.run_ml_script)
+        self.ml_button.grid(row=3, column=0, padx=10, pady=10)
+
+    def run_ml_script(self):
+        script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'InkAdditiveRFR.py'))
+        try:
+            subprocess.run(['python3', script_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self.status_label.configure(text="ML Model Completed. Output saved.")
+        except subprocess.CalledProcessError as e:
+            self.status_label.configure(text=f"ML script failed: {e}")
 
     def update_plot(self):
         """Fetch new spectrometer data and update the plot in real-time."""
