@@ -93,7 +93,7 @@ class SpectrometerFrame(ctk.CTkFrame):
     def run_ml_script(self):
         script_path = "/home/ecd515/Desktop/PASS/src/InkAdditiveRFR.py"
         try:
-            subprocess.run(['python3', script_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['python3', script_path], check=True)
             self.status_label.configure(text="ML Model Completed. Output saved.")
         except subprocess.CalledProcessError as e:
             self.status_label.configure(text=f"ML script failed: {e}")
