@@ -39,7 +39,7 @@ class SpectrometerFrame(ctk.CTkFrame):
             text="Waiting for Data...",
             justify="left",
             anchor="w",
-            font=("Arial", 14)
+            font=("Arial", 14),
             wraplength=400
         )
         self.status_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
