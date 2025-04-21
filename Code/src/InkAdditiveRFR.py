@@ -222,7 +222,7 @@ def adjusted_sq_efficiency(row):
 # **2. Uploading and Loading Data**"""
 def main():
     # Upload the file
-    data = pd.read_excel("PL VALUES.xlsx")  
+    data = pd.read_excel("Code/src/PL VALUES.xlsx")  
 
     """# **3. Function to display all the features in the target dataset**"""
 
