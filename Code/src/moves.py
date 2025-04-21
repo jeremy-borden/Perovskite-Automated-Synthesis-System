@@ -59,8 +59,6 @@ class Dispatcher():
             #"open_gripper": self.open_gripper,
             #"close_gripper": self.close_gripper,
             
-            "grab_slide_from": self.grab_slide_from,
-            "move_slide_to": self.move_slide_to,
             
             "add_spin_coater_step": self.add_spin_coater_step,
             "run_spin_coater": self.run_spin_coater,
