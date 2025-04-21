@@ -90,7 +90,7 @@ class SpectrometerFrame(ctk.CTkFrame):
         self.ml_button.grid(row=3, column=0, padx=10, pady=10)
 
     def run_ml_script(self):
-        script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'InkAdditiveRFR.py'))
+        script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'InkAdditiveRFR.py'))
         try:
             subprocess.run(['python3', script_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             self.status_label.configure(text="ML Model Completed. Output saved.")
