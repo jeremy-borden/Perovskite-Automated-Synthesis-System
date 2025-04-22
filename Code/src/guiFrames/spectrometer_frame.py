@@ -121,7 +121,7 @@ class SpectrometerFrame(ctk.CTkFrame):
                 self.ax.plot(wavelengths, intensities, color='blue', label="White Light Spectrum")
                 self.ax.set_title("Intensity vs Wavelength")
                 self.ax.set_xlabel("Wavelength (nm)")
-                self.ax.set_ylabel("Intensity")
+                self.ax.set_ylabel("Intensity %")
                 self.ax.set_xlim(300, 1000)  # Clamp wavelength range
                 self.ax.legend()
                 self.figure.tight_layout()
