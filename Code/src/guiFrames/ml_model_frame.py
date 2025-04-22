@@ -1,29 +1,24 @@
 import customtkinter as ctk
-from src.drivers.ml_driver import main as run_ml_model  # ✅ Direct call, no subprocess
+from drivers.ml_driver import main as run_ml_model  # Importing from ml_driver.py
 
 class MLModelFrame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
-        
-        self.title_label = ctk.CTkLabel(
-            self, text="Run Machine Learning Model", font=("Arial", 20, "bold")
-        )
-        self.title_label.grid(row=0, column=0, padx=10, pady=10)
+        self.configure(border_color="#1f6aa5", border_width=2)
 
-        self.status_label = ctk.CTkLabel(
-            self, text="Status: Waiting", font=("Arial", 14), wraplength=400
-        )
-        self.status_label.grid(row=1, column=0, padx=10, pady=10)
+        title = ctk.CTkLabel(self, text="Machine Learning Model", font=("Arial", 20, "bold"))
+        title.pack(pady=10)
 
-        self.run_button = ctk.CTkButton(
-            self, text="Run ML Pipeline", command=self.run_model
-        )
-        self.run_button.grid(row=2, column=0, padx=10, pady=10)
+        self.status_label = ctk.CTkLabel(self, text="Status: Idle", font=("Arial", 14), wraplength=400)
+        self.status_label.pack(pady=10)
 
-    def run_model(self):
-        self.status_label.configure(text="Status: Running ML Model...")
+        self.run_button = ctk.CTkButton(self, text="Run ML Analysis", command=self.run_ml)
+        self.run_button.pack(pady=10)
+
+    def run_ml(self):
+        self.status_label.configure(text="Status: Running...")
         try:
-            run_ml_model()  # 💡 This calls your entire ML script
-            self.status_label.configure(text="Status: Completed. Output saved.")
+            run_ml_model()
+            self.status_label.configure(text="Status: Completed. Results saved.")
         except Exception as e:
-            self.status_label.configure(text=f"Error: {str(e)}")
+            self.status_label.configure(text=f"Status: Failed.\n{str(e)}")
