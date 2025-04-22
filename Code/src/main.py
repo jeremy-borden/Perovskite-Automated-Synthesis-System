@@ -83,7 +83,7 @@ if __name__ == "__main__":
     # -- TIP MATRIX --
     tip_matrix = TipMatrix()
   
-    infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+    infeed_servo = AngularServo(pin=24, min_angle=0, max_angle=180,min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
     infeed = Infeed(infeed_servo)
     
     # -- VIAL CAROUSEL --
