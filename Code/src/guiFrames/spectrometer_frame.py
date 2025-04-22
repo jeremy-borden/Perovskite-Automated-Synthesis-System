@@ -87,17 +87,17 @@ class SpectrometerFrame(ctk.CTkFrame):
 
         self.canvas = FigureCanvasTkAgg(self.figure, master=self)
         self.canvas.get_tk_widget().grid(row=2, column=0, padx=5, pady=5)
-        self.ml_button = ctk.CTkButton(self, text="Run ML Model", command=self.run_ml_script)
-        self.ml_button.grid(row=3, column=0, padx=10, pady=10)
+        # self.ml_button = ctk.CTkButton(self, text="Run ML Model", command=self.run_ml_script)
+        # self.ml_button.grid(row=3, column=0, padx=10, pady=10)
 
-    def run_ml_script(self):
-        script_path = "/home/ecd515/Desktop/PASS/src/InkAdditiveRFR.py"
-        try:
-            subprocess.run(['python3', script_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            self.status_label.configure(text="ML Model Completed. Output saved.")
-        except subprocess.CalledProcessError as e:
-            self.status_label.configure(text=f"ML script failed: {e}")
-            print("Full error from subprocess:", e)
+    # def run_ml_script(self):
+    #     script_path = "/home/ecd515/Desktop/PASS/src/InkAdditiveRFR.py"
+    #     try:
+    #         subprocess.run(['python3', script_path], check=True)
+    #         self.status_label.configure(text="ML Model Completed. Output saved.")
+    #     except subprocess.CalledProcessError as e:
+    #         self.status_label.configure(text=f"ML script failed: {e}")
+    #         print("Full error from subprocess:", e)
 
     def update_plot(self):
         """Fetch new spectrometer data and update the plot in real-time."""
@@ -116,11 +116,13 @@ class SpectrometerFrame(ctk.CTkFrame):
 
             if (isinstance(intensities, np.ndarray) and isinstance(wavelengths, np.ndarray) and
                 intensities.size > 0 and wavelengths.size > 0 and intensities.shape == wavelengths.shape):
+                intensities = (intensities / np.max(intensities)) * 100
                 self.ax.clear()
                 self.ax.plot(wavelengths, intensities, color='blue', label="White Light Spectrum")
                 self.ax.set_title("Intensity vs Wavelength")
                 self.ax.set_xlabel("Wavelength (nm)")
-                self.ax.set_ylabel("Intensity")
+                self.ax.set_ylabel("Intensity %")
+                self.ax.set_xlim(300, 1000)  # Clamp wavelength range
                 self.ax.legend()
                 self.figure.tight_layout()
                 self.canvas.draw()
