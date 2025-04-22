@@ -494,7 +494,7 @@ class Dispatcher():
     # -------- INFEED MOVES --------
     def set_infeed_angle(self, angle: int):
         
-        current_angle = self.infeed.servo.angle
+        current_angle = int(self.infeed.servo.angle)
         step = 1 if angle > current_angle else -1
 
         for subangle in range(current_angle, angle, step):
