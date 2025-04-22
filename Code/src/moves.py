@@ -64,8 +64,7 @@ class Dispatcher():
             "run_spin_coater": self.run_spin_coater,
             
             "set_infeed_angle": self.set_infeed_angle,
-            #"open_infeed": self.open_infeed,
-            #"close_infeed": self.close_infeed,
+
             "set_actuator": self.set_actuator,
             "set_eject_angle": self.set_eject_angle,
             "set_vial": self.set_vial,
@@ -494,5 +493,5 @@ class Dispatcher():
         
     # -------- INFEED MOVES --------
     def set_infeed_angle(self, angle: int):
-        self.infeed.set_angle(angle)
+        self.infeed.servo.angle = angle
     
