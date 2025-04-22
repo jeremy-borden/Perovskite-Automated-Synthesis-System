@@ -493,5 +493,17 @@ class Dispatcher():
         
     # -------- INFEED MOVES --------
     def set_infeed_angle(self, angle: int):
+        
+        prev_angle = self.infeed.servo.angle
+        
+        diff = (angle - prev_angle)
+        if diff > 0:
+            p = 1
+        else:
+            p = -1
+        for i in range(abs(diff)):
+            self.infeed.servo.angle = prev_angle + p*i
+            sleep(0.1)
+        
         self.infeed.servo.angle = angle
     
