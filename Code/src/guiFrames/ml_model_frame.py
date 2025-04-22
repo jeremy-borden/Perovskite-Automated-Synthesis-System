@@ -19,7 +19,7 @@ class MLModelFrame(ctk.CTkFrame):
         self.canvas.grid(row=0, column=0, sticky="nsew")
         self.scrollbar.grid(row=0, column=1, sticky="ns")
 
-        # Create internal frame for images
+        # Create internal frame inside canvas
         self.scrollable_frame = ctk.CTkFrame(self.canvas)
         self.scrollable_frame.bind(
             "<Configure>",
@@ -28,7 +28,7 @@ class MLModelFrame(ctk.CTkFrame):
 
         self.canvas_window = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
 
-        # Track image objects to avoid garbage collection
+        # Keep reference to images
         self.image_refs = []
 
         # Load and display output graphs
@@ -43,17 +43,21 @@ class MLModelFrame(ctk.CTkFrame):
             "adjusted_efficiency_distribution.png"
         ]
 
-        image_dir = "/home/ecd515/Desktop/PASS/src"  # Adjust if saved elsewhere
+        image_dir = "/home/ecd515/Desktop/PASS/src"  # Adjust if needed
 
         for i, filename in enumerate(image_filenames):
             full_path = os.path.join(image_dir, filename)
             if os.path.exists(full_path):
-                img = Image.open(full_path)
-                img = img.resize((800, 400), Image.ANTIALIAS)
-                photo = ImageTk.PhotoImage(img)
-                label = ctk.CTkLabel(self.scrollable_frame, image=photo, text="")
-                label.grid(row=i, column=0, padx=10, pady=10)
-                self.image_refs.append(photo)
+                try:
+                    img = Image.open(full_path)
+                    img = img.resize((800, 400), Image.ANTIALIAS)
+                    photo = ImageTk.PhotoImage(img)
+                    label = ctk.CTkLabel(self.scrollable_frame, image=photo, text="")
+                    label.grid(row=i, column=0, padx=10, pady=10)
+                    self.image_refs.append(photo)
+                except Exception as e:
+                    label = ctk.CTkLabel(self.scrollable_frame, text=f"⚠️ Error loading {filename}: {e}")
+                    label.grid(row=i, column=0, padx=10, pady=10)
             else:
                 label = ctk.CTkLabel(self.scrollable_frame, text=f"⚠️ {filename} not found")
                 label.grid(row=i, column=0, padx=10, pady=10)
