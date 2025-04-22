@@ -95,7 +95,7 @@ if __name__ == "__main__":
     app.geometry("1200x1000")
     app.title("ECD 515 - Perovskite Automated Synthesis System")
     
-    spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
+    #spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
     
     dispatcher = Dispatcher(toolhead=toolhead,
                             spin_coater=spin_coater,
@@ -137,14 +137,15 @@ if __name__ == "__main__":
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
     connection_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-    spectrometer_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+    #spectrometer_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
     console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
     procedure_builder_frame.grid(row=1, column=1, rowspan=2, sticky="nsew")
     camera_frame.grid(row=1, column=2, padx=5, pady=5,sticky="new")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="new")
     location_frame.grid(row=2, column=2,padx=5, pady=5, sticky="new")
-    ml_model_frame.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
-
+    ml_model_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+    #ml_model_frame.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
+    
 
 
     # bg, eff = predict_bandgap_and_efficiency(
