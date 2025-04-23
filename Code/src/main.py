@@ -80,7 +80,6 @@ if __name__ == "__main__":
     # -- SPECTROMETER + INFEED --
     spectrometer = Spectrometer()
     
-    
     # -- TIP MATRIX --
     tip_matrix = TipMatrix()
   
