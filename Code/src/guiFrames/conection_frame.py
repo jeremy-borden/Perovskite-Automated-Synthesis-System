@@ -76,17 +76,17 @@ class ConnectionFrame(ctk.CTkFrame):
         self.command_entry_destination = ctk.CTkOptionMenu(
             master=self,
             values=["Control Board", "Spincoater", "Hotplate", "Spectrometer"],
-            width=150,
+            width=100,
             command=self._set_command_destination
         )
-        self.command_entry_destination.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky="nw")
+        self.command_entry_destination.grid(row=5, column=0, padx=5, pady=5, sticky="nw")
 
         self.command_entry = ctk.CTkEntry(
             master=self,
             width=300,
             height=50
         )
-        self.command_entry.grid(row=4, column=1, rowspan=2, columnspan=3, padx=5, pady=5, sticky="nw")
+        self.command_entry.grid(row=4, column=2, rowspan=2, columnspan=3, padx=5, pady=5, sticky="nw")
         self.command_entry.bind("<Return>", self._send_entry)
         
         self.send_entry_button = ctk.CTkButton(
