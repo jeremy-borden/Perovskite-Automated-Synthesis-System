@@ -154,9 +154,11 @@ if __name__ == "__main__":
     # ml_model_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
 
     # run the gui
+    hotplate.set_temperature(0)
     app.mainloop()
     
-    hotplate.set_temperature(0)
+    hotplate.set_temperature()
+    
     # -- CLEANUP --
     control_board.disconnect()
     spectrometer.disconnect()
