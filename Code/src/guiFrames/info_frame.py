@@ -79,7 +79,7 @@ class InfoFrame(ctk.CTkFrame):
         self.toolhead_position_label.configure(
             text=f"Toolhead Positon | X: {x}\tY: {y}\tZ: {z}")
         
-        pipette = self.pipette_handler.current_pipette
+        pipette = self.pipette_handler.get_pippete_index()
         self.pipette_label.configure(
             text=f"Pipette | {pipette}")
         
