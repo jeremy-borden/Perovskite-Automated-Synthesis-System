@@ -116,7 +116,7 @@ class SpectrometerFrame(ctk.CTkFrame):
 
             if (isinstance(intensities, np.ndarray) and isinstance(wavelengths, np.ndarray) and
                 intensities.size > 0 and wavelengths.size > 0 and intensities.shape == wavelengths.shape):
-                intensities = (intensities / np.max(intensities)) * 100
+                intensities = (intensities / np.max(intensities)) * 100  #Normalization 
                 self.ax.clear()
                 self.ax.plot(wavelengths, intensities, color='blue', label="White Light Spectrum")
                 self.ax.set_title("Intensity vs Wavelength")
