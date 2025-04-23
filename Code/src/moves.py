@@ -309,8 +309,8 @@ class Dispatcher():
             
     def extract_from_vial(self, volume_ul: int, vial_num: int):
         vial_draw_height = 82 #distance required for pipette to dip into vial
-        # if self.pippete_handler.current_pipette.NEEDS_BIG_TIP:
-        #     vial_draw_height +=25
+        if self.pippete_handler.current_pipette.NEEDS_BIG_TIP:
+            vial_draw_height +=25
             
         
         self.toolhead.move_axis("Z", 200)
@@ -395,39 +395,39 @@ class Dispatcher():
     def set_pipette(self, target_pipette: int):
         # rasie toolhead to avoid collisions
 
-        current_pipette = self.pippete_handler.get_pippete_index()
-        self.toolhead.move_axis("Z", 200)
+        # current_pipette = self.pippete_handler.get_pippete_index()
+        # self.toolhead.move_axis("Z", 200)
         
-        #self.move_to_location("pipette pickup")
-        #move in front of first pipette stand
-        self.move_to_location("pipette stand")
-        # self.toolhead.move_axis("Y", 85)
-        # self.toolhead.move_axis("Z", 148)
-        # self.toolhead.move_axis("X", 593)
+        # #self.move_to_location("pipette pickup")
+        # #move in front of first pipette stand
+        # self.move_to_location("pipette stand")
+        # # self.toolhead.move_axis("Y", 85)
+        # # self.toolhead.move_axis("Z", 148)
+        # # self.toolhead.move_axis("X", 593)
         
-        # if we have a pipette and its not the one we want, put it away
-        if current_pipette and current_pipette != target_pipette:
-            if current_pipette == 0:
-                self.toolhead.move_axis("Y", self.pippete_handler.STAND_0_Y)
-            else:
-                self.toolhead.move_axis("Y", self.pippete_handler.STAND_1_Y)
+        # # if we have a pipette and its not the one we want, put it away
+        # if current_pipette and current_pipette != target_pipette:
+        #     if current_pipette == 0:
+        #         self.toolhead.move_axis("Y", self.pippete_handler.STAND_0_Y)
+        #     else:
+        #         self.toolhead.move_axis("Y", self.pippete_handler.STAND_1_Y)
             
-            self.toolhead.move_axis("Z", 40, relative=True) # raise
-            self.toolhead.move_axis("X", 120, relative=True) #move forward
-            self.toolhead.move_axis("Z", -40, relative=True) #lower into stand
-            self.pippete_handler.open_grabber()
-            self.toolhead.move_axis("X", -120, relative=True) #move backwards
+        #     self.toolhead.move_axis("Z", 40, relative=True) # raise
+        #     self.toolhead.move_axis("X", 120, relative=True) #move forward
+        #     self.toolhead.move_axis("Z", -40, relative=True) #lower into stand
+        #     self.pippete_handler.open_grabber()
+        #     self.toolhead.move_axis("X", -120, relative=True) #move backwards
         
-        if current_pipette == 0:
-            self.toolhead.move_axis("Y", self.pippete_handler.STAND_0_Y)
-        else:
-            self.toolhead.move_axis("Y", self.pippete_handler.STAND_1_Y)
+        # if current_pipette == 0:
+        #     self.toolhead.move_axis("Y", self.pippete_handler.STAND_0_Y)
+        # else:
+        #     self.toolhead.move_axis("Y", self.pippete_handler.STAND_1_Y)
             
-        self.pippete_handler.open_grabber()
-        self.toolhead.move_axis("X", 120, relative=True) #move forward
-        self.pippete_handler.close_grabber()
-        self.toolhead.move_axis("Z", 40, relative=True) # raise
-        self.toolhead.move_axis("X", -120, relative=True) #move backwards
+        # self.pippete_handler.open_grabber()
+        # self.toolhead.move_axis("X", 120, relative=True) #move forward
+        # self.pippete_handler.close_grabber()
+        # self.toolhead.move_axis("Z", 40, relative=True) # raise
+        # self.toolhead.move_axis("X", -120, relative=True) #move backwards
         
         self.pippete_handler.set_pipette(target_pipette)
         
