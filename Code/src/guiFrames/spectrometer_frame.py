@@ -123,7 +123,7 @@ class SpectrometerFrame(ctk.CTkFrame):
                 self.ax.set_xlabel("Wavelength (nm)")
                 self.ax.set_ylabel("Intensity %")
                 self.ax.set_xlim(300, 1000)  # wavelength range
-                self.ax.set_ylim(0, 105) # intensity range
+                #self.ax.set_ylim(0, 105) # intensity range
                 self.ax.legend()
                 self.figure.tight_layout()
                 self.canvas.draw()
