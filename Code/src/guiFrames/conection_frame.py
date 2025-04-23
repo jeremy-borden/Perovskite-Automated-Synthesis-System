@@ -30,7 +30,7 @@ class ConnectionFrame(ctk.CTkFrame):
             justify="left",anchor="w",
             font=("Arial", 20, "bold"))
         self.title_label.grid(
-            row=0, column=0, columnspan=3, 
+            row=0, column=0, columnspan=5, 
             padx=5, pady=5, sticky="nw")
         # Control Board
         self.control_board_connection = NameLater(
