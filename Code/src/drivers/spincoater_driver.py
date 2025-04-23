@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 import serial
 import serial.threaded
 import threading
@@ -27,7 +28,9 @@ class SpinCoater():
         try:
             self.serial = serial.Serial(port, 9600, timeout=None)
             self._begin_reader_thread()
+            sleep(0.5)
             self.set_pc_mode()
+            sleep(0.5)
             self.clear_steps()
             self.logger.info(
                 f"Connected to spincoater on port {port}")
