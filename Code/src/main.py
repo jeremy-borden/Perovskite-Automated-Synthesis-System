@@ -78,7 +78,7 @@ if __name__ == "__main__":
     hotplate = Hotplate()
     # -- SPECTROMETER + INFEED --
     spectrometer = Spectrometer()
-    spectrometer.connect()
+    
     
     # -- TIP MATRIX --
     tip_matrix = TipMatrix()
@@ -111,6 +111,14 @@ if __name__ == "__main__":
     
     procedure_handler = ProcedureHandler(dispatcher=dispatcher)
     
+    # connect to devices
+    spectrometer.connect()
+    control_board.connect()
+    camera.connect()
+    spin_coater.connect()
+    hotplate.connect()
+    
+    
     # --------LOAD DEFAULT PROCEDURE--------
     procedure_config = ProcedureFile().Open("procedures/default_procedure.yml")
     if procedure_config is not None:
@@ -120,7 +128,6 @@ if __name__ == "__main__":
         logger.warning("Default procedure not found")
 
 
-    
     # trying to make an icon 
     icon = PhotoImage(file="guiImages/logo.png")
     app.wm_iconphoto(True, icon)
@@ -145,21 +152,7 @@ if __name__ == "__main__":
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="new")
     location_frame.grid(row=2, column=2,padx=5, pady=5, sticky="new")
     # ml_model_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
-    #ml_model_frame.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
-    
 
-
-    # bg, eff = predict_bandgap_and_efficiency(
-    # intensity=1500000,
-    # ink="FASnI3",
-    # additive="Zn",
-    # concentration=1.1,
-    # composition_value=5,
-    # composition_type="5% Zn"
-    # )
-
-    # logger.info(f"[ML Test] Predicted Bandgap: {bg:.3f} eV | Efficiency: {eff:.2f}%")
-    
     # run the gui
     app.mainloop()
     
