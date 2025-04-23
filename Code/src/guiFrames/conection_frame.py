@@ -67,7 +67,7 @@ class ConnectionFrame(ctk.CTkFrame):
         # command entry
         self.command_destination_label = ctk.CTkLabel(
             master=self,
-            text=f"Destination: {self.command_destination}",
+            text=f"Destination:",
             width=150,
             anchor="w"
         )
@@ -94,7 +94,7 @@ class ConnectionFrame(ctk.CTkFrame):
             width=50,height=50,
             command=self._send_entry)
         self.send_entry_button.grid(
-            row=4, column=3, 
+            row=4, column=5, 
             padx=5, pady=5, sticky="nw")
         
         self._update()
@@ -130,7 +130,7 @@ class ConnectionFrame(ctk.CTkFrame):
         
     def _set_command_destination(self, value: str):
         self.command_destination = value
-        self.command_destination_label.configure(text=f"Destination: {self.command_destination}")
+        self.command_destination_label.configure(text=f"Destination:")
 
     def _send_entry(self, event=None):
         value = self.command_entry.get()
