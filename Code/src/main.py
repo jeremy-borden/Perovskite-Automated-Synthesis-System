@@ -27,7 +27,7 @@ from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
 from guiFrames.spectrometer_frame import SpectrometerFrame
 from guiFrames.locations_frame import LocationFrame
-from src.guiFrames.ml_model_frame import MLModelFrame
+from guiFrames.ml_model_frame import MLModelFrame
 
 
 from procedure_handler import ProcedureHandler
