@@ -1,106 +1,188 @@
-# # ml_driver.py
-# import os
-# import pandas as pd
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-# from sklearn.model_selection import train_test_split
-# from sklearn.ensemble import RandomForestRegressor
-# from category_encoders import TargetEncoder
-# from sklearn.metrics import mean_absolute_error, r2_score
-# from scipy.interpolate import make_interp_spline
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from category_encoders import TargetEncoder
+from sklearn.metrics import mean_absolute_error, r2_score
+from scipy.interpolate import make_interp_spline
+from bayes_opt import BayesianOptimization
+import warnings
 
-# PERSISTENT_DIR = "/home/ecd515/Desktop/PASS/Code/src/persistent"
+warnings.filterwarnings("ignore")
 
-# def adjusted_sq_efficiency(row):
-#     base_eff = 0.337 * (row['Bandgap'] / 1.34) * np.exp(-(row['Bandgap'] - 1.34)**2 / 0.1)
-#     if row.get('Composition_Type_Zn'): base_eff *= 1.05
-#     if row.get('Composition_Type_Br'): base_eff *= 0.95
-#     if row.get('Composition_Type_FA'): base_eff *= 1.07
-#     if row.get('Composition_Type_EA'): base_eff *= 0.92
-#     return np.clip(base_eff * 0.90 * 0.95 * 0.97 * 100, 0, 100)
+PERSISTANT_DIR = os.path.join(os.path.dirname(__file__), "..", "persistant")
 
-# def run_model():
-#     data_path = "/home/ecd515/Desktop/PASS/Code/src/PL_VALUES.xlsx"
-#     data = pd.read_excel(data_path)
+def adjusted_sq_efficiency(row):
+    base_eff = 0.337 * (row['Bandgap'] / 1.34) * np.exp(-(row['Bandgap'] - 1.34)**2 / 0.1)
+    if row.get('Composition_Type_Zn'): base_eff *= 1.05
+    if row.get('Composition_Type_Br'): base_eff *= 0.95
+    if row.get('Composition_Type_FA'): base_eff *= 1.07
+    if row.get('Composition_Type_EA'): base_eff *= 0.92
+    return np.clip(base_eff * 0.90 * 0.95 * 0.97 * 100, 0, 100)
 
-#     data['Bandgap'] = 1240 / data['Wavelength'].replace(0, np.nan)
-#     data.dropna(subset=['Bandgap'], inplace=True)
-#     data['Composition_Value'] = data['Ink Composition %'].str.extract(r'(\d+)')[0].astype(float).fillna(0)
-#     data['Composition_Type_original'] = data['Ink Composition %']
-#     data['Composition_Type_Zn'] = data['Composition_Type_original'].str.contains("Zn")
-#     data['Composition_Type_Br'] = data['Composition_Type_original'].str.contains("Br")
-#     data['Composition_Type_FA'] = data['Composition_Type_original'].str.contains("FA")
-#     data['Composition_Type_EA'] = data['Composition_Type_original'].str.contains("EA")
+def run_model():
+    data_path = os.path.join(os.path.dirname(__file__), "..", "PL_VALUES.xlsx")
+    data = pd.read_excel(data_path)
 
-#     ink_enc = TargetEncoder(cols=['Ink'])
-#     add_enc = TargetEncoder(cols=['Additive'])
-#     comp_enc = TargetEncoder(cols=['Composition_Type_original'])
-#     data['Ink_encoded'] = ink_enc.fit_transform(data['Ink'], data['Bandgap'])
-#     data['Additive_encoded'] = add_enc.fit_transform(data['Additive'], data['Bandgap'])
-#     data['Composition_Type_encoded'] = comp_enc.fit_transform(data['Composition_Type_original'], data['Bandgap'])
+    data['Bandgap'] = 1240 / data['Wavelength'].replace(0, np.nan)
+    data.dropna(subset=['Bandgap'], inplace=True)
+    data['Composition_Value'] = data['Ink Composition %'].str.extract(r'(\d+)')[0].astype(float).fillna(0)
+    data['Composition_Type_original'] = data['Ink Composition %']
+    data['Composition_Type_Zn'] = data['Composition_Type_original'].str.contains("Zn")
+    data['Composition_Type_Br'] = data['Composition_Type_original'].str.contains("Br")
+    data['Composition_Type_FA'] = data['Composition_Type_original'].str.contains("FA")
+    data['Composition_Type_EA'] = data['Composition_Type_original'].str.contains("EA")
 
-#     X = data[['Intensity', 'Ink Concentration [M]', 'Composition_Value', 'Ink_encoded', 'Additive_encoded', 'Composition_Type_encoded']]
-#     y = data['Bandgap']
-#     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    ink_enc = TargetEncoder(cols=['Ink'])
+    add_enc = TargetEncoder(cols=['Additive'])
+    comp_enc = TargetEncoder(cols=['Composition_Type_original'])
 
-#     rf = RandomForestRegressor(n_estimators=100, random_state=42)
-#     rf.fit(X_train, y_train)
-#     y_pred = rf.predict(X_test)
-#     data['Adjusted_SQ_Efficiency'] = data.apply(adjusted_sq_efficiency, axis=1)
+    data['Ink_encoded'] = ink_enc.fit_transform(data['Ink'], data['Bandgap'])
+    data['Additive_encoded'] = add_enc.fit_transform(data['Additive'], data['Bandgap'])
+    data['Composition_Type_encoded'] = comp_enc.fit_transform(data['Composition_Type_original'], data['Bandgap'])
 
-#     # Feature Importance
-#     plt.figure()
-#     plt.barh(X.columns, rf.feature_importances_)
-#     plt.title("Feature Importance")
-#     plt.tight_layout()
-#     plt.savefig(os.path.join(PERSISTENT_DIR, "Feature Importance.png"))
-#     plt.close()
+    X = data[['Intensity', 'Ink Concentration [M]', 'Composition_Value',
+              'Ink_encoded', 'Additive_encoded', 'Composition_Type_encoded']]
+    y = data['Bandgap']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-#     # Actual vs Predicted
-#     y_pred_all = rf.predict(X)
-#     plt.figure()
-#     plt.scatter(y, y_pred_all, alpha=0.6)
-#     plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--')
-#     plt.title("Actual vs Predicted Bandgap")
-#     plt.tight_layout()
-#     plt.savefig(os.path.join(PERSISTENT_DIR, "Actual vs Predicted Bandgap.png"))
-#     plt.close()
+    rf = RandomForestRegressor(n_estimators=100, random_state=42)
+    rf.fit(X_train, y_train)
+    y_pred = rf.predict(X_test)
+    data['Adjusted_SQ_Efficiency'] = data.apply(adjusted_sq_efficiency, axis=1)
 
-#     # Residuals
-#     residuals = y - y_pred_all
-#     plt.figure()
-#     sns.kdeplot(residuals, fill=True)
-#     plt.title("Density Distribution of Residuals")
-#     plt.tight_layout()
-#     plt.savefig(os.path.join(PERSISTENT_DIR, "Density Distribution of Residuals.png"))
-#     plt.close()
+    if not os.path.exists(PERSISTANT_DIR):
+        os.makedirs(PERSISTANT_DIR)
 
-#     # SQ Limit Plot
-#     sq_curve = 0.337 * (np.linspace(0.9, 2.1, 500) / 1.34) * np.exp(-(np.linspace(0.9, 2.1, 500) - 1.34)**2 / 0.15) * 100
-#     grouped = data.groupby('Bandgap')['Adjusted_SQ_Efficiency'].mean().reset_index()
-#     spline = make_interp_spline(grouped['Bandgap'], grouped['Adjusted_SQ_Efficiency'], k=3)
-#     x_smooth = np.linspace(grouped['Bandgap'].min(), grouped['Bandgap'].max(), 300)
-#     y_smooth = spline(x_smooth)
+    # === PLOTS ===
+    plt.figure(figsize=(8, 6), dpi=150)
+    plt.barh(X.columns, rf.feature_importances_, color='steelblue')
+    plt.xlabel("Importance")
+    plt.title("Feature Importance")
+    plt.tight_layout()
+    plt.savefig(os.path.join(PERSISTANT_DIR, "Feature Importance.png"), bbox_inches="tight")
+    plt.close()
 
-#     plt.figure()
-#     plt.plot(np.linspace(0.9, 2.1, 500), sq_curve, label="SQ Limit", color='black')
-#     plt.plot(x_smooth, y_smooth, label="ML Curve", color='blue')
-#     plt.scatter(data['Bandgap'], data['Adjusted_SQ_Efficiency'], color='green', alpha=0.5, label="Samples")
-#     plt.axvline(1.34, color='red', linestyle='--', label="Ideal")
-#     plt.legend()
-#     plt.xlabel("Bandgap (eV)")
-#     plt.ylabel("Efficiency (%)")
-#     plt.title("SQ Limit vs ML Prediction")
-#     plt.grid()
-#     plt.tight_layout()
-#     plt.savefig(os.path.join(PERSISTENT_DIR, "sq_limit_with_all_samples.png"))
-#     plt.close()
 
-#     # Efficiency Distribution
-#     plt.figure()
-#     sns.histplot(data['Adjusted_SQ_Efficiency'], bins=30, kde=True, color="green")
-#     plt.title("Adjusted Efficiency Distribution")
-#     plt.tight_layout()
-#     plt.savefig(os.path.join(PERSISTENT_DIR, "adjusted_efficiency_distribution.png"))
-#     plt.close()
+    y_pred_all = rf.predict(X)
+    plt.figure(figsize=(8, 6), dpi=150)
+    plt.scatter(y, y_pred_all, alpha=0.6, color='deepskyblue', edgecolors='k')
+    plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--', linewidth=2)
+    plt.xlabel("Actual Bandgap")
+    plt.ylabel("Predicted Bandgap")
+    plt.title("Actual vs Predicted Bandgap")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(PERSISTANT_DIR, "Actual vs Predicted Bandgap.png"), bbox_inches="tight")
+    plt.close()
+
+
+    residuals = y - y_pred_all
+    plt.figure(figsize=(8, 6), dpi=150)
+    sns.kdeplot(residuals, fill=True, color="cornflowerblue", linewidth=2)
+    plt.title("Density Distribution of Residuals")
+    plt.xlabel("Residual")
+    plt.ylabel("Density")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(PERSISTANT_DIR, "Density Distribution of Residuals.png"), bbox_inches="tight")
+    plt.close()
+
+    sq_curve = 0.337 * (np.linspace(0.9, 2.1, 500) / 1.34) * np.exp(-(np.linspace(0.9, 2.1, 500) - 1.34)**2 / 0.15) * 100
+    grouped = data.groupby('Bandgap')['Adjusted_SQ_Efficiency'].mean().reset_index()
+    spline = make_interp_spline(grouped['Bandgap'], grouped['Adjusted_SQ_Efficiency'], k=3)
+    x_smooth = np.linspace(grouped['Bandgap'].min(), grouped['Bandgap'].max(), 300)
+    y_smooth = spline(x_smooth)
+
+    plt.figure(figsize=(8, 6), dpi=150)
+    plt.plot(np.linspace(0.9, 2.1, 500), sq_curve, label="SQ Limit", color='black')
+    plt.plot(x_smooth, y_smooth, label="ML Curve", color='royalblue')
+    plt.scatter(data['Bandgap'], data['Adjusted_SQ_Efficiency'], color='green', alpha=0.5, label="Samples")
+    plt.axvline(1.34, color='red', linestyle='--', label="Ideal Bandgap")
+    plt.xlabel("Bandgap (eV)")
+    plt.ylabel("Efficiency (%)")
+    plt.title("SQ Limit vs ML Prediction")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(PERSISTANT_DIR, "sq_limit_with_all_samples.png"), bbox_inches="tight")
+    plt.close()
+
+
+    plt.figure(figsize=(8, 6), dpi=150)
+    sns.histplot(data['Adjusted_SQ_Efficiency'], bins=30, kde=True, color="mediumseagreen", edgecolor="black")
+    plt.xlabel("Adjusted SQ Efficiency (%)")
+    plt.ylabel("Count")
+    plt.title("Adjusted Efficiency Distribution")
+    plt.tight_layout()
+    plt.savefig(os.path.join(PERSISTANT_DIR, "adjusted_efficiency_distribution.png"), bbox_inches="tight")
+    plt.close()
+
+    # === PRINT TOP 3 ===
+    top3 = data.nlargest(3, 'Adjusted_SQ_Efficiency')[['Ink', 'Additive', 'Ink Concentration [M]', 'Composition_Type_original', 'Adjusted_SQ_Efficiency']]
+    print("\nTop 3 Efficient Samples from Dataset:")
+    print(top3.to_string(index=False))
+
+    # === BAYESIAN OPTIMIZATION ===
+    composition_options = ['10% Zn', '20% Br', '20% FA', '15% EA']
+    best_result = None
+    best_eff = 0
+
+    for comp_type in composition_options:
+        comp_val = 0
+        try:
+            comp_val = float(''.join(filter(str.isdigit, comp_type)))
+        except:
+            comp_val = 0
+
+        def objective(Intensity, Ink_Concentration):
+            sample = pd.DataFrame([{
+                'Intensity': Intensity,
+                'Ink Concentration [M]': Ink_Concentration,
+                'Composition_Value': comp_val,
+                'Ink': 'FASnI3',
+                'Additive': 'Zn',
+                'Composition_Type_original': comp_type
+            }])
+            sample['Ink_encoded'] = ink_enc.transform(sample[['Ink']])
+            sample['Additive_encoded'] = add_enc.transform(sample[['Additive']])
+            sample['Composition_Type_encoded'] = comp_enc.transform(sample[['Composition_Type_original']])
+            X_synth = sample[['Intensity', 'Ink Concentration [M]', 'Composition_Value',
+                              'Ink_encoded', 'Additive_encoded', 'Composition_Type_encoded']]
+            sample['Bandgap'] = rf.predict(X_synth)[0]
+            sample['Composition_Type_Zn'] = 'Zn' in comp_type
+            sample['Composition_Type_Br'] = 'Br' in comp_type
+            sample['Composition_Type_FA'] = 'FA' in comp_type
+            sample['Composition_Type_EA'] = 'EA' in comp_type
+            return adjusted_sq_efficiency(sample.iloc[0])
+
+        optimizer = BayesianOptimization(
+            f=objective,
+            pbounds={
+                'Intensity': (1000, 2000000),
+                'Ink_Concentration': (1.0, 1.3)
+            },
+            random_state=42
+        )
+        optimizer.maximize(init_points=2, n_iter=5)
+        if optimizer.max['target'] > best_eff:
+            best_eff = optimizer.max['target']
+            best_result = {
+                "Composition_Type": comp_type,
+                "params": optimizer.max['params'],
+                "efficiency": best_eff
+            }
+
+    print("\n[Bayesian Optimization Result]")
+    print(f"Best Composition Type: {best_result['Composition_Type']}")
+    print(f"Intensity: {best_result['params']['Intensity']:.4f}")
+    print(f"Ink_Concentration: {best_result['params']['Ink_Concentration']:.4f}")
+    print(f"Predicted Efficiency: {best_result['efficiency']:.2f}%")
+
+if __name__ == "__main__":
+    from multiprocessing import freeze_support
+    freeze_support()
+    run_model()
