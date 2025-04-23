@@ -3,6 +3,7 @@ from tkinter import PhotoImage
 import customtkinter as ctk
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
+from time import sleep
 # -- DRIVER IMPORT --
 from drivers.controlboard_driver import ControlBoard
 from drivers.spincoater_driver import SpinCoater
@@ -156,8 +157,8 @@ if __name__ == "__main__":
     # run the gui
     hotplate.set_temperature(0)
     app.mainloop()
-    
-    
+    hotplate.set_temperature(0)
+    sleep(1)
     # -- CLEANUP --
     control_board.disconnect()
     spectrometer.disconnect()
