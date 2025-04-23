@@ -309,8 +309,10 @@ class Dispatcher():
             
     def extract_from_vial(self, volume_ul: int, vial_num: int):
         vial_draw_height = 82 #distance required for pipette to dip into vial
-        if self.pippete_handler.current_pipette.NEEDS_BIG_TIP:
-            vial_draw_height +=25
+        # if self.pippete_handler.current_pipette.NEEDS_BIG_TIP:
+        #     vial_draw_height +=25
+            
+        
         self.toolhead.move_axis("Z", 200)
         self.move_to_location("vial carousel")
         self.vial_carousel.set_vial(vial_num)
