@@ -36,7 +36,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Toolhead Position: X/X",
             justify="left",anchor="w",
             width=400,)
-        self.toolhead_position_label.grid(row=1, column=0, padx=20, pady=20, sticky="nw")
+        self.toolhead_position_label.grid(row=1, column=0, padx=5, pady=5, sticky="nw")
 
         # ---HOTPLATE TEMPERATURE---
         self.hotplate_label = ctk.CTkLabel(
@@ -44,7 +44,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Hotplate: X/X",
             justify="left",anchor="w",
             width=400,)
-        self.hotplate_label.grid(row=2, column=0, padx=20, pady=20, sticky="nw")
+        self.hotplate_label.grid(row=2, column=0, padx=5, pady=5, sticky="nw")
         
         # ---PIPETTE STATUS---
         self.pipette_label = ctk.CTkLabel(
@@ -52,7 +52,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Pipette: X/X",
             justify="left",anchor="w",
             width=400,)
-        self.pipette_label.grid(row=3, column=0, padx=20, pady=20, sticky="nw")
+        self.pipette_label.grid(row=3, column=0, padx=5, pady=5, sticky="nw")
         
         # ---CURRENT VIAL---
         self.vial_label =  ctk.CTkLabel(
@@ -60,7 +60,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Vial",
             justify="left",anchor="w",
             width=400,)
-        self.vial_label.grid(row=4,column=0, padx=20, pady=20, sticky="nw")
+        self.vial_label.grid(row=4,column=0, padx=5, pady=5, sticky="nw")
 
         self.update_information()
         
