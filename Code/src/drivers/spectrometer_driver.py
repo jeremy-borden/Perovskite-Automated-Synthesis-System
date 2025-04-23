@@ -24,9 +24,11 @@ logging.basicConfig(level=logging.INFO)
 class Spectrometer:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, integration_time=5000):
+    def __init__(self, integration_time=5000, accumulations=3, averages=2):
         self.logger = logging.getLogger("Main Logger")
         self.integration_time = integration_time
+        self.accumulations = accumulations
+        self.averages = averages
         self.serial = None
         self.wavelengths = []
         self.measurements = {}  # to store intensities for Background, Reference, and Sample
@@ -81,6 +83,9 @@ class Spectrometer:
 
         self.send_command("<preflush:2>")   # Default preflush behavior
         self.send_command(f"<itime:{self.integration_time}>")
+        self.send_command("<accum:3>")     # Adjust number as needed (e.g. 3–10)
+        self.send_command("<average:2>")   # Adjust number as needed (e.g. 2–5)
+
         
         self.serial.reset_input_buffer()
        
