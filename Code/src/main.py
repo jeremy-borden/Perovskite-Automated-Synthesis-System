@@ -157,7 +157,6 @@ if __name__ == "__main__":
     hotplate.set_temperature(0)
     app.mainloop()
     
-    hotplate.set_temperature()
     
     # -- CLEANUP --
     control_board.disconnect()
