@@ -28,7 +28,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Info",
             justify="center",
             font=("Arial", 20, "bold"))
-        self.title_label.grid(row=0, column=0, padx=20, pady=20, sticky="new")
+        self.title_label.grid(row=0, column=0, padx=20, pady=20, sticky="nw")
         
         # ---TOOLHEAD POSITION---
         self.toolhead_position_label = ctk.CTkLabel(
@@ -36,7 +36,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Toolhead Position: X/X",
             justify="left",anchor="w",
             width=400,)
-        self.toolhead_position_label.grid(row=1, column=0, padx=20, pady=20)
+        self.toolhead_position_label.grid(row=1, column=0, padx=20, pady=20, sticky="nw")
 
         # ---HOTPLATE TEMPERATURE---
         self.hotplate_label = ctk.CTkLabel(
@@ -44,7 +44,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Hotplate: X/X",
             justify="left",anchor="w",
             width=400,)
-        self.hotplate_label.grid(row=2, column=0, padx=20, pady=20)
+        self.hotplate_label.grid(row=2, column=0, padx=20, pady=20, sticky="nw")
         
         # ---PIPETTE STATUS---
         self.pipette_label = ctk.CTkLabel(
@@ -52,7 +52,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Pipette: X/X",
             justify="left",anchor="w",
             width=400,)
-        self.pipette_label.grid(row=3, column=0, padx=20, pady=20)
+        self.pipette_label.grid(row=3, column=0, padx=20, pady=20, sticky="nw")
         
         # ---CURRENT VIAL---
         self.vial_label =  ctk.CTkLabel(
@@ -60,7 +60,7 @@ class InfoFrame(ctk.CTkFrame):
             text="Vial",
             justify="left",anchor="w",
             width=400,)
-        self.vial_label.grid(row=4,column=0, padx=20, pady=20)
+        self.vial_label.grid(row=4,column=0, padx=20, pady=20, sticky="nw")
 
         self.update_information()
         
@@ -69,23 +69,25 @@ class InfoFrame(ctk.CTkFrame):
         if self.hotplate is not None:
             current_temperature = self.hotplate.current_temperature_c
             target_temperature  = self.hotplate.target_temperature_c
-            self.hotplate_label.configure(text=f"Hotplate Temperature | {current_temperature}/{target_temperature}")
+            self.hotplate_label.configure(text=f"Current/Target Hotplate Temperature | {current_temperature}/{target_temperature}")
         
         # Toolhead Position
         x=self.control_board.positions["X"]
         y=self.control_board.positions["Y"]
         z=self.control_board.positions["Z"]
+        a=self.control_board.positions["A"]
+        b=self.control_board.positions["B"]
 
         self.toolhead_position_label.configure(
             text=f"Toolhead Positon | X: {x}\tY: {y}\tZ: {z}")
         
         pipette = self.pipette_handler.get_pippete_index()
         self.pipette_label.configure(
-            text=f"Pipette | {pipette}")
+            text=f"Current Pipette | {pipette} | Actuator Position | B:{b}")
         
         vial = self.vial_carousel.current_vial
         self.vial_label.configure(
-            text=f"Vial | {vial}")
+            text=f"Current Vial | {vial} Carousel Position | A:{a}")
 
-        self.after(1000, self.update_information)
+        self.after(200, self.update_information)
         
