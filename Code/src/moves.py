@@ -64,11 +64,13 @@ class Dispatcher():
             "run_spin_coater": self.run_spin_coater,
             
             "set_infeed_angle": self.set_infeed_angle,
+            "open_infeed": self.open_infeed,
+            "close_infeed": self.close_infeed,
 
             "set_actuator": self.set_actuator,
             "set_eject_angle": self.set_eject_angle,
             "set_vial": self.set_vial,
-            #"extract_from_vial": self.extract_from_vial,
+            "extract_from_vial": self.extract_from_vial,
             #"replace_tip": self.replace_tip,
             #"mix_fluid": self.mix_fluid,
             "eject_tip": self.eject_tip,
@@ -277,7 +279,9 @@ class Dispatcher():
     def grab_new_slide(self):
         self.open_gripper()
         self.move_to_location("slide matrix")
-        self.slide_matrix.get_slide_offset(slide_num=self.slide_matrix.slides_taken)
+        x_offset, y_offset = self.slide_matrix.get_slide_offset(slide_num=self.slide_matrix.slides_taken)
+        self.toolhead.move_axis("X", -x_offset, relative=True)
+        self.toolhead.move_axis("Y", -y_offset, relative=True)
         self.toolhead.move_axis("Z", 13)
         self.close_gripper()
         self.toolhead.move_axis("Z", 200)
@@ -501,4 +505,10 @@ class Dispatcher():
             self.infeed.servo.angle = subangle
             sleep(0.1)
         self.infeed.servo.angle = angle
+        
+    def open_infeed(self):
+        self.set_infeed_angle(90)
+        
+    def close_infeed(self):
+        self.set_infeed_angle(0)
     
