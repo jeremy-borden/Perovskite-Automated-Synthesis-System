@@ -86,7 +86,7 @@ class ConnectionFrame(ctk.CTkFrame):
             width=300,
             height=50
         )
-        self.command_entry.grid(row=4, column=2, rowspan=2, columnspan=3, padx=5, pady=5, sticky="nw")
+        self.command_entry.grid(row=4, column=1, rowspan=2, columnspan=3, padx=5, pady=5, sticky="nw")
         self.command_entry.bind("<Return>", self._send_entry)
         
         self.send_entry_button = ctk.CTkButton(
