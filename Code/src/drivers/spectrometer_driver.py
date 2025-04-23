@@ -83,8 +83,9 @@ class Spectrometer:
 
         self.send_command("<preflush:2>")   # Default preflush behavior
         self.send_command(f"<itime:{self.integration_time}>")
-        self.send_command("<accum:3>")     # Adjust number as needed (e.g. 3–10)
-        self.send_command("<average:2>")   # Adjust number as needed (e.g. 2–5)
+        self.send_command(f"<accum:{self.accumulations}>")
+        self.send_command(f"<average:{self.averages}>")
+
 
         
         self.serial.reset_input_buffer()
