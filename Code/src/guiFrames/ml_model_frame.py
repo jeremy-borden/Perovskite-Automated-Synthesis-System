@@ -40,7 +40,7 @@ class MLModelFrame(ctk.CTkFrame):
             "sq_limit_with_all_samples.png",
             "adjusted_efficiency_distribution.png"
         ]
-        self.image_dir = "/home/ecd515/Desktop/PASS/src"
+        self.image_dir = "/home/ecd515/Desktop/PASS/src/persistent"
         self.display_output_images()
 
     def display_output_images(self):
