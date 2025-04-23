@@ -83,11 +83,11 @@ class InfoFrame(ctk.CTkFrame):
         
         pipette = self.pipette_handler.get_pippete_index()
         self.pipette_label.configure(
-            text=f"Current Pipette | {pipette} | Actuator Position | B:{b}")
+            text=f"Current Pipette | {pipette}\nActuator Position | B: {b}")
         
         vial = self.vial_carousel.current_vial
         self.vial_label.configure(
-            text=f"Current Vial | {vial} Carousel Position | A:{a}")
+            text=f"Current Vial | {vial}\nCarousel Position | A: {a}")
 
         self.after(200, self.update_information)
         
