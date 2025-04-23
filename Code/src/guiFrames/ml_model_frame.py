@@ -42,7 +42,7 @@ class MLModelFrame(ctk.CTkFrame):
         for i, filename in enumerate(self.image_filenames):
             full_path = os.path.join(self.image_dir, filename)
             if os.path.exists(full_path):
-                img = Image.open(full_path).resize((800, 400), Image.ANTIALIAS)
+                img = Image.open(full_path).resize((800, 400), Image.Resampling.LANCZOS)
                 photo = ImageTk.PhotoImage(img)
                 label = ctk.CTkLabel(self.scrollable_frame, image=photo, text="")
                 label.grid(row=i, column=0, padx=10, pady=10)
