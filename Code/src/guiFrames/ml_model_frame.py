@@ -15,7 +15,7 @@ class MLModelFrame(ctk.CTkFrame):
         self.run_button = ctk.CTkButton(self, text="Run ML Model", command=self.run_ml_model)
         self.run_button.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
 
-        self.canvas = tk.Canvas(self)
+        self.canvas = tk.Canvas(self, bg="black", highlightthickness=0)
         self.scrollbar = ctk.CTkScrollbar(self, command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
         self.canvas.grid(row=1, column=0, sticky="nsew")
@@ -24,6 +24,7 @@ class MLModelFrame(ctk.CTkFrame):
         self.scrollable_frame = ctk.CTkFrame(self.canvas)
         self.canvas_window = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.canvas.bind("<Configure>", self._resize_canvas)
 
         self.image_refs = []
         self.image_filenames = [
@@ -35,10 +36,14 @@ class MLModelFrame(ctk.CTkFrame):
         ]
         self.image_dir = os.path.join(os.path.dirname(__file__), "..", "persistant")
 
-        self.output_text = ctk.CTkTextbox(self, width=880, height=180)
+        self.output_text = ctk.CTkTextbox(self, width=850, height=180)
         self.output_text.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
         self.display_output_images()
+
+    def _resize_canvas(self, event):
+        canvas_width = event.width
+        self.canvas.itemconfig(self.canvas_window, width=canvas_width)
 
     def display_output_images(self):
         for widget in self.scrollable_frame.winfo_children():
@@ -66,10 +71,10 @@ class MLModelFrame(ctk.CTkFrame):
             ml_driver.run_model()
             self.display_output_images()
         except Exception as e:
-            self.output_text.insert(tk.END, f"❌ ML model failed: {e}\n")
+            self.output_text.insert(tk.END, f"❌ ML model failed: {e}\\n")
 
         sys.stdout = sys.__stdout__
         result = buffer.getvalue()
         filtered_lines = [line for line in result.splitlines() if "iter" not in line and "target" not in line]
-        self.output_text.insert(tk.END, "\n".join(filtered_lines))
+        self.output_text.insert(tk.END, "\\n".join(filtered_lines))
         buffer.close()
