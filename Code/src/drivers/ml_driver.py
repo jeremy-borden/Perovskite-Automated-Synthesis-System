@@ -18,12 +18,19 @@ warnings.filterwarnings("ignore")
 PERSISTANT_DIR = os.path.join(os.path.dirname(__file__), "..", "persistant")
 
 def adjusted_sq_efficiency(row):
-    base_eff = 0.337 * (row['Bandgap'] / 1.34) * np.exp(-(row['Bandgap'] - 1.34)**2 / 0.1)
-    if row.get('Composition_Type_Zn'): base_eff *= 1.05
-    if row.get('Composition_Type_Br'): base_eff *= 0.95
-    if row.get('Composition_Type_FA'): base_eff *= 1.07
-    if row.get('Composition_Type_EA'): base_eff *= 0.92
-    return np.clip(base_eff * 0.90 * 0.95 * 0.97 * 100, 0, 100)
+    base_eff = 0.337 * (row['Bandgap'] / 1.34) * np.exp(-(row['Bandgap'] - 1.34) ** 2 / 0.1)
+
+    if row.get('Composition_Type_Zn'):
+        base_eff *= 1.05
+    if row.get('Composition_Type_Br'):
+        base_eff *= 0.95
+    if row.get('Composition_Type_FA'):
+        base_eff *= 1.07
+    if row.get('Composition_Type_EA'):
+        base_eff *= 0.92
+
+    η_total = 0.90 * 0.95 * 0.97
+    return np.clip(base_eff * η_total * 100, 0, 100)
 
 def run_model():
     data_path = os.path.join(os.path.dirname(__file__), "..", "PL_VALUES.xlsx")
@@ -58,7 +65,7 @@ def run_model():
     if not os.path.exists(PERSISTANT_DIR):
         os.makedirs(PERSISTANT_DIR)
 
-    # Feature Importance
+    # === PLOTS ===
     plt.figure(figsize=(8, 6), dpi=150)
     plt.barh(X.columns, rf.feature_importances_, color='steelblue')
     plt.xlabel("Importance")
@@ -67,35 +74,31 @@ def run_model():
     plt.savefig(os.path.join(PERSISTANT_DIR, "Feature Importance.png"), bbox_inches="tight")
     plt.close()
 
-    # Actual vs Predicted
     y_pred_all = rf.predict(X)
     plt.figure(figsize=(8, 6), dpi=150)
-    plt.scatter(y, y_pred_all, alpha=0.6, c='blue', label='All Data')
+    plt.scatter(y, y_pred_all, alpha=0.6, edgecolor=None, c='blue', label='All Data')
     plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--', lw=2, label='Prediction Line')
     plt.xlabel("Actual Bandgap")
     plt.ylabel("Predicted Bandgap")
-    plt.title("Actual vs Predicted Bandgap (Random Forest)")
-    plt.legend()
+    plt.title("Actual vs Predicted Bandgap")
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(os.path.join(PERSISTANT_DIR, "Actual vs Predicted Bandgap.png"), bbox_inches="tight")
     plt.close()
 
-    # Residuals
     residuals = y - y_pred_all
     plt.figure(figsize=(8, 6), dpi=150)
-    sns.kdeplot(residuals, fill=True, color="blue", alpha=0.6, label='Residual Density')
-    plt.axvline(0, color='red', linestyle='--', label='Zero Error Line')
+    sns.kdeplot(residuals, fill=True, color="cornflowerblue", linewidth=2)
+    plt.axvline(0, linestyle="--", color="red", label="Zero Error Line")
+    plt.title("Density Distribution of Residuals")
     plt.xlabel("Residuals")
     plt.ylabel("Density")
-    plt.title("Density Distribution of Residuals")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(os.path.join(PERSISTANT_DIR, "Density Distribution of Residuals.png"), bbox_inches="tight")
     plt.close()
 
-    # Efficiency Distribution
     plt.figure(figsize=(8, 6), dpi=150)
     sns.histplot(data['Adjusted_SQ_Efficiency'], bins=30, kde=True, color="green", label="Adjusted Efficiency")
     plt.xlabel("Efficiency (%)")
@@ -107,28 +110,26 @@ def run_model():
     plt.savefig(os.path.join(PERSISTANT_DIR, "adjusted_efficiency_distribution.png"), bbox_inches="tight")
     plt.close()
 
-    # SQ Limit Comparison Plot (clean version)
     bandgap_values = np.linspace(0.4, 3.0, 500)
-    sq_curve = 0.337 * (np.linspace(0.9, 2.1, 500) / 1.34) * np.exp(-(np.linspace(0.9, 2.1, 500) - 1.34)**2 / 0.15) * 100
-    filtered = data.dropna(subset=['Bandgap', 'Adjusted_SQ_Efficiency'])
-    filtered = filtered.drop_duplicates(subset=['Bandgap'])  # remove duplicates
-    filtered = filtered[filtered['Adjusted_SQ_Efficiency'] <= 100]  # filter outliers
+    sq_eff = 0.337 * (bandgap_values / 1.34) * np.exp(-(bandgap_values - 1.34) ** 2 / 0.15)
+    sq_eff_percent = sq_eff * 100
 
+    filtered = data.dropna(subset=['Bandgap', 'Adjusted_SQ_Efficiency'])
     grouped = filtered.groupby('Bandgap', as_index=False)['Adjusted_SQ_Efficiency'].mean()
     grouped = grouped.sort_values('Bandgap')
 
-    x = grouped['Bandgap'].values
-    y = grouped['Adjusted_SQ_Efficiency'].values
-
-    if len(x) >= 4:
+    if len(grouped) >= 4:
+        x = grouped['Bandgap'].values
+        y_smooth = grouped['Adjusted_SQ_Efficiency'].values
+        spline = make_interp_spline(x, y_smooth, k=3)
         x_smooth = np.linspace(x.min(), x.max(), 300)
-        spline = make_interp_spline(x, y, k=3)
         y_smooth = spline(x_smooth)
     else:
-        x_smooth, y_smooth = x, y
+        x_smooth = grouped['Bandgap'].values
+        y_smooth = grouped['Adjusted_SQ_Efficiency'].values
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(np.linspace(0.9, 2.1, 500), sq_curve, color='black', linewidth=2, label="Shockley–Queisser Limit (Ideal)")
+    plt.figure(figsize=(8, 6), dpi=150)
+    plt.plot(bandgap_values, sq_eff_percent, color='black', linewidth=2, label="Shockley–Queisser Limit (Ideal)")
     plt.plot(x_smooth, y_smooth, color='blue', linewidth=2.2, label="Interpolated Dataset Efficiency")
     plt.scatter(filtered['Bandgap'], filtered['Adjusted_SQ_Efficiency'], color='green', s=35, alpha=0.5, label="Dataset Samples")
     plt.axvline(x=1.34, color='red', linestyle='--', label="Optimal Bandgap (1.34 eV)")
@@ -140,19 +141,20 @@ def run_model():
     plt.grid(True, linestyle="--", alpha=0.5)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(PERSISTANT_DIR, "sq_limit_with_all_samples.png"))
+    plt.savefig(os.path.join(PERSISTANT_DIR, "sq_limit_with_all_samples.png"), bbox_inches="tight")
     plt.close()
-    
-    print("\nEfficiency Summary Table:")
-    print(data[['Bandgap', 'Adjusted_SQ_Efficiency']].round(6).sort_values(by='Bandgap').to_string(index=False))
 
+    # === Efficiency Summary Printout ===
+    summary = filtered[['Bandgap', 'Adjusted_SQ_Efficiency']].copy()
+    summary = summary.sort_values(by='Bandgap')
+    print("\nEfficiency Summary Table:\n", summary.to_string(index=False))
 
-    # Top 3
+    # === TOP 3 ===
     top3 = data.nlargest(3, 'Adjusted_SQ_Efficiency')[['Ink', 'Additive', 'Ink Concentration [M]', 'Composition_Type_original', 'Adjusted_SQ_Efficiency']]
     print("\nTop 3 Efficient Samples from Dataset:")
     print(top3.to_string(index=False))
 
-    # Bayesian Optimization
+    # === BAYESIAN OPTIMIZATION ===
     best_result = None
     best_eff = 0
     compositions = data['Composition_Type_original'].dropna().unique()
@@ -218,3 +220,4 @@ if __name__ == "__main__":
     from multiprocessing import freeze_support
     freeze_support()
     run_model()
+
