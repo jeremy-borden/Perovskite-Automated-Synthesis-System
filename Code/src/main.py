@@ -155,12 +155,14 @@ if __name__ == "__main__":
 
     # run the gui
     hotplate.set_temperature(0)
+    print(">> GUI is starting")
     app.mainloop()
-    hotplate.set_temperature(0)
-    sleep(1)
-    # -- CLEANUP --
-    control_board.disconnect()
-    spectrometer.disconnect()
-    spin_coater.disconnect()
-    camera.disconnect()
-    hotplate.disconnect()
+    print(">> GUI ended")
+    # hotplate.set_temperature(0)
+    # sleep(1)
+    # # -- CLEANUP --
+    # control_board.disconnect()
+    # spectrometer.disconnect()
+    # spin_coater.disconnect()
+    # camera.disconnect()
+    # hotplate.disconnect()
