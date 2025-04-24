@@ -26,9 +26,9 @@ from guiFrames.info_frame import InfoFrame
 from guiFrames.camera_frame import CameraFrame
 from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
-from guiFrames.spectrometer_frame import SpectrometerFrame
+#from guiFrames.spectrometer_frame import SpectrometerFrame
 from guiFrames.locations_frame import LocationFrame
-# from guiFrames.ml_model_frame import MLModelFrame
+from guiFrames.ml_model_frame import MLModelFrame
 
 
 from procedure_handler import ProcedureHandler
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     app.geometry("1200x1000")
     app.title("ECD 515 - Perovskite Automated Synthesis System")
     
-    spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
+    #spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
     
     dispatcher = Dispatcher(toolhead=toolhead,
                             spin_coater=spin_coater,
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                             spectrometer=spectrometer,
                             vial_carousel=vial_carousel,
                             pippete_handler=pipette_handler,
-                            spectrometer_frame=spectrometer_frame, 
+                            #spectrometer_frame=spectrometer_frame, 
                             tip_matrix=tip_matrix)
     
     procedure_handler = ProcedureHandler(dispatcher=dispatcher)
@@ -145,13 +145,13 @@ if __name__ == "__main__":
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
     connection_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-    spectrometer_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+    #spectrometer_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
     console_frame.grid(row=1, column=0, padx=5, pady=5,sticky="nsew")
     procedure_builder_frame.grid(row=1, column=1, rowspan=2, sticky="nsew")
     camera_frame.grid(row=1, column=2, padx=5, pady=5,sticky="new")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="new")
     location_frame.grid(row=2, column=2,padx=5, pady=5, sticky="new")
-    # ml_model_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+    ml_model_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
 
     # run the gui
     hotplate.set_temperature(0)
