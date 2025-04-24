@@ -10,6 +10,8 @@ from drivers.spincoater_driver import SpinCoater
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 from drivers.spectrometer_driver import Spectrometer
+from drivers import ml_driver
+
 # -- OBJECT IMPORT --
 
 from objects.tip_matrix import TipMatrix
@@ -28,12 +30,11 @@ from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
 from guiFrames.spectrometer_frame import SpectrometerFrame
 from guiFrames.locations_frame import LocationFrame
-# from guiFrames.ml_model_frame import MLModelFrame
+from guiFrames.ml_model_frame import MLModelFrame
 
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
-# from predictor import predict_bandgap_and_efficiency
 
 if __name__ == "__main__":
     #enable software pwm
@@ -141,7 +142,7 @@ if __name__ == "__main__":
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
     procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict, procedure_handler)
     location_frame = LocationFrame(master=app)
-    # ml_model_frame = MLModelFrame(app)
+    ml_model_frame = MLModelFrame(app)
     
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
@@ -153,6 +154,7 @@ if __name__ == "__main__":
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="new")
     location_frame.grid(row=2, column=2,padx=5, pady=5, sticky="new")
     # ml_model_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+    ml_model_frame.grid(row=1, column=2, padx=5, pady=5,sticky="new")
 
     # run the gui
     hotplate.set_temperature(0)
