@@ -95,7 +95,7 @@ if __name__ == "__main__":
     app.geometry("1200x1000")
     app.title("ECD 515 - Perovskite Automated Synthesis System")
     
-    #spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
+    spectrometer_frame = SpectrometerFrame(master=app, spectrometer=spectrometer)
     
     dispatcher = Dispatcher(toolhead=toolhead,
                             spin_coater=spin_coater,
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                             spectrometer=spectrometer,
                             vial_carousel=vial_carousel,
                             pippete_handler=pipette_handler,
-                            #spectrometer_frame=spectrometer_frame, 
+                            spectrometer_frame=spectrometer_frame, 
                             tip_matrix=tip_matrix)
     
     procedure_handler = ProcedureHandler(dispatcher=dispatcher)
