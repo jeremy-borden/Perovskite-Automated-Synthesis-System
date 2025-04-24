@@ -109,22 +109,28 @@ def run_model():
 
     # SQ Limit Comparison Plot (clean version)
     bandgap_values = np.linspace(0.4, 3.0, 500)
-    sq_efficiency_curve = 0.337 * (bandgap_values / 1.34) * np.exp(-(bandgap_values - 1.34)**2 / 0.15) * 100
+    sq_curve = 0.337 * (np.linspace(0.9, 2.1, 500) / 1.34) * np.exp(-(np.linspace(0.9, 2.1, 500) - 1.34)**2 / 0.15) * 100
     filtered = data.dropna(subset=['Bandgap', 'Adjusted_SQ_Efficiency'])
-    grouped = filtered.groupby('Bandgap', as_index=False)['Adjusted_SQ_Efficiency'].mean().sort_values('Bandgap')
+    filtered = filtered.drop_duplicates(subset=['Bandgap'])  # remove duplicates
+    filtered = filtered[filtered['Adjusted_SQ_Efficiency'] <= 100]  # filter outliers
+
+    grouped = filtered.groupby('Bandgap', as_index=False)['Adjusted_SQ_Efficiency'].mean()
+    grouped = grouped.sort_values('Bandgap')
+
     x = grouped['Bandgap'].values
-    y_vals = grouped['Adjusted_SQ_Efficiency'].values
+    y = grouped['Adjusted_SQ_Efficiency'].values
 
     if len(x) >= 4:
         x_smooth = np.linspace(x.min(), x.max(), 300)
-        y_smooth = make_interp_spline(x, y_vals, k=3)(x_smooth)
+        spline = make_interp_spline(x, y, k=3)
+        y_smooth = spline(x_smooth)
     else:
-        x_smooth, y_smooth = x, y_vals
+        x_smooth, y_smooth = x, y
 
-    plt.figure(figsize=(8, 6), dpi=150)
-    plt.plot(bandgap_values, sq_efficiency_curve, color='black', linewidth=2, label="Shockley–Queisser Limit (Ideal)")
+    plt.figure(figsize=(10, 6))
+    plt.plot(np.linspace(0.9, 2.1, 500), sq_curve, color='black', linewidth=2, label="Shockley–Queisser Limit (Ideal)")
     plt.plot(x_smooth, y_smooth, color='blue', linewidth=2.2, label="Interpolated Dataset Efficiency")
-    plt.scatter(filtered['Bandgap'], filtered['Adjusted_SQ_Efficiency'], color='green', alpha=0.5, label="Dataset Samples")
+    plt.scatter(filtered['Bandgap'], filtered['Adjusted_SQ_Efficiency'], color='green', s=35, alpha=0.5, label="Dataset Samples")
     plt.axvline(x=1.34, color='red', linestyle='--', label="Optimal Bandgap (1.34 eV)")
     plt.xlabel("Bandgap (eV)")
     plt.ylabel("Efficiency (%)")
@@ -134,8 +140,12 @@ def run_model():
     plt.grid(True, linestyle="--", alpha=0.5)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(PERSISTANT_DIR, "sq_limit_with_all_samples.png"), bbox_inches="tight")
+    plt.savefig(os.path.join(PERSISTANT_DIR, "sq_limit_with_all_samples.png"))
     plt.close()
+    
+    print("\nEfficiency Summary Table:")
+    print(data[['Bandgap', 'Adjusted_SQ_Efficiency']].round(6).sort_values(by='Bandgap').to_string(index=False))
+
 
     # Top 3
     top3 = data.nlargest(3, 'Adjusted_SQ_Efficiency')[['Ink', 'Additive', 'Ink Concentration [M]', 'Composition_Type_original', 'Adjusted_SQ_Efficiency']]
