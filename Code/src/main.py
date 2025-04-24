@@ -142,7 +142,7 @@ if __name__ == "__main__":
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
     procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict, procedure_handler)
     location_frame = LocationFrame(master=app)
-    ml_model_frame = MLModelFrame(app)
+    ml_model_frame = MLModelFrame(app, width=370)
     
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
