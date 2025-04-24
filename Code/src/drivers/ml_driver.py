@@ -58,7 +58,7 @@ def run_model():
     if not os.path.exists(PERSISTANT_DIR):
         os.makedirs(PERSISTANT_DIR)
 
-    # === PLOTS ===
+    # Feature Importance
     plt.figure(figsize=(8, 6), dpi=150)
     plt.barh(X.columns, rf.feature_importances_, color='steelblue')
     plt.xlabel("Importance")
@@ -67,64 +67,82 @@ def run_model():
     plt.savefig(os.path.join(PERSISTANT_DIR, "Feature Importance.png"), bbox_inches="tight")
     plt.close()
 
+    # Actual vs Predicted
     y_pred_all = rf.predict(X)
     plt.figure(figsize=(8, 6), dpi=150)
-    plt.scatter(y, y_pred_all, alpha=0.6, color='deepskyblue', edgecolors='k')
-    plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--', linewidth=2)
+    plt.scatter(y, y_pred_all, alpha=0.6, c='blue', label='All Data')
+    plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--', lw=2, label='Prediction Line')
     plt.xlabel("Actual Bandgap")
     plt.ylabel("Predicted Bandgap")
-    plt.title("Actual vs Predicted Bandgap")
+    plt.title("Actual vs Predicted Bandgap (Random Forest)")
+    plt.legend()
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(os.path.join(PERSISTANT_DIR, "Actual vs Predicted Bandgap.png"), bbox_inches="tight")
     plt.close()
 
+    # Residuals
     residuals = y - y_pred_all
     plt.figure(figsize=(8, 6), dpi=150)
-    sns.kdeplot(residuals, fill=True, color="cornflowerblue", linewidth=2)
-    plt.title("Density Distribution of Residuals")
-    plt.xlabel("Residual")
+    sns.kdeplot(residuals, fill=True, color="blue", alpha=0.6, label='Residual Density')
+    plt.axvline(0, color='red', linestyle='--', label='Zero Error Line')
+    plt.xlabel("Residuals")
     plt.ylabel("Density")
+    plt.title("Density Distribution of Residuals")
+    plt.legend()
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(os.path.join(PERSISTANT_DIR, "Density Distribution of Residuals.png"), bbox_inches="tight")
     plt.close()
 
-    sq_curve = 0.337 * (np.linspace(0.9, 2.1, 500) / 1.34) * np.exp(-(np.linspace(0.9, 2.1, 500) - 1.34)**2 / 0.15) * 100
-    grouped = data.groupby('Bandgap')['Adjusted_SQ_Efficiency'].mean().reset_index()
-    spline = make_interp_spline(grouped['Bandgap'], grouped['Adjusted_SQ_Efficiency'], k=3)
-    x_smooth = np.linspace(grouped['Bandgap'].min(), grouped['Bandgap'].max(), 300)
-    y_smooth = spline(x_smooth)
-
+    # Efficiency Distribution
     plt.figure(figsize=(8, 6), dpi=150)
-    plt.plot(np.linspace(0.9, 2.1, 500), sq_curve, label="SQ Limit", color='black')
-    plt.plot(x_smooth, y_smooth, label="ML Curve", color='royalblue')
-    plt.scatter(data['Bandgap'], data['Adjusted_SQ_Efficiency'], color='green', alpha=0.5, label="Samples")
-    plt.axvline(1.34, color='red', linestyle='--', label="Ideal Bandgap")
-    plt.xlabel("Bandgap (eV)")
-    plt.ylabel("Efficiency (%)")
-    plt.title("SQ Limit vs ML Prediction")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(os.path.join(PERSISTANT_DIR, "sq_limit_with_all_samples.png"), bbox_inches="tight")
-    plt.close()
-
-    plt.figure(figsize=(8, 6), dpi=150)
-    sns.histplot(data['Adjusted_SQ_Efficiency'], bins=30, kde=True, color="mediumseagreen", edgecolor="black")
-    plt.xlabel("Adjusted SQ Efficiency (%)")
+    sns.histplot(data['Adjusted_SQ_Efficiency'], bins=30, kde=True, color="green", label="Adjusted Efficiency")
+    plt.xlabel("Efficiency (%)")
     plt.ylabel("Count")
-    plt.title("Adjusted Efficiency Distribution")
+    plt.title("Adjusted SQ Efficiency Distribution (Composition + Losses)")
+    plt.grid(True)
+    plt.legend()
     plt.tight_layout()
     plt.savefig(os.path.join(PERSISTANT_DIR, "adjusted_efficiency_distribution.png"), bbox_inches="tight")
     plt.close()
 
-    # === TOP 3 SAMPLES ===
+    # SQ Limit Comparison Plot (clean version)
+    bandgap_values = np.linspace(0.4, 3.0, 500)
+    sq_efficiency_curve = 0.337 * (bandgap_values / 1.34) * np.exp(-(bandgap_values - 1.34)**2 / 0.15) * 100
+    filtered = data.dropna(subset=['Bandgap', 'Adjusted_SQ_Efficiency'])
+    grouped = filtered.groupby('Bandgap', as_index=False)['Adjusted_SQ_Efficiency'].mean().sort_values('Bandgap')
+    x = grouped['Bandgap'].values
+    y_vals = grouped['Adjusted_SQ_Efficiency'].values
+
+    if len(x) >= 4:
+        x_smooth = np.linspace(x.min(), x.max(), 300)
+        y_smooth = make_interp_spline(x, y_vals, k=3)(x_smooth)
+    else:
+        x_smooth, y_smooth = x, y_vals
+
+    plt.figure(figsize=(8, 6), dpi=150)
+    plt.plot(bandgap_values, sq_efficiency_curve, color='black', linewidth=2, label="Shockley–Queisser Limit (Ideal)")
+    plt.plot(x_smooth, y_smooth, color='blue', linewidth=2.2, label="Interpolated Dataset Efficiency")
+    plt.scatter(filtered['Bandgap'], filtered['Adjusted_SQ_Efficiency'], color='green', alpha=0.5, label="Dataset Samples")
+    plt.axvline(x=1.34, color='red', linestyle='--', label="Optimal Bandgap (1.34 eV)")
+    plt.xlabel("Bandgap (eV)")
+    plt.ylabel("Efficiency (%)")
+    plt.title("Solar Efficiency: Dataset Samples vs Shockley–Queisser Limit")
+    plt.xlim(0.9, 2.1)
+    plt.ylim(0, 40)
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(PERSISTANT_DIR, "sq_limit_with_all_samples.png"), bbox_inches="tight")
+    plt.close()
+
+    # Top 3
     top3 = data.nlargest(3, 'Adjusted_SQ_Efficiency')[['Ink', 'Additive', 'Ink Concentration [M]', 'Composition_Type_original', 'Adjusted_SQ_Efficiency']]
     print("\nTop 3 Efficient Samples from Dataset:")
     print(top3.to_string(index=False))
 
-    # === BAYESIAN OPTIMIZATION (dynamic Ink + Additive) ===
+    # Bayesian Optimization
     best_result = None
     best_eff = 0
     compositions = data['Composition_Type_original'].dropna().unique()
