@@ -95,7 +95,7 @@ class SpectrometerFrame(ctk.CTkFrame):
     
     def run_ml_model(self):
         try:
-            ml_driver.run_model(print_logs=False)
+            ml_driver.run_model()
             print("[INFO] ML Model executed. Check /persistant for output.")
             done_label = ctk.CTkLabel(self, text="ML Run Complete", text_color="green")
             done_label.grid(row=4, column=0, pady=5)
