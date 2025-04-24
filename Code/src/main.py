@@ -26,7 +26,7 @@ from guiFrames.info_frame import InfoFrame
 from guiFrames.camera_frame import CameraFrame
 from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
-from guiFrames.spectrometer_frame import SpectrometerFrame
+#from guiFrames.spectrometer_frame import SpectrometerFrame
 from guiFrames.locations_frame import LocationFrame
 from guiFrames.ml_model_frame import MLModelFrame
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                             spectrometer=spectrometer,
                             vial_carousel=vial_carousel,
                             pippete_handler=pipette_handler,
-                            #spectrometer_frame=spectrometer_frame, 
+                            spectrometer_frame=spectrometer_frame, 
                             tip_matrix=tip_matrix)
     
     procedure_handler = ProcedureHandler(dispatcher=dispatcher)
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
     procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict, procedure_handler)
     location_frame = LocationFrame(master=app)
-    # ml_model_frame = MLModelFrame(app)
+    ml_model_frame = MLModelFrame(app)
     
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
