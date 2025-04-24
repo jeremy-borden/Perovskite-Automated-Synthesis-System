@@ -63,7 +63,7 @@ class Dispatcher():
             "add_spin_coater_step": self.add_spin_coater_step,
             "run_spin_coater": self.run_spin_coater,
             
-            #"set_infeed_angle": self.set_infeed_angle,
+            "set_infeed_angle": self.set_infeed_angle,
             "open_infeed": self.open_infeed,
             "close_infeed": self.close_infeed,
 
@@ -140,9 +140,6 @@ class Dispatcher():
         self.tip_matrix.refill_tips()
         self.slide_matrix.refill_slides()
         self.open_gripper()
-        self.set_temperature(0)
-        
-    
 
         
     def kill(self):
