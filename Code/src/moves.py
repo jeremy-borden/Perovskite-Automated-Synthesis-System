@@ -323,7 +323,7 @@ class Dispatcher():
         self.toolhead.move_axis("Z", 200)
         self.move_to_location("vial carousel")
         self.vial_carousel.set_vial(vial_num)
-        self.toolhead.move_axis("Z", vial_draw_height,)
+        self.toolhead.move_axis("Z", vial_draw_height)
         self.pippete_handler.draw_ul(volume_ul)
         self.toolhead.move_axis("Z", 200)
                 
@@ -363,7 +363,7 @@ class Dispatcher():
         
         # mix fluids together
         for i in range(5):
-            self.pippete_handler.draw_ul(20)
+            self.pippete_handler.draw_ul(10)
             self.pippete_handler.dispense_all(1)
             
         self.toolhead.move_axis("Z", 200)
@@ -414,9 +414,11 @@ class Dispatcher():
     def set_1(self):
         self.pippete_handler.set_actuator_position(97)
         self.pippete_handler.set_pipette(1)
-        self.toolhead.move_axis("Z", 200)
+        
         self.move_to_location("pipette stand")
+        self.toolhead.move_axis("Z", 200)
         self.toolhead.move_axis("Y", 151)
+        self.toolhead.move_axis("Z", 128)
         self.pippete_handler.set_grabber_angle(145)
         self.toolhead.move_axis("X", 120, relative=True) #move forward
         self.pippete_handler.set_grabber_angle(48)

@@ -21,7 +21,7 @@ class Pipette:
 class PipetteHandler():
     ACTUATOR_MAX_HEIGHT_MM: int
     STAND_0_Y: float = 85
-    STAND_1_Y: float = 151
+    STAND_1_Y: float = 152
     def __init__(self, control_board: ControlBoard, tip_eject_servo: AngularServo, grabber_servo: AngularServo, pipettes: list):
         self.logger = logging.getLogger("Main Logger")
         
