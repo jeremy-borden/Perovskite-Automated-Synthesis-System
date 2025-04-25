@@ -88,24 +88,26 @@ class ControlBoard():
         if axis not in self.positions.keys():
             raise f"Invalid axis {axis}"
   
-
+        if relative and distance_mm == 0:
+            return
+        
         if relative:
             self.send_message("G91")
-        sleep(0.2)
+        sleep(0.1)
         # dont go crazy with these axes,
         if (axis == "Z" or axis == "A" or axis == "B") and feedrate_mm_per_minute == 2000:
             feedrate_mm_per_minute = 600
             
         self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
-        sleep(0.2)
+        sleep(0.1)
             
         
         if finish_move:
             self.finish_moves()
-            sleep(1)
+            sleep(0.1)
         if relative:
             self.send_message("G90")
-            sleep(1)
+            sleep(0.1)
 
     def finish_moves(self):
         """Wait for the move to finish"""
@@ -116,7 +118,7 @@ class ControlBoard():
         sleep(0.5)
         self.send_message("M400")
         self.logger.debug("Waiting for move to finish")
-        self.received_ok.wait(timeout=60)  # Wait until the move_finished event is set
+        self.received_ok.wait(timeout=120)  # Wait until the move_finished event is set
         
 
 
