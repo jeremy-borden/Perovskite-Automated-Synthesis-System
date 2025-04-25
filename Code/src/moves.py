@@ -317,8 +317,7 @@ class Dispatcher():
             
     def extract_from_vial(self, vial_num: int, volume_ul: int):
         vial_draw_height = 82 #distance required for pipette to dip into vial
-        if self.pippete_handler.current_pipette.NEEDS_BIG_TIP:
-            vial_draw_height +=25
+    
             
         
         self.toolhead.move_axis("Z", 200)
@@ -330,8 +329,7 @@ class Dispatcher():
                 
     def mix_fluid(self, source_vial_1: int, amount_1: int, source_vial_2: int, amount_2: int, destination_vial: int):
         vial_draw_height = 82
-        if self.pippete_handler.current_pipette.NEEDS_BIG_TIP:
-            vial_draw_height +=25
+        
 
         # raise machine to avoid collisions
         self.toolhead.move_axis("Z", 200)
@@ -403,6 +401,7 @@ class Dispatcher():
     
     
     def set_0(self):
+        self.pippete_handler.set_actuator_position(97)
         self.pippete_handler.set_pipette(0)
         self.toolhead.move_axis("Z", 200)
         self.move_to_location("pipette stand")
@@ -413,6 +412,7 @@ class Dispatcher():
         self.toolhead.move_axis("X", -120, relative=True) #move backwards
         
     def set_1(self):
+        self.pippete_handler.set_actuator_position(97)
         self.pippete_handler.set_pipette(1)
         self.toolhead.move_axis("Z", 200)
         self.move_to_location("pipette stand")
@@ -424,6 +424,7 @@ class Dispatcher():
         self.toolhead.move_axis("X", -120, relative=True) #move backwards
         
     def put_0(self):
+        self.pippete_handler.set_actuator_position(97)
         self.toolhead.move_axis("Z", 200)
         self.move_to_location("pipette stand")
         self.toolhead.move_axis("Z", 40, relative=True) # raise
@@ -433,6 +434,7 @@ class Dispatcher():
         self.toolhead.move_axis("X", -120, relative=True) #move backwards
     
     def put_1(self):
+        self.pippete_handler.set_actuator_position(97)
         self.toolhead.move_axis("Z", 200)
         self.move_to_location("pipette stand")
         self.toolhead.move_axis("Y", 151)
