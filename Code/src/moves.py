@@ -443,8 +443,7 @@ class Dispatcher():
         self.toolhead.move_axis("Z", 200)
    
         self.toolhead.move_axis("Y", 151)
-        self.toolhead.move_axis("Z", 128)
-        self.toolhead.move_axis("Z", 40, relative=True) # raise
+        self.toolhead.move_axis("Z", 168)
         self.toolhead.move_axis("X", 120, relative=True) #move forward
         self.toolhead.move_axis("Z", -40, relative=True) # raise
         self.pippete_handler.set_grabber_angle(145)
