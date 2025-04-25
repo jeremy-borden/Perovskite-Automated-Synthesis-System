@@ -73,6 +73,7 @@ class Dispatcher():
             "set_eject_angle": self.set_eject_angle,
             "set_vial": self.set_vial,
             "extract_from_vial": self.extract_from_vial,
+            "dispense": self.dispense,
             #"replace_tip": self.replace_tip,
             "mix_fluid": self.mix_fluid,
             "eject_tip": self.eject_tip,
