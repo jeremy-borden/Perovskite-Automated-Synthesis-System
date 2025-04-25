@@ -81,6 +81,11 @@ class Dispatcher():
             
             "measure_spectrum": self.measure_spectrum,
             "automated_measurement": self.automated_measurement,
+            
+            "put_0": self.put_0,
+            "put_1": self.put_1,
+            "set_0": self.set_0,
+            "set_0": self.set_1,
         }
         
         
@@ -397,8 +402,45 @@ class Dispatcher():
     
     
     
+    def set_0(self):
+        self.pippete_handler.set_pipette(0)
+        self.toolhead.move_axis("Z", 200)
+        self.move_to_location("pipette stand")
+        self.pippete_handler.set_grabber_angle(145)
+        self.toolhead.move_axis("X", 120, relative=True) #move forward
+        self.pippete_handler.set_grabber_angle(40)
+        self.toolhead.move_axis("Z", 40, relative=True) # raise
+        self.toolhead.move_axis("X", -120, relative=True) #move backwards
+        
     def set_1(self):
-        pass
+        self.pippete_handler.set_pipette(1)
+        self.toolhead.move_axis("Z", 200)
+        self.move_to_location("pipette stand")
+        self.toolhead.move_axis("Y", 151)
+        self.pippete_handler.set_grabber_angle(145)
+        self.toolhead.move_axis("X", 120, relative=True) #move forward
+        self.pippete_handler.set_grabber_angle(40)
+        self.toolhead.move_axis("Z", 40, relative=True) # raise
+        self.toolhead.move_axis("X", -120, relative=True) #move backwards
+        
+    def put_0(self):
+        self.toolhead.move_axis("Z", 200)
+        self.move_to_location("pipette stand")
+        self.toolhead.move_axis("Z", 40, relative=True) # raise
+        self.toolhead.move_axis("X", 120, relative=True) #move forward
+        self.toolhead.move_axis("Z", -40, relative=True) # raise
+        self.pippete_handler.set_grabber_angle(145)
+        self.toolhead.move_axis("X", -120, relative=True) #move backwards
+    
+    def put_1(self):
+        self.toolhead.move_axis("Z", 200)
+        self.move_to_location("pipette stand")
+        self.toolhead.move_axis("Y", 151)
+        self.toolhead.move_axis("Z", 40, relative=True) # raise
+        self.toolhead.move_axis("X", 120, relative=True) #move forward
+        self.toolhead.move_axis("Z", -40, relative=True) # raise
+        self.pippete_handler.set_grabber_angle(145)
+        self.toolhead.move_axis("X", -120, relative=True) #move backwards
     
     def set_pipette(self, target_pipette: int):
         # rasie toolhead to avoid collisions

@@ -1,6 +1,7 @@
 Procedure:
 # pick up slide and move it to spincoater
   - [set_gripper_angle, 117]
+  - [open_gripper]
   - [move_to_location, SLIDEMAT1]
   - [close_gripper]
   - [move_to_location, SO]
@@ -8,19 +9,20 @@ Procedure:
   - [move_to_location, spincoater g]
   - [open_gripper]
 # pick up first pipette, mix fluids and dispense on slide
-#   - [set_pipette, 0]
-#   - [mix_fluid, 1, 50, 2, 50, 0]
-#   - [extract_from_vial, 0, 75]
-#   - [move_to_location, spincoater p]
-#   - [dispense, 3]
-#   - [put_away_pipette]
-# # pick up second pipette, draw and dispense fluid on slide
-#   - [set_pipette, 1]
-#   - [extract_from_vial, 4, 100]
-#   - [move_to_location, spincoater p]
-#   - [dispense, 3]
-#   - [put_away_pipette]
+  - [set_0]
+  - [mix_fluid, 1, 50, 2, 50, 0]
+  - [extract_from_vial, 0, 75]
+  - [move_to_location, spincoater p]
+  - [dispense, 3]
+  - [put_0]
+# pick up second pipette, draw and dispense fluid on slide
+  - [set_1]
+  - [extract_from_vial, 4, 100]
+  - [move_to_location, spincoater p]
+  - [dispense, 3]
+  - [put_1]
 # begin spinning
+  - [move_to_location, SO]
   - [add_spin_coater_step, 1000, 5]
   - [run_spin_coater]
 # pick up slide and place on hotplate
