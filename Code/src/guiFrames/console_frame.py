@@ -7,7 +7,7 @@ class ConsoleFrame(ctk.CTkFrame):
     """ GUI Frame to display the console log """
     
     def __init__(self, master):
-        super().__init__(master=master,border_color="#1f6aa5",border_width=2)
+        super().__init__(master=master,border_color="#1f6aa5",border_width=2, height=200)
         
         self.logger = logging.getLogger("Main Logger")
         self.log_queue = Queue()

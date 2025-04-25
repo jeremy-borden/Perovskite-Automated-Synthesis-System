@@ -36,6 +36,7 @@ class ControlBoard():
         try:
             self.serial = serial.Serial(port, 115200, timeout=None)
             self._begin_reader_thread()
+            self.send_message("M501")
             self.logger.info(f"Connected to control board on port {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to control board: {e}")

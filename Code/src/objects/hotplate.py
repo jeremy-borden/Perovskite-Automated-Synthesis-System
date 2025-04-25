@@ -33,7 +33,8 @@ class Hotplate(threading.Thread):
     def disconnect(self):
         if not self.is_connected():
             return
-        
+        self.set_temperature(0)
+        time.sleep(0.5)
         self.serial.close()
         self.logger.debug("Hotplate Disconnected")
             

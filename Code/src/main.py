@@ -3,12 +3,15 @@ from tkinter import PhotoImage
 import customtkinter as ctk
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
+from time import sleep
 # -- DRIVER IMPORT --
 from drivers.controlboard_driver import ControlBoard
 from drivers.spincoater_driver import SpinCoater
 from drivers.camera_driver import Camera
 from drivers.procedure_file_driver import ProcedureFile
 from drivers.spectrometer_driver import Spectrometer
+# from drivers import ml_driver
+
 # -- OBJECT IMPORT --
 
 from objects.tip_matrix import TipMatrix
@@ -27,10 +30,11 @@ from guiFrames.conection_frame import ConnectionFrame
 from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
 from guiFrames.spectrometer_frame import SpectrometerFrame
 from guiFrames.locations_frame import LocationFrame
+# from guiFrames.ml_model_frame import MLModelFrame
+
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
-# from predictor import predict_bandgap_and_efficiency
 
 if __name__ == "__main__":
     #enable software pwm
@@ -66,8 +70,8 @@ if __name__ == "__main__":
     tip_eject_servo = AngularServo(pin=27, min_angle=0, max_angle=270, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
     grabber_servo = AngularServo(pin=22, min_angle=0, max_angle=180, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
     grabber_servo.angle = 180
-    pipettes = [Pipette(200, 22, 4.5, 2.5, False),
-                Pipette(1000, 22, 4.5, 2.5, True)]
+    pipettes = [Pipette(200, 97, 17, 3, False),
+                Pipette(1000, 97, 17, 3, True)]
     pipette_handler = PipetteHandler(control_board=control_board,
                                      tip_eject_servo=tip_eject_servo, grabber_servo=grabber_servo,
                                      pipettes=pipettes)
@@ -76,12 +80,12 @@ if __name__ == "__main__":
     hotplate = Hotplate()
     # -- SPECTROMETER + INFEED --
     spectrometer = Spectrometer()
-    spectrometer.connect()
+    
     
     # -- TIP MATRIX --
     tip_matrix = TipMatrix()
   
-    infeed_servo = AngularServo(pin=23, min_angle=0, max_angle=180,min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+    infeed_servo = AngularServo(pin=24, min_angle=0, max_angle=180,min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
     infeed = Infeed(infeed_servo)
     
     # -- VIAL CAROUSEL --
@@ -109,6 +113,14 @@ if __name__ == "__main__":
     
     procedure_handler = ProcedureHandler(dispatcher=dispatcher)
     
+    # connect to devices
+    spectrometer.connect()
+    control_board.connect()
+    camera.connect()
+    spin_coater.connect()
+    hotplate.connect()
+    
+    
     # --------LOAD DEFAULT PROCEDURE--------
     procedure_config = ProcedureFile().Open("procedures/default_procedure.yml")
     if procedure_config is not None:
@@ -118,7 +130,6 @@ if __name__ == "__main__":
         logger.warning("Default procedure not found")
 
 
-    
     # trying to make an icon 
     icon = PhotoImage(file="guiImages/logo.png")
     app.wm_iconphoto(True, icon)
@@ -131,6 +142,8 @@ if __name__ == "__main__":
     info_frame = InfoFrame(app, control_board, hotplate, pipette_handler, vial_carousel)
     procedure_builder_frame = ProcedureBuilderFrame(app, dispatcher.move_dict, procedure_handler)
     location_frame = LocationFrame(master=app)
+    # ml_model_frame = MLModelFrame(app, width=370)
+    
     # putting the frames on the gui
     procedure_frame.grid(row=0, column=0, padx=5, pady=5,sticky="nsew")
     connection_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
@@ -140,21 +153,13 @@ if __name__ == "__main__":
     camera_frame.grid(row=1, column=2, padx=5, pady=5,sticky="new")
     info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="new")
     location_frame.grid(row=2, column=2,padx=5, pady=5, sticky="new")
+    # ml_model_frame.grid(row=1, column=2, padx=5, pady=5,sticky="new")
 
-    # bg, eff = predict_bandgap_and_efficiency(
-    # intensity=1500000,
-    # ink="FASnI3",
-    # additive="Zn",
-    # concentration=1.1,
-    # composition_value=5,
-    # composition_type="5% Zn"
-    # )
-
-    # logger.info(f"[ML Test] Predicted Bandgap: {bg:.3f} eV | Efficiency: {eff:.2f}%")
-    
     # run the gui
+    hotplate.set_temperature(0)
     app.mainloop()
-    
+    hotplate.set_temperature(0)
+    sleep(1)
     # -- CLEANUP --
     control_board.disconnect()
     spectrometer.disconnect()

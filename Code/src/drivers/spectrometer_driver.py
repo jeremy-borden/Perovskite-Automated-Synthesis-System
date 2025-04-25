@@ -24,9 +24,11 @@ logging.basicConfig(level=logging.INFO)
 class Spectrometer:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, integration_time=5000):
+    def __init__(self, integration_time=5000, accumulations=3, averages=2): #set integration time, accumulation, average
         self.logger = logging.getLogger("Main Logger")
         self.integration_time = integration_time
+        self.accumulations = accumulations
+        self.averages = averages
         self.serial = None
         self.wavelengths = []
         self.measurements = {}  # to store intensities for Background, Reference, and Sample
@@ -37,7 +39,7 @@ class Spectrometer:
         
         port = "/dev/spectrometer"
         try:
-            self.serial = serial.Serial(port, baudrate=115200, timeout=5)
+            self.serial = serial.Serial(port, baudrate=115200, timeout=5)  
             self.logger.info(f"Connected to spectrometer on {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to spectrometer: {e}")
@@ -81,6 +83,10 @@ class Spectrometer:
 
         self.send_command("<preflush:2>")   # Default preflush behavior
         self.send_command(f"<itime:{self.integration_time}>")
+        self.send_command(f"<accum:{self.accumulations}>")
+        self.send_command(f"<average:{self.averages}>")
+
+
         
         self.serial.reset_input_buffer()
        

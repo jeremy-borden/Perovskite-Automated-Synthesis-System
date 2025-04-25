@@ -20,7 +20,8 @@ class Pipette:
 
 class PipetteHandler():
     ACTUATOR_MAX_HEIGHT_MM: int
-    
+    STAND_0_Y: float = 85
+    STAND_1_Y: float = 151
     def __init__(self, control_board: ControlBoard, tip_eject_servo: AngularServo, grabber_servo: AngularServo, pipettes: list):
         self.logger = logging.getLogger("Main Logger")
         
@@ -46,6 +47,8 @@ class PipetteHandler():
         """Return the currently held pippete index"""
         if self.current_pipette is not None:
             return self.pipettes.index(self.current_pipette)
+        else:
+            return None
         
     def home(self):
         self.control_board.send_message("G28 B")
@@ -57,8 +60,8 @@ class PipetteHandler():
     def flush_pippete(self):
         """Presses the pippete beyond its normal limit to ensure all fluid is purged.
             The actuator then returns to the bottom of the plunger"""
-        self.control_board.move_axis("B", self.current_pipette.PLUNGER_FLUSH_MM, 300, False)
-        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, 300, False)
+        self.control_board.move_axis("B", self.current_pipette.PLUNGER_FLUSH_MM, 300)
+        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, 300)
         
         self.current_fluid_volume_ul = 0
     
@@ -68,7 +71,7 @@ class PipetteHandler():
         current_position = self.control_board.positions["B"]
         feed_rate = 60*(current_position - self.current_pipette.PLUNGER_BOTTOM_MM) / duration_s
         # press plunger down to minimum height, ejecting all fluid
-        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate, False)
+        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate)
         self.current_fluid_volume_ul = 0
         
     def draw_ul(self, volume_ul):
@@ -93,10 +96,10 @@ class PipetteHandler():
     def set_grabber_angle(self, angle: int):
         self.grabber_servo.angle = angle
     def open_grabber(self):
-        self.grabber_servo.angle = 0
+        self.grabber_servo.angle = 180
         
     def close_grabber(self):
-        self.grabber_servo.angle = 180
+        self.grabber_servo.angle = 80
         
     def detatch_servos(self):
         self.tip_eject_servo.detach()
