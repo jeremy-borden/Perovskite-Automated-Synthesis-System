@@ -1,6 +1,5 @@
 Procedure:
 # pick up slide and move it to spincoater
-  - [home]
   - [move_to_location, SLIDEMAT1]
   - [set_gripper_angle, 117]
   - [close_gripper]
