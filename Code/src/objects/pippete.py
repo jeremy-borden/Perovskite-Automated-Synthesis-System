@@ -61,7 +61,6 @@ class PipetteHandler():
         """Presses the pippete beyond its normal limit to ensure all fluid is purged.
             The actuator then returns to the bottom of the plunger"""
         self.control_board.move_axis("B", self.current_pipette.PLUNGER_FLUSH_MM, 300)
-        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, 300)
         
         self.current_fluid_volume_ul = 0
     
