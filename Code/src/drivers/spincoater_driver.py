@@ -61,8 +61,9 @@ class SpinCoater():
             return
 
         self.reader_thread.write(message.encode("ascii"))
-        self.logger.debug(f"Sending command: {message}")
         
+        self.logger.debug(f"Sending command: {message}")
+        sleep(0.2)
         
         
     def stop(self):
@@ -72,7 +73,7 @@ class SpinCoater():
         self.send_message("spc run")
         self.done.clear()
         if wait_to_finish:
-            self.done.wait(timeout=60)
+            self.done.wait()
         self.clear_steps()
         
     def add_step(self, rpm: int, time_seconds:float):
