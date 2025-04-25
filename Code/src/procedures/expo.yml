@@ -46,3 +46,5 @@ Procedure:
   - [open_gripper]
   - [move_to_location, SO]
 
+# Trigger Spectrometer 
+  - [measure_spectrum, '''White Light''']
