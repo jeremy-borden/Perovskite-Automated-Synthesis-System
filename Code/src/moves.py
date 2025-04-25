@@ -85,7 +85,7 @@ class Dispatcher():
             "put_0": self.put_0,
             "put_1": self.put_1,
             "set_0": self.set_0,
-            "set_0": self.set_1,
+            "set_1": self.set_1,
         }
         
         
