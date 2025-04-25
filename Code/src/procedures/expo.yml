@@ -10,8 +10,8 @@ Procedure:
   - [open_gripper]
 # pick up first pipette, mix fluids and dispense on slide
   - [set_0]
-  - [mix_fluid, 1, 50, 2, 50, 0]
-  - [extract_from_vial, 0, 75]
+  - [mix_fluid, 1, 20, 2, 20, 0]
+  - [extract_from_vial, 0, 20]
   - [move_to_location, spincoater p]
   - [dispense, 3]
   - [put_0]

@@ -407,7 +407,7 @@ class Dispatcher():
         self.move_to_location("pipette stand")
         self.pippete_handler.set_grabber_angle(145)
         self.toolhead.move_axis("X", 120, relative=True) #move forward
-        self.pippete_handler.set_grabber_angle(40)
+        self.pippete_handler.set_grabber_angle(48)
         self.toolhead.move_axis("Z", 40, relative=True) # raise
         self.toolhead.move_axis("X", -120, relative=True) #move backwards
         
@@ -419,7 +419,7 @@ class Dispatcher():
         self.toolhead.move_axis("Y", 151)
         self.pippete_handler.set_grabber_angle(145)
         self.toolhead.move_axis("X", 120, relative=True) #move forward
-        self.pippete_handler.set_grabber_angle(40)
+        self.pippete_handler.set_grabber_angle(48)
         self.toolhead.move_axis("Z", 40, relative=True) # raise
         self.toolhead.move_axis("X", -120, relative=True) #move backwards
         
