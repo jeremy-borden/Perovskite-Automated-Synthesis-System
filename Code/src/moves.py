@@ -56,8 +56,8 @@ class Dispatcher():
             "align_gripper": self.align_gripper,
             "set_finger_angle": self.set_finger_angle,
             "set_gripper_angle": self.set_gripper_angle,
-            #"open_gripper": self.open_gripper,
-            #"close_gripper": self.close_gripper,
+            "open_gripper": self.open_gripper,
+            "close_gripper": self.close_gripper,
             
             
             "add_spin_coater_step": self.add_spin_coater_step,
