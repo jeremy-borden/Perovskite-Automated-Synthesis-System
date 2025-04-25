@@ -440,7 +440,10 @@ class Dispatcher():
         self.pippete_handler.set_actuator_position(97)
         self.toolhead.move_axis("Z", 200)
         self.move_to_location("pipette stand")
+        self.toolhead.move_axis("Z", 200)
+   
         self.toolhead.move_axis("Y", 151)
+        self.toolhead.move_axis("Z", 128)
         self.toolhead.move_axis("Z", 40, relative=True) # raise
         self.toolhead.move_axis("X", 120, relative=True) #move forward
         self.toolhead.move_axis("Z", -40, relative=True) # raise
