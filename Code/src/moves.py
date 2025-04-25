@@ -324,6 +324,7 @@ class Dispatcher():
         self.move_to_location("vial carousel")
         self.vial_carousel.set_vial(vial_num)
         self.toolhead.move_axis("Z", vial_draw_height)
+        self.pippete_handler.dispense_all(3)
         self.pippete_handler.draw_ul(volume_ul)
         self.toolhead.move_axis("Z", 200)
                 
