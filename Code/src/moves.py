@@ -394,7 +394,12 @@ class Dispatcher():
         
         self.pippete_handler.set_pipette()
         
-        
+    
+    
+    
+    def set_1(self):
+        pass
+    
     def set_pipette(self, target_pipette: int):
         # rasie toolhead to avoid collisions
 
