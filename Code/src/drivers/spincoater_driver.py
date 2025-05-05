@@ -1,5 +1,4 @@
 import logging
-from time import sleep
 import serial
 import serial.threaded
 import threading
@@ -28,10 +27,7 @@ class SpinCoater():
         try:
             self.serial = serial.Serial(port, 9600, timeout=None)
             self._begin_reader_thread()
-            sleep(0.5)
             self.set_pc_mode()
-            sleep(0.5)
-            self.clear_steps()
             self.logger.info(
                 f"Connected to spincoater on port {port}")
         except serial.SerialException as e:
@@ -55,15 +51,14 @@ class SpinCoater():
         self.reader_thread.daemon = True
         self.reader_thread.start()
         
-    def send_message(self, message: str):
+    def send_command(self, message: str):
         if self.serial is None:
             self.logger.error("Serial is not connected")
             return
 
         self.reader_thread.write(message.encode("ascii"))
-        
         self.logger.debug(f"Sending command: {message}")
-        sleep(0.2)
+        
         
         
     def stop(self):
@@ -74,7 +69,6 @@ class SpinCoater():
         self.done.clear()
         if wait_to_finish:
             self.done.wait()
-        self.clear_steps()
         
     def add_step(self, rpm: int, time_seconds:float):
         self.send_message(f"spc add step {rpm} {time_seconds}")
@@ -101,7 +95,7 @@ class SpinCoaterLineReader(serial.threaded.LineReader):
         line = line.strip()
         self.logger.debug(f"Received: {line}")
         
-        if line == "Done":
+        if line == "done":
             self.spin_coater.done.set()
             
     

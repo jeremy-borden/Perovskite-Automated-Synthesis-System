@@ -24,11 +24,9 @@ logging.basicConfig(level=logging.INFO)
 class Spectrometer:
     """Handles Ossila Spectrometer communication, data collection, and saving to CSV"""
 
-    def __init__(self, integration_time=5000, accumulations=3, averages=2): #set integration time, accumulation, average
+    def __init__(self, integration_time=5000):
         self.logger = logging.getLogger("Main Logger")
         self.integration_time = integration_time
-        self.accumulations = accumulations
-        self.averages = averages
         self.serial = None
         self.wavelengths = []
         self.measurements = {}  # to store intensities for Background, Reference, and Sample
@@ -39,7 +37,7 @@ class Spectrometer:
         
         port = "/dev/spectrometer"
         try:
-            self.serial = serial.Serial(port, baudrate=115200, timeout=5)  
+            self.serial = serial.Serial(port, baudrate=115200, timeout=5)
             self.logger.info(f"Connected to spectrometer on {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to spectrometer: {e}")
@@ -83,10 +81,6 @@ class Spectrometer:
 
         self.send_command("<preflush:2>")   # Default preflush behavior
         self.send_command(f"<itime:{self.integration_time}>")
-        self.send_command(f"<accum:{self.accumulations}>")
-        self.send_command(f"<average:{self.averages}>")
-
-
         
         self.serial.reset_input_buffer()
        
@@ -96,8 +90,9 @@ class Spectrometer:
         raw_data = self.serial.read(3204)
         
         print(f"[DEBUG] Raw data length: {len(raw_data)}")
-        print(f"[DEBUG] Raw data preview: {raw_data[:16].hex()}")  
+        print("[DEBUG] Raw data (hex preview):", raw_data[:64].hex(" ", 1))  
 
+        
         if len(raw_data) != 3204:
             self.logger.warning("Incomplete spectrum data received.")
             return np.array([])
@@ -112,7 +107,6 @@ class Spectrometer:
         # Store the collected data
         self.measurements[measurement_type] = intensities
         self.logger.info(f"Read {len(intensities)} intensity values for {measurement_type}.")
-        print(f"[DEBUG] Sample Intensities: {intensities[:10]} ...")  # Shows first 10 values
         return intensities
 
 
