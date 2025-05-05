@@ -113,12 +113,13 @@ if __name__ == "__main__":
     
     procedure_handler = ProcedureHandler(dispatcher=dispatcher)
     
-    # connect to devices
-    spectrometer.connect()
-    control_board.connect()
-    camera.connect()
-    spin_coater.connect()
-    hotplate.connect()
+    # program stalls when not everything is connected and this is called
+    # # connect to devices
+    # spectrometer.connect()
+    # control_board.connect()
+    # camera.connect()
+    # spin_coater.connect()
+    # hotplate.connect()
     
     
     # --------LOAD DEFAULT PROCEDURE--------

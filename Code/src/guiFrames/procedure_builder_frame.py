@@ -483,18 +483,18 @@ class peepee():
     def __init__(self):
         
         self.moves = {
-            "fardddd_yo": self.fardddd_yo,
-            "shit": self.shit,
-            "nothing": self.nothing
+            "move": self.move,
+            "move_another": self.move_another,
+            "what_the": self.what_the
         }
         
-    def shit(self, a: int, b: str, bool_ean: bool):
+    def move(self, this_is_an_int: int, this_is_a_str: str, this_is_a_float: float):
         pass
     
-    def fardddd_yo(self, inbt: int, flot: float, str: str):
+    def move_another(self, inbt: int, flot: float, str: str):
         pass # gas
     
-    def nothing(self):
+    def what_the(self):
         pass
     
     def get_dick(self):
@@ -506,10 +506,14 @@ if __name__ == "__main__":
     app.configure()
     pee = peepee()
     moves = pee.get_dick()
-    f = ProcedureBuilderFrame(app, moves)
+    f = ProcedureBuilderFrame(app, moves, None)
     f.grid(
         row=0, column=0,
         padx=5, pady=5,
         sticky="nw"
     )
     app.mainloop()
+    
+    
+    
+

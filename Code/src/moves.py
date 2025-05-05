@@ -43,6 +43,8 @@ class Dispatcher():
         ImageProcessor.set_detector()
 
         self.move_dict = {
+            "example_move": self.example_move,
+            
             "log": self.log,
             "wait": self.wait,
             "home": self.home,
@@ -181,7 +183,8 @@ class Dispatcher():
         except Exception as e:
             self.logger.error(f"Error while running sub-move: {e}")
             
-        
+    def example_move(self, value_1: int, value_2: float, value_3: str):
+        return
     #  --------- HOTPLATE MOVES --------
     def set_temperature(self, temperature_c: int):
         self.hotplate.set_temperature(temperature_c)
