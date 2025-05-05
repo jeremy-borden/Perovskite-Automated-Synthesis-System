@@ -1,5 +1,3 @@
-from logging import Logger
-import logging
 from sre_parse import State
 import customtkinter as ctk
 from procedure_handler import ProcedureHandler
@@ -23,7 +21,6 @@ class ProcedureFrame(ctk.CTkFrame):
             border_width=2)
         self.procedure_handler = procedure_handler
         self.killed = False
-        self.logger = logging.getLogger("Main Logger")
 
         # title label
         self.title_label = ctk.CTkLabel(
@@ -143,14 +140,13 @@ class ProcedureFrame(ctk.CTkFrame):
     def _start_procedure(self):
         """ Callback to begin the procedure."""
         if self.procedure_handler.started.is_set():
-            self.logger.warning("Procedure already started")
             return
         
         self.procedure_handler.begin()
 
     def _toggle_pause(self):
         """ Toggle the pause state of the procedure  """
-        if not self.procedure_handler.paused.is_set():
+        if self.procedure_handler.running.is_set():
             self.procedure_handler.pause()
             self.pause_button.configure(text="Resume")
         else:
