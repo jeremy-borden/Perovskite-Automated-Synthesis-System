@@ -9,7 +9,9 @@ class VialCarousel():
         
         self.current_vial = 0
         self.vial_volumes_ul = [0]*self.VIALS
-        
+    
+    def home(self):
+        self.control_board.send_message("G28 A")
     
     def remove_fluid(self, vial_num: int, volume_ul: int):
         """ Removes fluid from the specified vial. Returns True if the 
@@ -56,10 +58,11 @@ class VialCarousel():
         self.vial_volumes_ul[vial_num] = 0
         return True
         
-    def set_vial(self, vial_num):
+    def set_vial(self, vial_num: int):
         if vial_num >12:
             vial_num = 11
-        next_vial_offset = 2.862
-        self.control_board.move_axis("A", vial_num * next_vial_offset, finish_move=True)
+        initial_offset = 0.4
+        next_vial_offset = 2.65
+        self.control_board.move_axis("A", initial_offset + (vial_num * next_vial_offset), finish_move=True)
         self.current_vial = vial_num
 

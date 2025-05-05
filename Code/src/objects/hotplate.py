@@ -33,7 +33,8 @@ class Hotplate(threading.Thread):
     def disconnect(self):
         if not self.is_connected():
             return
-        
+        self.set_temperature(0)
+        time.sleep(0.5)
         self.serial.close()
         self.logger.debug("Hotplate Disconnected")
             
@@ -50,6 +51,8 @@ class Hotplate(threading.Thread):
         except Exception as e:
             self.logger.error(f"Failed to send message: {e}")
             
+            
+            
     def get_temperature(self):
         """Read actual temperature from Arduino via serial."""
         if not self.is_connected():
@@ -60,7 +63,7 @@ class Hotplate(threading.Thread):
             time.sleep(0.5)
             response = self.serial.readline().decode().strip()
             #self.logger.debug(f"Raw response: {response}")
-            temperature = None;
+            temperature = None
 
             if response.startswith("TEMP:"):
                 temperature = float(response.split(":")[1])
@@ -105,7 +108,9 @@ class Hotplate(threading.Thread):
         self.logger.info("Hotplate thread started.")
         while True:
             if self.is_connected():
-                self.current_temperature_c = self.get_temperature()
+                t = self.get_temperature()
+                if t:
+                    self.current_temperature_c = t
             time.sleep(1)
 
 

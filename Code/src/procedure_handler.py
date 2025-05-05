@@ -47,23 +47,16 @@ class ProcedureHandler(threading.Thread):
         while True:
             # wait until user has started procedure
             self.started.wait()
-            # home gantry and initialize values
-            self.dispatcher.home
+            
             self.current_step = 0
             
-            for move in self.procedure:
-                # if procedure is paused after finishing previous move
-                if self.paused.is_set():
-                    self.logger.debug("Paused")
-                    self.procedure_timer.pause()
-                    while self.paused.is_set():
-                        if not self.started.is_set():
-                            break
-                    
-                # if procedure is stopped, break from the loop
-                if not self.started.is_set():
-                    self.logger.debug("Stopping")
+            while self.started.is_set() and (self.current_step < len(self.procedure)):
+                
+                if self.started.is_set() == False:
+                    self.logger.info("Stopping")
                     break
+                
+                move = self.procedure[self.current_step]
                 
                 self.logger.debug(f"Executing move {self.current_step}")
                 func_name = move[0]
@@ -77,10 +70,19 @@ class ProcedureHandler(threading.Thread):
                     break
                 self.logger.debug(f"Move Done")
                 self.current_step+=1
+                time.sleep(0.2)
             
-            self.logger.debug("Procedure Ended")
+                # if procedure is paused after finishing previous move
+                if self.paused.is_set():
+                    self.logger.info("Paused")
+                    self.procedure_timer.pause()
+                    while self.paused.is_set():
+                        time.sleep(0.1)
+                    self.procedure_timer.unpause()
+                    self.logger.info("Unpaused")
+            
             self.stop()
-            
+            self.logger.debug("Procedure Ended")
 
     def begin(self):
         """Begin the procedure

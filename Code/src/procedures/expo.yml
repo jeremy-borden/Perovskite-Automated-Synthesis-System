@@ -1,0 +1,53 @@
+Procedure:
+# pick up slide and move it to spincoater
+  - [set_gripper_angle, 117]
+  - [open_gripper]
+  - [move_to_location, SLIDEMAT1]
+  - [close_gripper]
+  - [move_to_location, SO]
+  - [align_gripper]
+  - [move_to_location, spincoater g]
+  - [open_gripper]
+# pick up first pipette, mix fluids and dispense on slide
+  - [set_0]
+  - [mix_fluid, 1, 20, 2, 20, 0]
+  - [extract_from_vial, 0, 20]
+  - [move_to_location, spincoater p]
+  - [dispense, 3]
+  - [put_0]
+# pick up second pipette, draw and dispense fluid on slide
+  - [set_1]
+  - [extract_from_vial, 4, 100]
+  - [move_to_location, spincoater p]
+  - [dispense, 3]
+  - [put_1]
+# begin spinning
+  - [move_to_location, SO]
+  - [add_spin_coater_step, 1000, 5]
+  - [run_spin_coater]
+# pick up slide and place on hotplate
+  - [move_to_location, SO]
+  - [align_gripper]
+  - [open_gripper]
+  - [move_to_location, spincoater g]
+  - [close_gripper]
+  - [move_to_location, hotplate]
+  - [set_gripper_angle, 117]
+  - [open_gripper]
+  - [move_to_location, SO]
+# turn on hotplate
+  - [set_temperature, 50]
+  - [wait_for_temperature, 50, 5]
+  - [wait, 20]
+  - [set_temperature, 0]
+
+# pick up slide 
+  - [move_to_location, hotplate]
+  - [set_gripper_angle, 117]
+  - [close_gripper]
+  - [move_to_location, SLIDEMAT1]
+  - [open_gripper]
+  - [move_to_location, SO]
+
+# Trigger Spectrometer 
+  - [measure_spectrum, '''White Light''']

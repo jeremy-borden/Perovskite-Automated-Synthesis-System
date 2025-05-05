@@ -1,6 +1,7 @@
 from queue import Queue
 import logging
 import threading
+from time import sleep
 import serial
 import serial.threaded
 
@@ -35,6 +36,7 @@ class ControlBoard():
         try:
             self.serial = serial.Serial(port, 115200, timeout=None)
             self._begin_reader_thread()
+            self.send_message("M501")
             self.logger.info(f"Connected to control board on port {port}")
         except serial.SerialException as e:
             self.logger.error(f"Error connecting to control board: {e}")
@@ -81,36 +83,42 @@ class ControlBoard():
         self.reader_thread.write(message.encode("utf-8"))
         self.logger.debug(f"Sending message: {message}")
         
-    def move_axis(self, axis: str, distance_mm: float, feedrate_mm_per_minute: int = 1000, relative: bool = False, finish_move: bool = True):
+    def move_axis(self, axis: str, distance_mm: float, feedrate_mm_per_minute: int = 2000, relative: bool = False, finish_move: bool = True):
         """ Takes in a list of axes, distances and speeds to move the gantry"""
         if axis not in self.positions.keys():
             raise f"Invalid axis {axis}"
   
-        if relative and (not self.relative_positioning_enabled):
+        if relative and distance_mm == 0:
+            return
+        
+        if relative:
             self.send_message("G91")
-            self.relative_positioning_enabled = True
-        elif (not relative) and self.relative_positioning_enabled:
-            self.send_message("G90")
-            self.relative_positioning_enabled = False
+        sleep(0.1)
+        # dont go crazy with these axes,
+        if (axis == "Z" or axis == "A" or axis == "B") and feedrate_mm_per_minute == 2000:
+            feedrate_mm_per_minute = 600
             
-        if feedrate_mm_per_minute:
-            self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
-        else:
-            self.send_message(f"G0 {axis}{distance_mm}")
+        self.send_message(f"G0 {axis}{distance_mm} F{feedrate_mm_per_minute}")
+        sleep(0.1)
             
+        
         if finish_move:
             self.finish_moves()
+            sleep(0.1)
+        if relative:
+            self.send_message("G90")
+            sleep(0.1)
 
     def finish_moves(self):
         """Wait for the move to finish"""
         if not self.is_connected():
             self.logger.error("Serial is not connected")
             return
-        
-        self.send_message("M400")
         self.received_ok.clear()
+        sleep(0.5)
+        self.send_message("M400")
         self.logger.debug("Waiting for move to finish")
-        self.received_ok.wait()  # Wait until the move_finished event is set
+        self.received_ok.wait(timeout=120)  # Wait until the move_finished event is set
         
 
 
