@@ -3,6 +3,7 @@ import logging
 
 class ProcedureFile:
     def Open(self, path: str):
+        print("DEBUG: path is", path, type(path))
         try:
             with open(path, 'r', encoding='utf-8') as input_file:
                 config = yaml.safe_load(input_file)

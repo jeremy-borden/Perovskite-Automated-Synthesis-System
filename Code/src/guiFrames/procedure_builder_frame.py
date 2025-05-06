@@ -24,9 +24,9 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         # step holding frame
         self.step_frame = ctk.CTkScrollableFrame(
             master=self,
-            width=600,height=600)
+            width=600,height=500)
         self.step_frame.grid(
-            row=0, column=0, rowspan=8,
+            row=0, column=0, rowspan=9,
             padx=5,pady=5)
         
         self.step_frame.bind("<Button-1>", self._deselect_step)
@@ -93,6 +93,17 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             padx=5, pady=5, 
             sticky="nwe")
         
+        # import steps button
+        self.import_button = ctk.CTkButton(
+            master=self,
+            text="Import\nProcedure",
+            width=120, height=50,
+            command=self._import)
+        self.import_button.grid(
+            row=6, column=1,
+            padx=5, pady=5, 
+            sticky="nwe")
+        
         # quick run button
         self.quick_run_button = ctk.CTkButton(
             master=self,
@@ -108,7 +119,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         self.loop_count = LabelEntry(self, "Loop Count: ", int)
         self.loop_count.entry.insert(0,"1")
         self.loop_count.grid(
-            row=6, column=1,
+            row=8, column=1,
             padx=5, pady=5,
             sticky="nwe")
         
@@ -253,7 +264,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
         except ValueError:
             self.logger.error("Loop count must be > 0")
             return
-    
+        
         for loop in range(loop_count):
             for step, variation_step in zip(self.step_list, self.variation_step_list):
                 partial_step = [step.function.__name__] # get step name
@@ -269,7 +280,7 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
                         partial_step.append(entry)  
                 procedure["Procedure"].append(partial_step)
         
-            return procedure
+        return procedure
         
     def _export(self):
         procedure = self._get_procedure()
@@ -282,6 +293,50 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
             ProcedureFile().Save(path=file_path, procedure=procedure)
             self.logger.info("Procedure Succesfully Exported!")
             
+        
+    def _import(self):
+        file_path = filedialog.askopenfilename(
+        initialdir="src/procedures/",
+        title="Open Procedure File",
+        filetypes=(("Yaml files", "*.yml*"), ("All files", "*.*")))
+        if not file_path:
+            return
+        
+        
+        
+        try:
+            procedure = ProcedureFile().Open(file_path)
+            for step, vstep in zip(self.step_list, self.variation_step_list):
+                if step is not None:
+                    step.destroy()
+                if vstep is not None:
+                    vstep.destroy()
+                
+            self.step_list.clear()
+            self.variation_step_list.clear()
+            self.selected_step = None
+
+            for step in procedure["Procedure"]:
+                func_name = step[0]
+                if func_name not in self.moves:
+                    self.logger.error(f"Function '{func_name}' not found in moves.")
+                    return
+                
+                function = self.moves[func_name]
+                new_step = StepFrame(self.step_frame, function)
+
+                # Populate step entries with the arguments from the procedure
+                for entry, value in zip(new_step.entry_list, step[1:]):
+                    entry.entry.insert(0, str(value))
+
+                # Bind click events and update lists
+                self._bind_step_widgets(new_step)
+                self.step_list.append(new_step)
+                self.variation_step_list.append(None)
+        except Exception as e:
+            self.logger.error(f"Ran into error {e} while importing")
+        self._update()
+        
     def _update(self):
         """ Update the step frame"""
         for i, step in enumerate(self.step_list):
@@ -298,7 +353,13 @@ class ProcedureBuilderFrame(ctk.CTkFrame):
                 row=i, column=1,
                 padx=5,pady=5,
                 sticky="nw")
+    
+    def update_super_moves(self):
+        # search through persistant folder
+        # for each file ending in _supermove, add it to the moves list
+        # when this move is run, it should run the moves specified in the file
         
+        pass
 # -------- STEPS --------
 class StepFrame(ctk.CTkFrame):
     def __init__(self, master, function):
@@ -405,14 +466,14 @@ class LabelEntry(ctk.CTkFrame):
     
     def _validate_float(self, P):
         """ Validate that only floats are entered. """
-        if P.isdigit() or P == "" or (P.count('.') == 1 and P.replace('.', '').isdigit()):
+        if P.isdigit() or P == "" or (P.count('.') == 1 and P.replace('.', '').replace("-", "").isdigit()) or ((P.count('-') == 1 and (P.replace('-', '').replace(".", "").isdigit() or P.replace('-', '') == ''))):
             return True
         else:
             return False
         
     def _validate_int(self, P):
         """ Validate that only ints are entered. """
-        if P.isdigit() or P == "":
+        if P.isdigit() or P == "" or ((P.count('-') == 1 and (P.replace('-', '').isdigit() or P.replace('-', '') == ''))):
             return True
         else:
             return False
@@ -422,18 +483,18 @@ class peepee():
     def __init__(self):
         
         self.moves = {
-            "fardddd_yo": self.fardddd_yo,
-            "shit": self.shit,
-            "nothing": self.nothing
+            "move": self.move,
+            "move_another": self.move_another,
+            "what_the": self.what_the
         }
         
-    def shit(self, a: int, b: str, bool_ean: bool):
+    def move(self, this_is_an_int: int, this_is_a_str: str, this_is_a_float: float):
         pass
     
-    def fardddd_yo(self, inbt: int, flot: float, str: str):
+    def move_another(self, inbt: int, flot: float, str: str):
         pass # gas
     
-    def nothing(self):
+    def what_the(self):
         pass
     
     def get_dick(self):
@@ -445,10 +506,14 @@ if __name__ == "__main__":
     app.configure()
     pee = peepee()
     moves = pee.get_dick()
-    f = ProcedureBuilderFrame(app, moves)
+    f = ProcedureBuilderFrame(app, moves, None)
     f.grid(
         row=0, column=0,
         padx=5, pady=5,
         sticky="nw"
     )
     app.mainloop()
+    
+    
+    
+

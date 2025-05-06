@@ -30,7 +30,7 @@ class ConnectionFrame(ctk.CTkFrame):
             justify="left",anchor="w",
             font=("Arial", 20, "bold"))
         self.title_label.grid(
-            row=0, column=0, columnspan=3, 
+            row=0, column=0, columnspan=5, 
             padx=5, pady=5, sticky="nw")
         # Control Board
         self.control_board_connection = NameLater(
@@ -67,8 +67,8 @@ class ConnectionFrame(ctk.CTkFrame):
         # command entry
         self.command_destination_label = ctk.CTkLabel(
             master=self,
-            text=f"Destination: {self.command_destination}",
-            width=150,
+            text=f"Destination:",
+            width=80,
             anchor="w"
         )
         self.command_destination_label.grid(row=4, column=0, padx=5, pady=5, sticky="nw")
@@ -76,7 +76,7 @@ class ConnectionFrame(ctk.CTkFrame):
         self.command_entry_destination = ctk.CTkOptionMenu(
             master=self,
             values=["Control Board", "Spincoater", "Hotplate", "Spectrometer"],
-            width=150,
+            width=120,
             command=self._set_command_destination
         )
         self.command_entry_destination.grid(row=5, column=0, padx=5, pady=5, sticky="nw")
@@ -86,7 +86,7 @@ class ConnectionFrame(ctk.CTkFrame):
             width=300,
             height=50
         )
-        self.command_entry.grid(row=4, column=1, rowspan=2, columnspan=2, padx=5, pady=5, sticky="nw")
+        self.command_entry.grid(row=4, column=1, rowspan=2, columnspan=3, padx=5, pady=5, sticky="nw")
         self.command_entry.bind("<Return>", self._send_entry)
         
         self.send_entry_button = ctk.CTkButton(
@@ -94,7 +94,7 @@ class ConnectionFrame(ctk.CTkFrame):
             width=50,height=50,
             command=self._send_entry)
         self.send_entry_button.grid(
-            row=4, column=3, rowspan=3, 
+            row=4, column=4, rowspan=2,
             padx=5, pady=5, sticky="nw")
         
         self._update()
@@ -130,7 +130,7 @@ class ConnectionFrame(ctk.CTkFrame):
         
     def _set_command_destination(self, value: str):
         self.command_destination = value
-        self.command_destination_label.configure(text=f"Destination: {self.command_destination}")
+        self.command_destination_label.configure(text=f"Destination:")
 
     def _send_entry(self, event=None):
         value = self.command_entry.get()

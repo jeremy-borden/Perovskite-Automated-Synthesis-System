@@ -20,7 +20,8 @@ class Pipette:
 
 class PipetteHandler():
     ACTUATOR_MAX_HEIGHT_MM: int
-    
+    STAND_0_Y: float = 85
+    STAND_1_Y: float = 151
     def __init__(self, control_board: ControlBoard, tip_eject_servo: AngularServo, grabber_servo: AngularServo, pipettes: list):
         self.logger = logging.getLogger("Main Logger")
         
@@ -46,23 +47,21 @@ class PipetteHandler():
         """Return the currently held pippete index"""
         if self.current_pipette is not None:
             return self.pipettes.index(self.current_pipette)
+        else:
+            return None
         
-    def set_actuator_position(self, position_mm, speed):
-        # dont allow actuator to go too far away
-        if position_mm > self.ACTUATOR_MAX_HEIGHT_MM:
-            return
-        # dont allow actuator to go past the flush height if there is a pippete
-        if self.current_pipette is not None and position_mm < self.current_pipette.PLUNGER_FLUSH_MM:
-            return
+    def home(self):
+        self.control_board.send_message("G28 B")
         
-        self.control_board.move_axis("B", position_mm, speed, False)
+    def set_actuator_position(self, position_mm):
+        
+        self.control_board.move_axis("B", position_mm)
         
     def flush_pippete(self):
         """Presses the pippete beyond its normal limit to ensure all fluid is purged.
             The actuator then returns to the bottom of the plunger"""
-        self.control_board.move_axis("B", self.current_pipette.PLUNGER_FLUSH_MM, 300, False)
-        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, 300, False)
-        self.control_board.finish_moves()
+        self.control_board.move_axis("B", self.current_pipette.PLUNGER_FLUSH_MM, 300)
+        
         self.current_fluid_volume_ul = 0
     
     def dispense_all(self, duration_s: float):
@@ -71,10 +70,10 @@ class PipetteHandler():
         current_position = self.control_board.positions["B"]
         feed_rate = 60*(current_position - self.current_pipette.PLUNGER_BOTTOM_MM) / duration_s
         # press plunger down to minimum height, ejecting all fluid
-        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate, False)
+        self.control_board.move_axis("B", self.current_pipette.PLUNGER_BOTTOM_MM, feed_rate)
         self.current_fluid_volume_ul = 0
         
-    def draw_ul(self, volume_ul, feedrate):
+    def draw_ul(self, volume_ul):
         """ Raises the actuator so that the specified volume is drawn. Cannot draw past max volume. 
         Draws are persistant, so when draw_ul is called twice without dispensing, the total fluid is compounded...?"""
         if self.current_fluid_volume_ul + volume_ul > self.current_pipette.MAX_VOLUME_UL:
@@ -83,18 +82,23 @@ class PipetteHandler():
             
         ul_per_mm = self.current_pipette.MAX_VOLUME_UL/(self.current_pipette.PLUNGER_TOP_MM - self.current_pipette.PLUNGER_BOTTOM_MM)
         self.current_fluid_volume_ul += volume_ul
-        self.control_board.move_axis("B",  volume_ul*ul_per_mm, feedrate, True)
+        self.control_board.move_axis("B",  volume_ul*ul_per_mm, relative=True)
         
     def eject_tip(self):
-        self.tip_eject_servo.angle = 200
+        self.tip_eject_servo.angle = 160
         sleep(1)
         self.tip_eject_servo.angle = 0
          
+    def set_eject_angle(self, angle: int):
+        self.tip_eject_servo.angle = angle
+        
+    def set_grabber_angle(self, angle: int):
+        self.grabber_servo.angle = angle
     def open_grabber(self):
-        self.grabber_servo.angle = 0
+        self.grabber_servo.angle = 180
         
     def close_grabber(self):
-        self.grabber_servo.angle = 180
+        self.grabber_servo.angle = 80
         
     def detatch_servos(self):
         self.tip_eject_servo.detach()
