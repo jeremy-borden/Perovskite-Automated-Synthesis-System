@@ -46,4 +46,4 @@ class CameraFrame(ctk.CTkFrame):
             
             self.image_label.configure(image=image)
             self.image_label.image = image
-        self.after(int(1000/60), self.update_image)
+        self.after(int(1000/20), self.update_image)
