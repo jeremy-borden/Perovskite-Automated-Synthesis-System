@@ -4,6 +4,7 @@ import customtkinter as ctk
 from gpiozero import AngularServo, Device
 from gpiozero.pins.pigpio import PiGPIOFactory
 from time import sleep
+
 # -- DRIVER IMPORT --
 from drivers.controlboard_driver import ControlBoard
 from drivers.spincoater_driver import SpinCoater
@@ -13,7 +14,6 @@ from drivers.spectrometer_driver import Spectrometer
 # from drivers import ml_driver
 
 # -- OBJECT IMPORT --
-
 from objects.tip_matrix import TipMatrix
 from objects.vial_carousel import VialCarousel
 from objects.infeed import Infeed
@@ -21,6 +21,7 @@ from objects.hotplate import Hotplate
 from objects.gripper import Gripper
 from objects.pippete import Pipette, PipetteHandler
 from objects.toolhead import Toolhead
+
 # -- GUI IMPORT --
 from guiFrames.console_frame import ConsoleFrame
 from guiFrames.procedure_frame import ProcedureFrame
@@ -31,7 +32,6 @@ from guiFrames.procedure_builder_frame import ProcedureBuilderFrame
 from guiFrames.spectrometer_frame import SpectrometerFrame
 from guiFrames.locations_frame import LocationFrame
 # from guiFrames.ml_model_frame import MLModelFrame
-
 
 from procedure_handler import ProcedureHandler
 from moves import Dispatcher
@@ -159,9 +159,11 @@ if __name__ == "__main__":
     # run the gui
     hotplate.set_temperature(0)
     app.mainloop()
+    
+    # -- CLEANUP --
     hotplate.set_temperature(0)
     sleep(1)
-    # -- CLEANUP --
+    
     control_board.disconnect()
     spectrometer.disconnect()
     spin_coater.disconnect()
